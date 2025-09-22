@@ -1,0 +1,14 @@
+#+TITLE: Typed miniKanren
+#+AUTHOR: Noah Ma
+#+EMAIL: noahstorym@gmail.com
+
+* Table of Contents                                       :TOC_5_gh:noexport:
+- [[#installation][Installation]]
+- [[#license][License]]
+
+* Installation
+Install the package with ~raco pkg install --auto typed-miniKanren~.
+
+* License
+This project is distributed under the MIT License; see [[file:LICENSE]] for
+more information.
