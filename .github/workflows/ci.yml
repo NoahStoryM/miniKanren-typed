@@ -14,4 +14,4 @@ jobs:
       - name: Install dependencies
         run: raco pkg install --auto --batch
       - name: Run tests
-        run: raco test -p typed-miniKanren
+        run: raco test -p miniKanren-typed
