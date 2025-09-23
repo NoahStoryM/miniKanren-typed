@@ -88,8 +88,12 @@
 (define (reify v) (walk* v (reify-s v empty-s)))
 
 
-(define-syntax-rule (λF : a body ...) (λ () : (Streamof a) body ...))
-(define-syntax-rule (λG (x) body ...) (ann (λ (x) body ...) Goal))
+(define-syntax λF
+  (syntax-rules (:)
+    [(_ : a body ...)
+     (λ () : (Streamof a) body ...)]))
+(define-syntax-rule (λG (x) body ...)
+  (ann (λ (x) body ...) Goal))
 
 (define-syntax-rule (run n^ (x) g ...)
   (let ([n n^] [x (var 'x)])
