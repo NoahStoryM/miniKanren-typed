@@ -2,31 +2,35 @@
 (: *o       (→ Term Term Term Goal))
 (: odd-*o   (→ Term Term Term Term Goal))
 (: bound-*o (→ Term Term Term Term Goal))
-(define (*o n m p)
+(define (*o n m p)                      ; p = n*m
   (condi
-    [(== '() n) (== '() p)]
-    [(poso n) (== '() m) (== '() p)]
-    [(== '(1) n) (poso m) (== m p)]
-    [(>1o n) (== '(1) m) (== n p)]
+    [(== '() n) (== '() p)]             ; n = 0, p = 0
+    [(poso n) (== '() m) (== '() p)]    ; n > 0, m = 0, p = 0
+    [(== '(1) n) (poso m) (== m p)]     ; n = 1, m > 0, p = m
+    [(>1o n) (== '(1) m) (== n p)]      ; n > 1, m = 1, p = n
     [(fresh (x z)
-       (== `(0 . ,x) n) (poso x)
-       (== `(0 . ,z) p) (poso z)
-       (>1o m)
-       (*o x m z))]
+       (== `(0 . ,x) n) (poso x)        ; n = 2*x, x > 0
+       (== `(0 . ,z) p) (poso z)        ; p = 2*z, z > 0
+       (>1o m)                          ; m > 1
+       (*o x m z))]                     ; z = x*m
     [(fresh (x y)
-       (== `(1 . ,x) n) (poso x)
-       (== `(0 . ,y) m) (poso y)
-       (*o m n p))]
+       (== `(1 . ,x) n) (poso x)        ; n = 2*x + 1, x > 0
+       (== `(0 . ,y) m) (poso y)        ; m = 2*y, y > 0
+       (*o m n p))]                     ; p = m*n
     [(fresh (x y)
-       (== `(1 . ,x) n) (poso x)
-       (== `(1 . ,y) m) (poso y)
+       (== `(1 . ,x) n) (poso x)        ; n = 2*x + 1, x > 0
+       (== `(1 . ,y) m) (poso y)        ; m = 2*y + 1, y > 0
        (odd-*o x n m p))]
     [else fail]))
 (define (odd-*o x n m p)
+  ;; p = n*m
+  ;;   = (2*x + 1)*m
+  ;;   = 2*x*m + m (distributive law)
+  ;;   = 2*q + m
   (fresh (q)
     (bound-*o q p n m)
-    (*o x m q)
-    (+o `(0 . ,q) m p)))
+    (*o x m q)                          ; q = x*m
+    (+o `(0 . ,q) m p)))                ; p = 2*q + m
 (define (bound-*o q p n m)
   (conde
     [(nullo q) (pairo p)]
