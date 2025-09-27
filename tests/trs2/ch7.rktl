@@ -115,7 +115,7 @@
         (cons (assert m bit?) (build-num n)))))
 
 (: poso (→ Term Goal))
-(define (poso n)
+(define (poso n)                        ; n > 0
   (fresh (a d)
     (== `(,a . ,d) n)))
 (check-equal?
@@ -139,7 +139,7 @@
  '((_.0 . _.1)))
 
 (: >1o (→ Term Goal))
-(define (>1o n)
+(define (>1o n)                         ; n > 1
   (fresh (a ad dd)
     (== `(,a ,ad . ,dd) n)))
 (check-equal?
@@ -253,7 +253,7 @@
    ((0 1) (1 1))))
 
 (: +o (→ Term Term Term Goal))
-(define (+o n m k)
+(define (+o n m k)                      ; k = n + m
   (addero 0 n m k))
 (check-equal?
  (run* (s)
@@ -268,8 +268,8 @@
    ((0 1) (1 1))))
 
 (: -o (→ Term Term Term Goal))
-(define (-o n m k)
-  (+o m k n))
+(define (-o n m k)                      ; k = n - m
+  (+o m k n))                           ; n = m + k
 (check-equal?
  (run* (q)
    (-o '(0 0 0 1) '(1 0 1) q))
