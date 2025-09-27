@@ -31,7 +31,7 @@
     (bound-*o q p n m)                  ; l(p) ≤ l(n) + l(m)
     (*o x m q)                          ; q = x*m
     (+o `(0 . ,q) m p)))                ; p = 2*q + m
-(define (bound-*o q p n m)
+(define (bound-*o q p n m)              ; l(p) ≤ l(n) + l(m)
   (conde
     [(nullo q) (pairo p)]               ; l(q) = 0, l(p) > 0
     [else
@@ -267,7 +267,7 @@
  '((_.0 _.1 _.2 _.3 . _.4) (0 1 1) (1 1 1)))
 
 (: splito (→ Term Term Term Term Goal))
-(define (splito n r l h)                ; n = h*2^(l(r)+1) + l
+(define (splito n r l h)                ; n = h*2^(l(r) + 1) + l
   (condi
     [(== '() n) (== '() h) (== '() l)]  ; n = 0, h = 0, l = 0
     [(fresh (b n^)
@@ -289,13 +289,13 @@
        (== `(1 . ,n^) n)                ; n = 2*n^ + 1
        (== `(,a . ,r^) r)               ; r = 2*r^ + a
        (== '(1) l)                      ; l = 1
-       (splito n^ r^ '() h))]
+       (splito n^ r^ '() h))]           ; n^ = h*2^(l(r^) + 1)
     [(fresh (b n^ a r^ l^)
        (== `(,b . ,n^) n)               ; n = 2*n^ + b
        (== `(,a . ,r^) r)               ; r = 2*r^ + a
        (== `(,b . ,l^) l)               ; l = 2*l^ + b
        (poso l^)                        ; l^ > 0
-       (splito n^ r^ l^ h))]
+       (splito n^ r^ l^ h))]            ; n^ = h*2^(l(r^) + 1) + l^
     [else fail]))
 (: ÷o (→ Term Term Term Term Goal))
 (define (÷o n m q r)                    ; n = m*q + r, r < m
@@ -310,8 +310,8 @@
        (poso q)                         ; q > 0
        (fresh (nh nl qh ql qlm qlmr rr rh)
          (alli
-           (splito n r nl nh)
-           (splito q r ql qh)
+           (splito n r nl nh)           ; n = nh*2^(l(r) + 1) + nl
+           (splito q r ql qh)           ; q = qh*2^(l(r) + 1) + ql
            (conde
              [(== '() nh)               ; nh = 0
               (== '() qh)               ; qh = 0
@@ -323,7 +323,7 @@
                 (*o ql m qlm)           ; qlm = ql * m
                 (+o qlm r qlmr)         ; qlmr = qlm + r
                 (-o qlmr nl rr)         ; rr = qlmr - nl
-                (splito rr r '() rh)
+                (splito rr r '() rh)    ; rr = rh*2^(l(r) + 1)
                 (÷o nh m qh rh))]))))])); nh = m*qh + rh
 (check-equal?
  (run 15 (t)
@@ -358,27 +358,27 @@
  '())
 
 (: exp2o (→ Term Term Term Goal))
-(define (exp2o n b q)                   ; TODO
+(define (exp2o n b q)                   ; l(n) = q + l(b) + 1
   (condi
     [(== '(1) n) (== '() q)]            ; n = 1, q = 0
     [(>1o n) (== '(1) q)                ; n > 1, q = 1
      (fresh (s)
-       (splito n b s '(1)))]
+       (splito n b s '(1)))]            ; n = 2^(l(b) + 1) + s
     [(fresh (q1 b2)
        (alli
          (== `(0 . ,q1) q)              ; q = 2*q1
          (poso q1)                      ; q1 > 0
-         (<lo b n)                      ; b < n
-         (appendo b `(1 . ,b) b2)
-         (exp2o n b2 q1)))]
+         (<lo b n)                      ; l(b) < l(n)
+         (appendo b `(1 . ,b) b2)       ; l(b2) + 1 = 2*(l(b) + 1)
+         (exp2o n b2 q1)))]             ; l(n) = q1 + l(b2) + 1
     [(fresh (q1 nh b2 s)
        (alli
          (== `(1 . ,q1) q)              ; q = 2*q1 + 1
          (poso q1)                      ; q1 > 0
          (poso nh)                      ; nh > 0
-         (splito n b s nh)
-         (appendo b `(1 . ,b) b2)
-         (exp2o nh b2 q1)))]
+         (splito n b s nh)              ; n = nh*2^(l(b) + 1) + s
+         (appendo b `(1 . ,b) b2)       ; l(b2) + 1 = 2*(l(b) + 1)
+         (exp2o nh b2 q1)))]            ; l(nh) = q1 + l(b2) + 1
     [else fail]))
 (: repeated-mulo (→ Term Term Term Goal))
 (define (repeated-mulo n q nq)          ; nq = n * q
@@ -403,26 +403,26 @@
      (fresh (a ad dd)
        (poso dd)                                 ; dd > 0
        (== `(,a ,ad . ,dd) n)                    ; n = a + 2*ad + 4*dd
-       (exp2o n '() q)                           ; TODO
+       (exp2o n '() q)                           ; l(n) = q + 1
        (fresh (s)
-         (splito n dd r s)))]
+         (splito n dd r s)))]                    ; n = s*2^(l(dd) + 1) + r
     [(fresh (a ad add ddd)
        (conde
          [(== '(1 1) b)]                         ; b = 3
          [else (== `(,a ,ad ,add . ,ddd) b)]))   ; b = a + 2*ad + 4*add + 8*ddd
      (<lo b n)                                   ; l(b) < l(n)
      (fresh (bw1 bw nw nw1 ql1 ql s)
-       (exp2o b '() bw1)                         ; TODO
+       (exp2o b '() bw1)                         ; l(b) = bw1 + 1
        (+o bw1 '(1) bw)                          ; bw = bw1 + 1
        (<lo q n)                                 ; l(q) < l(n)
        (fresh (q1 bwq1)
          (+o q '(1) q1)                          ; q = q1 + 1
          (*o bw q1 bwq1)                         ; bwq1 = bw*q1
          (<o nw1 bwq1)                           ; nw1 < bwq1
-         (exp2o n '() nw1)                       ; TODO
+         (exp2o n '() nw1)                       ; l(n) = nw1 + 1
          (+o nw1 '(1) nw)                        ; nw = nw1 + 1
          (÷o nw bw ql1 s)                        ; nw = bw*ql1 + s, s < bw
-         (+o ql '(1) ql1)                        ; ql = ql1 + 1
+         (+o ql '(1) ql1)                        ; ql1 = ql + 1
          (conde
            [(== q ql)]                           ; q = ql
            [else (<lo ql q)])                    ; l(ql) < q
