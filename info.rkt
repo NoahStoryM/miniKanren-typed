@@ -7,8 +7,12 @@
 (define pkg-desc "Typed miniKanren")
 
 (define deps '("base" "typed-racket-lib"))
-(define build-deps '("rackunit-typed"))
-#;
+(define build-deps
+  '("rackunit-typed"
+    "scribble-lib"
+    "racket-doc"
+    "typed-racket-doc"))
+
 (define scribblings '(("scribblings/miniKanren.scrbl")))
 
 (define clean '("compiled" "private/compiled"))
