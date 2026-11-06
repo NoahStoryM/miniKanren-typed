@@ -1,3 +1,7 @@
+;; Examples from The Reasoned Schemer, first edition (MIT Press, 2005),
+;; chapter 4.  Copyright (C) 2005 Massachusetts Institute of Technology.
+;; Transcribed for use as tests only; see NOTICE.
+
 (displayln "Test code in chapter 4")
 (: mem (→ Term (Listof Term) (Option (Listof Term))))
 (define (mem x l)
