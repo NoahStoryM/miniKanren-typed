@@ -24,11 +24,10 @@ read directly.
 @section[#:tag "trs2-basis"]{Implementation Basis}
 
 The implementation is a Typed Racket rewrite of the official code of
-the second edition, published under the MIT License at
+the second edition,
 @url{https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd},
 which is the code of Chapter 10 (``Under the Hood'') and the appendix
-``Connecting the Wires''.  The file @tt{NOTICE} in the source
-repository reproduces its copyright notice and license.
+``Connecting the Wires''.
 
 The differences from that code are:
 

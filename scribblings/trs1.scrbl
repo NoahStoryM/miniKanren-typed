@@ -31,10 +31,6 @@ Hood''), and the stream operators and goal constructors are those of
 the appendix ``Connecting the Wires''.  The second edition is a
 different language (see @secref["trs2"] and @secref["comparison"]).
 
-The code of @racketmodname[typed/miniKanren/trs1] is derived from the
-code printed in the book, which is not covered by the package's MIT
-License; the file @tt{NOTICE} in the source repository lists the
-sources and their copyright holders.
 
 The differences from the first edition are:
 

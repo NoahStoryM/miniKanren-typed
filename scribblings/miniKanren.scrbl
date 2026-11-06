@@ -32,13 +32,6 @@ Every internal operator is exported.
 The two modules export many of the same names, so a program should
 require only one of them, or use @racket[prefix-in].
 
-The implementation of the first edition is derived from the code
-printed in the book, which is not covered by the package's MIT License;
-the implementation of the second edition is derived from the official
-code of that edition, which is MIT-licensed.  The file @tt{NOTICE} in
-the source repository lists the sources, their copyright holders, and
-their licenses.
-
 @table-of-contents[]
 
 @include-section["trs1.scrbl"]
