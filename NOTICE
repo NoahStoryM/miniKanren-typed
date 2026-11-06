@@ -46,9 +46,11 @@ which remains under the terms of its own copyright holders.
 3. The miniKanren implementation of The Reasoned Schemer, second edition
 
    Files:   miniKanren/trs2/main.rkt
+            miniKanren/trs2/tests/arith.rktl
 
    Source:  https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd
-            (trs2-impl.scm), the code of chapter 10 and appendix A of
+            (trs2-impl.scm and trs2-arith.scm), the code of chapters
+            7, 8, 10 and appendix A of
             Daniel P. Friedman, William E. Byrd, Oleg Kiselyov, and
             Jason Hemann, The Reasoned Schemer, second edition, MIT
             Press, 2018.
@@ -58,8 +60,10 @@ which remains under the terms of its own copyright holders.
    declares every argument a Term and the result a Goal); variables are
    structs compared with eq? and named after the fresh identifier;
    literals are compared with equal? instead of eqv?; and ext-s skips
-   the occurs check for ground terms.  The code is distributed under
-   the following license:
+   the occurs check for ground terms.  miniKanren/trs2/tests/arith.rktl
+   adapts the arithmetic code with a type annotation for build-num;
+   the shared list helpers are provided by the chapter tests.  The
+   code is distributed under the following license:
 
    MIT License
 
@@ -85,3 +89,18 @@ which remains under the terms of its own copyright holders.
    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
+
+
+4. Examples from The Reasoned Schemer, second edition
+
+   Files:   miniKanren/trs2/tests/ch1.rktl ... ch10.rktl
+
+   Source:  The Reasoned Schemer, second edition, MIT Press, 2018,
+            chapters 1-10.
+
+   Copyright (C) 2018 Massachusetts Institute of Technology.
+   All rights reserved by the copyright holder.
+
+   These examples were transcribed from the book to check that the
+   implementation produces the results printed in the book.  They are
+   included for testing only.
