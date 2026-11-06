@@ -57,13 +57,14 @@ which remains under the terms of its own copyright holders.
 
    miniKanren/trs2/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout (defrel
-   declares every argument a Term and the result a Goal); variables are
-   structs compared with eq? and named after the fresh identifier;
-   literals are compared with equal? instead of eqv?; and ext-s skips
-   the occurs check for ground terms.  miniKanren/trs2/tests/arith.rktl
-   adapts the arithmetic code with a type annotation for build-num;
-   the shared list helpers are provided by the chapter tests.  The
-   code is distributed under the following license:
+   gives an argument the type Term unless it is annotated, and the
+   result the type Goal); variables are structs compared with eq? and
+   named after the fresh identifier; literals are compared with equal?
+   instead of eqv?; and ext-s skips the occurs check for ground terms.
+   miniKanren/trs2/tests/arith.rktl adapts the arithmetic code with a
+   type annotation for build-num; the shared list helpers are provided
+   by the chapter tests.  The code is distributed under the following
+   license:
 
    MIT License
 

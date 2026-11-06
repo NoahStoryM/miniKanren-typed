@@ -95,16 +95,11 @@
      [succeed fail])
    fail)
  '())
-;; 20-27. Higher-order relations use the two lambdas of defrel explicitly,
-;; since the implementation's defrel assigns Term to every parameter.
-(: onceo (→ Goal Goal))
-(define (onceo g)
-  (lambda (s)
-    (lambda ()
-      ((condu
-         [g succeed]
-         [succeed fail])
-       s))))
+;; 20-27. Higher-order relations give their goal arguments a type.
+(defrel (onceo [g : Goal])
+  (condu
+    [g succeed]
+    [succeed fail]))
 (check-equal?
  (run* x
    (onceo (teacupo x)))
@@ -209,19 +204,15 @@
       (== `(,i ,j ,k) r)))
   (void))
 
-(: enumerateo (→ (→ Term Term Term Goal) Term Term Goal))
-(define (enumerateo op r n)
-  (lambda (s)
-    (lambda ()
-      ((fresh (i j k)
-         (bumpo n i)
-         (bumpo n j)
-         (op i j k)
-         (onceo
-          (fresh (x y z)
-            (op x y z)
-            (== i x)
-            (== j y)
-            (== k z)))
-         (== `(,i ,j ,k) r))
-       s))))
+(defrel (enumerateo [op : (→ Term Term Term Goal)] r n)
+  (fresh (i j k)
+    (bumpo n i)
+    (bumpo n j)
+    (op i j k)
+    (onceo
+     (fresh (x y z)
+       (op x y z)
+       (== i x)
+       (== j y)
+       (== k z)))
+    (== `(,i ,j ,k) r)))

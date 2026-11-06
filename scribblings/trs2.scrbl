@@ -158,10 +158,15 @@ Binds each @racket[x] to a new variable, named after the identifier,
 and behaves as the conjunction of the @racket[goal]s.  (Chapter 1.)
 }
 
-@defform[(defrel (name x ...) goal ...)]{
-Defines @racket[name] as a relation: a function of type
-@racket[(→ Term ... Goal)] whose goal suspends before running the
-conjunction of the @racket[goal]s.  It expands to
+@defform[#:literals (:)
+         (defrel (name arg ...) goal ...)
+         #:grammar ([arg x [x : type]])]{
+Defines @racket[name] as a relation: a function whose result is a
+@racket[Goal] that suspends before running the conjunction of the
+@racket[goal]s.  An argument written as a plain @racket[x] has type
+@racket[Term]; an argument written as @racket[[x : type]] has the given
+type, which lets a relation take goals or other relations as
+arguments.  For plain arguments, it expands to
 
 @racketblock[
 (define (name [x : Term] ...) : Goal
@@ -175,6 +180,12 @@ The inner @racket[(λ () ...)] is the @racket[Suspension] that makes the
 stream immature; this is the only place where the language suspends a
 computation, and therefore the only place where @racket[conde]
 switches between branches.  (Chapter 1; implemented in the appendix.)
+
+@mk-examples[
+(defrel (twiceo [g : Goal])
+  (conde [g] [g]))
+(run* q (twiceo (== q 'x)))
+]
 }
 
 @defform[(conde [goal ...+] ...)]{
