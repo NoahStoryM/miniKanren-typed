@@ -12,6 +12,8 @@
 ;; and Jason Hemann.  MIT License; see NOTICE for the full text and for
 ;; the changes made here.
 
+(require (for-syntax racket/base syntax/parse))
+
 (provide (all-defined-out))
 
 
@@ -208,14 +210,23 @@
     [(_ g) g]
     [(_ g0 g ...) (conj2 g0 (conj g ...))]))
 
-;; Every argument of a relation is a Term and every relation returns a
-;; Goal, so defrel can supply the types itself.  The body is suspended:
+;; Every relation returns a Goal, and an argument is a Term unless it is
+;; written [x : T], so defrel can supply the types itself.  The body is suspended:
 ;; this is where streams become immature.
-(define-syntax-rule (defrel (name x ...) g ...)
-  (define (name [x : Term] ...) : Goal
-    (λ (s)
-      (λ ()
-        ((conj g ...) s)))))
+(define-syntax (defrel stx)
+  (syntax-parse stx
+    #:datum-literals (:)
+    [(_ (name:id arg ...) g ...)
+     #:with (param ...)
+     (for/list ([arg (in-list (syntax->list #'(arg ...)))])
+       (syntax-parse arg
+         #:datum-literals (:)
+         [x:id #'[x : Term]]
+         [[x:id : t] arg]))
+     #'(define (name param ...) : Goal
+         (λ (s)
+           (λ ()
+             ((conj g ...) s))))]))
 
 (define-syntax run
   (syntax-rules ()
