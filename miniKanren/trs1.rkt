@@ -1,5 +1,16 @@
 #lang typed/racket/base
 
+;; miniKanren as implemented in The Reasoned Schemer, first edition,
+;; rewritten in Typed Racket.
+;;
+;; Source: Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov,
+;; The Reasoned Schemer, MIT Press, 2005 -- chapter 9 ("Under the Hood")
+;; and appendix A ("Connecting the Wires").  The same code is published,
+;; without a license, at https://github.com/miniKanren/TheReasonedSchemer.
+;; The original code is Copyright (C) 2005 Massachusetts Institute of
+;; Technology.  See NOTICE for details and for the changes made here.
+
+
 (provide (all-defined-out))
 
 

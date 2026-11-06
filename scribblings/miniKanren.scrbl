@@ -1,20 +1,20 @@
 #lang scribble/manual
 
 @(require (for-label typed/racket/base
-                     typed/miniKanren)
+                     typed/miniKanren/trs1)
           scribble/example)
 
 @(define mk-eval
    (make-base-eval #:lang 'typed/racket/base
-                   '(require typed/miniKanren)))
+                   '(require typed/miniKanren/trs1)))
 @(define-syntax-rule (mk-examples body ...)
    (examples #:eval mk-eval body ...))
 
 @title{miniKanren-typed: Typed miniKanren}
-@defmodule[typed/miniKanren #:packages ("miniKanren-typed")]
+@defmodule[typed/miniKanren/trs1 #:packages ("miniKanren-typed")]
 @author[@author+email["Noah Ma" "noahstorym@gmail.com"]]
 
-This library is a Typed Racket implementation of the miniKanren
+This module is a Typed Racket implementation of the miniKanren
 language used in the @emph{first} edition of @italic{The Reasoned
 Schemer} (Friedman, Byrd, and Kiselyov, MIT Press, 2005).  It keeps
 the operators of that edition, including the interleaving forms
@@ -35,8 +35,14 @@ unification and reification are those of Chapter 9 (``Under the
 Hood''), and the stream operators and goal constructors are those of
 the appendix ``Connecting the Wires''.  The second edition is a
 different language (its @racket[conde] interleaves, there is no
-@racket[condi] or @racket[alli]) and is not what this library
-implements.
+@racket[condi] or @racket[alli]) and is not what this module
+implements.  Each edition has its own module in this package, named
+after the edition; this one is @racketmodname[typed/miniKanren/trs1].
+
+The code of @racketmodname[typed/miniKanren/trs1] is derived from the
+code printed in the book, which is not covered by the package's MIT
+License; the file @tt{NOTICE} in the source repository lists the
+sources and their copyright holders.
 
 The differences from the first edition are:
 
