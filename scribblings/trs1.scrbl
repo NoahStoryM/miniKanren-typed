@@ -84,9 +84,7 @@ of terms.  Every argument of @racket[==] is a @racket[Term].
 }
 
 @deftogether[(@deftype[Var]
-              @defproc[(var [name Symbol]) Var]
-              @defproc[(var? [v Any]) Boolean]
-              @defproc[(var-name [x Var]) Symbol])]{
+              @defstruct*[var ([name Symbol]) #:transparent])]{
 Logic variables.  A variable is identified by the object itself
 (@racket[eq?]), not by its name; the name is only for printing.  Two
 calls to @racket[var] with the same name produce distinct variables.

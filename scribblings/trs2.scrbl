@@ -68,9 +68,7 @@ variables, and pairs of terms.
 }
 
 @deftogether[(@deftype[Var]
-              @defproc[(var [name Symbol]) Var]
-              @defproc[(var? [v Any]) Boolean]
-              @defproc[(var-name [x Var]) Symbol]
+              @defstruct*[var ([name Symbol]) #:transparent]
               @defproc[(data? [v Any]) Boolean])]{
 Logic variables, compared by identity, and the predicate for
 @racket[Data].  (Chapter 10.)
