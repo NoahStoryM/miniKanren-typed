@@ -2,7 +2,8 @@
 
 @(require (for-label typed/racket/base
                      typed/miniKanren/trs2)
-          scribble/example)
+          scribble/example
+          "utils.rkt")
 
 @(define mk-eval
    (make-base-eval #:lang 'typed/racket/base
@@ -56,9 +57,9 @@ edition.
 
 @section[#:tag "trs2-types"]{Types}
 
-@deftogether[(@defidform[Literal]
-              @defidform[Data]
-              @defidform[Term])]{
+@deftogether[(@deftype[Literal]
+              @deftype[Data]
+              @deftype[Term])]{
 @racket[Literal] is the type of atomic values: booleans, numbers,
 characters, byte strings, strings, keywords, symbols, and
 @racket['()].  @racket[Data] is the type of ground terms, built from
@@ -66,7 +67,7 @@ literals and pairs.  @racket[Term] is the type of all terms: literals,
 variables, and pairs of terms.
 }
 
-@deftogether[(@defidform[Var]
+@deftogether[(@deftype[Var]
               @defproc[(var [name Symbol]) Var]
               @defproc[(var? [v Any]) Boolean]
               @defproc[(var-name [x Var]) Symbol]
@@ -75,13 +76,13 @@ Logic variables, compared by identity, and the predicate for
 @racket[Data].  (Chapter 10.)
 }
 
-@defidform[Substitution]{
+@deftype[Substitution]{
 Defined as @racket[(Listof (Pair Var Term))], a triangular association
 list from variables to terms.
 }
 
-@deftogether[(@defform[(Streamof a)]
-              @defform[(Suspension a)])]{
+@deftogether[(@deftypeconstr[(Streamof a)]
+              @deftypeconstr[(Suspension a)])]{
 Defined as
 
 @racketblock[
@@ -103,7 +104,7 @@ control before it has produced anything.  This is what lets
 @racket[conde] switch away from a branch that never produces an answer.
 }
 
-@defidform[Goal]{
+@deftype[Goal]{
 Defined as @racket[(→ Substitution (Streamof Substitution))].
 
 @mk-examples[

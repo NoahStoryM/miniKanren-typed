@@ -2,7 +2,8 @@
 
 @(require (for-label typed/racket/base
                      typed/miniKanren/trs1)
-          scribble/example)
+          scribble/example
+          "utils.rkt")
 
 @(define mk-eval
    (make-base-eval #:lang 'typed/racket/base
@@ -66,23 +67,23 @@ edition.
 
 @section[#:tag "trs1-types"]{Types}
 
-@defidform[Literal]{
+@deftype[Literal]{
 The type of atomic values that may appear in a term: booleans,
 numbers, characters, byte strings, strings, keywords, symbols, and
 @racket['()].  Unification compares literals with @racket[equal?].
 }
 
-@defidform[Data]{
+@deftype[Data]{
 The type of ground terms: literals and pairs of ground terms, with no
 logic variables anywhere inside.
 }
 
-@defidform[Term]{
+@deftype[Term]{
 The type of terms: literals, logic variables (@racket[Var]), and pairs
 of terms.  Every argument of @racket[==] is a @racket[Term].
 }
 
-@deftogether[(@defidform[Var]
+@deftogether[(@deftype[Var]
               @defproc[(var [name Symbol]) Var]
               @defproc[(var? [v Any]) Boolean]
               @defproc[(var-name [x Var]) Symbol])]{
@@ -101,14 +102,14 @@ calls to @racket[var] with the same name produce distinct variables.
 Recognizes @racket[Data], that is, terms that contain no variables.
 }
 
-@defidform[Substitution]{
+@deftype[Substitution]{
 Defined as @racket[(Listof (Pair Var Term))].  A substitution is a
 triangular association list: a variable may be associated with a term
 that itself contains variables bound further along the list, and
 @racket[walk] follows those links.
 }
 
-@defform[(Streamof a)]{
+@deftypeconstr[(Streamof a)]{
 The type of lazy streams of answers, defined as
 
 @racketblock[
@@ -123,7 +124,7 @@ The middle case is the book's @emph{unit}; the last is its
 @emph{choice}.
 }
 
-@defidform[Goal]{
+@deftype[Goal]{
 Defined as @racket[(→ Substitution (Streamof Substitution))].  A goal
 maps a substitution to the stream of all extensions of it under which
 the goal holds.  A goal that fails returns the empty stream.
