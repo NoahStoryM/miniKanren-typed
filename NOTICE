@@ -10,7 +10,7 @@ which remains under the terms of its own copyright holders.
 
 1. The miniKanren implementation of The Reasoned Schemer, first edition
 
-   Files:   miniKanren/trs1.rkt
+   Files:   miniKanren/trs1/main.rkt
 
    Source:  Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov,
             The Reasoned Schemer, MIT Press, 2005: chapter 9
@@ -21,7 +21,7 @@ which remains under the terms of its own copyright holders.
 
    Copyright (C) 2005 Massachusetts Institute of Technology.
 
-   miniKanren/trs1.rkt is a Typed Racket rewrite of that code.  The
+   miniKanren/trs1/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout; a single
    answer in a stream is represented by an immutable box and the empty
    stream by '(); ext-s performs the occurs check (so == is the checked
@@ -31,7 +31,7 @@ which remains under the terms of its own copyright holders.
 
 2. Examples from The Reasoned Schemer, first edition
 
-   Files:   miniKanren/tests/trs1/ch1.rktl ... ch10.rktl
+   Files:   miniKanren/trs1/tests/ch1.rktl ... ch10.rktl
 
    Source:  The Reasoned Schemer, MIT Press, 2005, chapters 1-10.
 

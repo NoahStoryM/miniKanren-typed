@@ -30,8 +30,8 @@ The original work in this package is distributed under the MIT License;
 see [[file:LICENSE]].
 
 The package also contains third-party material that is *not* covered by
-that license: =miniKanren/trs1.rkt= is a Typed Racket rewrite of the
+that license: =miniKanren/trs1/main.rkt= is a Typed Racket rewrite of the
 miniKanren implementation printed in /The Reasoned Schemer/, first
-edition (MIT Press, 2005), and the tests in =miniKanren/tests/trs1/= are
+edition (MIT Press, 2005), and the tests in =miniKanren/trs1/tests/= are
 examples transcribed from that book, included for testing only.  See
 [[file:NOTICE]] for the sources and copyright holders.
