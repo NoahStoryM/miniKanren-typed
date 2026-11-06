@@ -1,3 +1,7 @@
+;; Examples from The Reasoned Schemer, first edition (MIT Press, 2005),
+;; chapter 8.  Copyright (C) 2005 Massachusetts Institute of Technology.
+;; Transcribed for use as tests only; see NOTICE.
+
 (displayln "Test code in chapter 8")
 (: *o       (→ Term Term Term Goal))
 (: odd-*o   (→ Term Term Term Term Goal))

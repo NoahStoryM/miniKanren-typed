@@ -1,3 +1,7 @@
+;; Examples from The Reasoned Schemer, first edition (MIT Press, 2005),
+;; chapter 9.  Copyright (C) 2005 Massachusetts Institute of Technology.
+;; Transcribed for use as tests only; see NOTICE.
+
 (displayln "Test code in chapter 9")
 (define u (var 'u))
 (define v (var 'v))

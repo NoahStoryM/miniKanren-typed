@@ -1,0 +1,43 @@
+miniKanren-typed
+Copyright (c) 2025 Noah Ma
+
+The MIT License in LICENSE applies to the original work of the author
+of this package: the Typed Racket types, the changes to the code
+described below, the documentation, and the package infrastructure.
+It does not grant any rights in the third-party material listed below,
+which remains under the terms of its own copyright holders.
+
+
+1. The miniKanren implementation of The Reasoned Schemer, first edition
+
+   Files:   miniKanren/trs1.rkt
+
+   Source:  Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov,
+            The Reasoned Schemer, MIT Press, 2005: chapter 9
+            ("Under the Hood") and appendix A ("Connecting the Wires").
+            The same code is also published at
+            https://github.com/miniKanren/TheReasonedSchemer,
+            which does not state a license.
+
+   Copyright (C) 2005 Massachusetts Institute of Technology.
+
+   miniKanren/trs1.rkt is a Typed Racket rewrite of that code.  The
+   changes are: type definitions and annotations throughout; a single
+   answer in a stream is represented by an immutable box and the empty
+   stream by '(); ext-s performs the occurs check (so == is the checked
+   unification); and #s, #u, and the goal and thunk lambdas are spelled
+   succeed, fail, λG, and λF.
+
+
+2. Examples from The Reasoned Schemer, first edition
+
+   Files:   miniKanren/tests/trs1/ch1.rktl ... ch10.rktl
+
+   Source:  The Reasoned Schemer, MIT Press, 2005, chapters 1-10.
+
+   Copyright (C) 2005 Massachusetts Institute of Technology.
+   All rights reserved by the copyright holder.
+
+   These examples were transcribed from the book to check that the
+   implementation produces the results printed in the book.  They are
+   included for testing only.

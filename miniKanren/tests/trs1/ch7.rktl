@@ -1,3 +1,7 @@
+;; Examples from The Reasoned Schemer, first edition (MIT Press, 2005),
+;; chapter 7.  Copyright (C) 2005 Massachusetts Institute of Technology.
+;; Transcribed for use as tests only; see NOTICE.
+
 (displayln "Test code in chapter 7")
 (: bit-xoro (→ Term Term Term Goal))
 (define (bit-xoro x y r)
