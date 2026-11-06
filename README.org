@@ -16,9 +16,17 @@ See the [[https://docs.racket-lang.org/miniKanren/index.html][online documentati
 ~raco docs miniKanren~ after installing the package.
 
 * Usage
+~typed/microKanren~ is microKanren (Hemann and Friedman, 2013).
+
+#+begin_src racket
+#lang typed/racket/base
+(require typed/microKanren)
+(run* (q) (conde [(== q 'red)] [(== q 'green)]))
+#+end_src
+
 Each edition of /The Reasoned Schemer/ has its own module:
 ~typed/miniKanren/trs1~ for the first edition (2005) and
-~typed/miniKanren/trs2~ for the second edition (2018).  The two
+~typed/miniKanren/trs2~ for the second edition (2018).  The
 modules export many of the same names, so require only one of them, or
 use ~prefix-in~.
 
@@ -47,6 +55,9 @@ examples transcribed from that book, included for testing only.
 =miniKanren/trs2/main.rkt= is a Typed Racket rewrite of the
 [[https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd][official code]]
 of the second edition (MIT License, Copyright (c) 2018 Daniel P.
-Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann).  See
+Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann).
+=microKanren/main.rkt= is a Typed Racket rewrite of
+[[https://github.com/jasonhemann/microKanren][microKanren]] (MIT
+License, Copyright (C) 2013 Jason Hemann and Daniel P. Friedman).  See
 [[file:NOTICE]] for the sources, the copyright holders, and the license
 texts.
