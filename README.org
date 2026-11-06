@@ -12,8 +12,8 @@
 Install the package with ~raco pkg install --auto miniKanren-typed~.
 
 * Documentation
-See the [[https://docs.racket-lang.org/miniKanren/index.html][online documentation]], or run
-~raco docs miniKanren~ after installing the package.
+See the [[https://docs.racket-lang.org/miniKanren-typed/index.html][online documentation]], or run
+~raco docs miniKanren-typed~ after installing the package.
 
 * Usage
 Each edition of /The Reasoned Schemer/ has its own module:

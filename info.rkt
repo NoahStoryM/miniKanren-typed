@@ -14,7 +14,8 @@
     "racket-doc"
     "typed-racket-doc"))
 
-(define scribblings '(("scribblings/miniKanren.scrbl" (multi-page))))
+(define scribblings
+  '(("scribblings/miniKanren.scrbl" (multi-page) (library) "miniKanren-typed")))
 
 (define clean '("compiled" "private/compiled"))
 (define test-omit-paths '(#px"^((?!/tests/).)*$"))
