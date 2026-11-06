@@ -4,10 +4,15 @@
 
 * Table of Contents                                       :TOC_5_gh:noexport:
 - [[#installation][Installation]]
+- [[#documentation][Documentation]]
 - [[#license][License]]
 
 * Installation
 Install the package with ~raco pkg install --auto miniKanren-typed~.
+
+* Documentation
+See the [[https://docs.racket-lang.org/miniKanren/index.html][online documentation]], or run
+~raco docs miniKanren~ after installing the package.
 
 * License
 This project is distributed under the MIT License; see [[file:LICENSE]] for
