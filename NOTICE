@@ -41,3 +41,47 @@ which remains under the terms of its own copyright holders.
    These examples were transcribed from the book to check that the
    implementation produces the results printed in the book.  They are
    included for testing only.
+
+
+3. The miniKanren implementation of The Reasoned Schemer, second edition
+
+   Files:   miniKanren/trs2/main.rkt
+
+   Source:  https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd
+            (trs2-impl.scm), the code of chapter 10 and appendix A of
+            Daniel P. Friedman, William E. Byrd, Oleg Kiselyov, and
+            Jason Hemann, The Reasoned Schemer, second edition, MIT
+            Press, 2018.
+
+   miniKanren/trs2/main.rkt is a Typed Racket rewrite of that code.  The
+   changes are: type definitions and annotations throughout (defrel
+   declares every argument a Term and the result a Goal); variables are
+   structs compared with eq? and named after the fresh identifier;
+   literals are compared with equal? instead of eqv?; and ext-s skips
+   the occurs check for ground terms.  The code is distributed under
+   the following license:
+
+   MIT License
+
+   Copyright (c) 2018 Daniel P. Friedman, William E. Byrd, Oleg Kiselyov,
+   and Jason Hemann
+
+   Permission is hereby granted, free of charge, to any person obtaining
+   a copy of this software and associated documentation files (the
+   "Software"), to deal in the Software without restriction, including
+   without limitation the rights to use, copy, modify, merge, publish,
+   distribute, sublicense, and/or sell copies of the Software, and to
+   permit persons to whom the Software is furnished to do so, subject to
+   the following conditions:
+
+   The above copyright notice and this permission notice shall be
+   included in all copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+   EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+   NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+   BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+   CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.

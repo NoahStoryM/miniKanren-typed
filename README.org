@@ -16,13 +16,23 @@ See the [[https://docs.racket-lang.org/miniKanren/index.html][online documentati
 ~raco docs miniKanren~ after installing the package.
 
 * Usage
-Each edition of /The Reasoned Schemer/ has its own module.  The
-first edition (2005) is provided by ~typed/miniKanren/trs1~:
+Each edition of /The Reasoned Schemer/ has its own module:
+~typed/miniKanren/trs1~ for the first edition (2005) and
+~typed/miniKanren/trs2~ for the second edition (2018).  The two
+modules export many of the same names, so require only one of them, or
+use ~prefix-in~.
 
 #+begin_src racket
 #lang typed/racket/base
 (require typed/miniKanren/trs1)
 (run* (q) (conde [(== q 'red)] [(== q 'green)]))
+#+end_src
+
+#+begin_src racket
+#lang typed/racket/base
+(require typed/miniKanren/trs2)
+(defrel (coloro c) (conde [(== c 'red)] [(== c 'green)]))
+(run* q (coloro q))
 #+end_src
 
 * License
@@ -33,5 +43,10 @@ The package also contains third-party material that is *not* covered by
 that license: =miniKanren/trs1/main.rkt= is a Typed Racket rewrite of the
 miniKanren implementation printed in /The Reasoned Schemer/, first
 edition (MIT Press, 2005), and the tests in =miniKanren/trs1/tests/= are
-examples transcribed from that book, included for testing only.  See
-[[file:NOTICE]] for the sources and copyright holders.
+examples transcribed from that book, included for testing only.
+=miniKanren/trs2/main.rkt= is a Typed Racket rewrite of the
+[[https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd][official code]]
+of the second edition (MIT License, Copyright (c) 2018 Daniel P.
+Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann).  See
+[[file:NOTICE]] for the sources, the copyright holders, and the license
+texts.
