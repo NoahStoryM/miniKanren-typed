@@ -14,8 +14,8 @@
 
 (require (for-syntax racket/base syntax/parse)
          racket/match
-         "../../../microKanren/stream/private/stream-api.rkt"
-         "../../../microKanren/stream/private/representation.rkt")
+         racket/stream/private/stream-api
+         racket/stream/private/representation)
 
 (provide (all-defined-out))
 

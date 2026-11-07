@@ -1,17 +1,17 @@
 #lang racket/base
 
 (module reference typed/racket/base
-  (require typed/racket/unsafe "../../main.rkt")
+  (require typed/racket/unsafe typed/microKanren/main)
   ;; Use original functions without higher-order boundary contracts.
   (unsafe-provide unit mzero mplus bind == call/fresh disj conj
                   empty-state take var? var-c))
 
 (require rackunit racket/match racket/promise racket/stream
-         "../private/stream-api.rkt" "../private/representation.rkt"
-         "../private/core.rkt" "workloads.rkt"
-         (prefix-in native: "../private/representation.rkt")
-         (prefix-in term: "../private/terms.rkt")
-         (prefix-in syntax: "../main.rkt")
+         racket/stream/private/stream-api racket/stream/private/representation
+         typed/microKanren/stream/private/core typed/microKanren/stream/tests/workloads
+         (prefix-in native: racket/stream/private/representation)
+         (prefix-in term: typed/microKanren/stream/private/terms)
+         (prefix-in syntax: typed/microKanren/stream)
          (prefix-in ref: (submod "." reference)))
 
 (define (reference-trace n source [project values])

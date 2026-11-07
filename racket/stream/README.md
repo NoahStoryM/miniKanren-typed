@@ -6,21 +6,21 @@ access to `racket/private/stream-cons`. These private names were tested with
 Racket 9.3 CS and may change between releases. RackUnit is consequently a runtime
 dependency of this experimental adapter.
 
-The package's collection is `typed`, so the entry points are
-`typed/microKanren/stream`, `typed/microKanren/stream/stream`, and
-`typed/miniKanren/stream/trs2`. Despite that prefix, this experiment makes no
-claim of Typed Racket support. The microKanren implementation is untyped; the
+The package has a multi-collection layout. The search-stream API is
+`racket/stream/search`; the logic programming entry points remain
+`typed/microKanren/stream` and `typed/miniKanren/stream/trs2`. Despite that
+prefix, this experiment makes no claim of Typed Racket support. The microKanren implementation is untyped; the
 TRS2 implementation retains the reference's type annotations under
 `typed/racket/no-check` for comparison.
 
 ## Read the layers
 
-- `stream.rkt`: the API for exploring search streams.
+- `search.rkt`: the API for exploring search streams.
 - `private/stream-api.rkt`: representation-independent merge, bind, and observers.
 - `private/representation.rkt`: native stream constructors and private queries.
-- `private/core.rkt`: microKanren parametrized by the stream API.
-- `main.rkt`: microKanren syntax and reification.
-- `../../miniKanren/stream/trs2/main.rkt`: TRS2, including `ifte` and `once`.
+- `../../typed/microKanren/stream/private/core.rkt`: microKanren parametrized by the stream API.
+- `../../typed/microKanren/stream/main.rkt`: microKanren syntax and reification.
+- `../../typed/miniKanren/stream/trs2/main.rkt`: TRS2, including `ifte` and `once`.
 
 A ready node uses `stream-cons` with **both** head and tail `#:eager`. Its answer
 is stored directly, without a Box; its tail can itself be a suspended stream.
@@ -33,7 +33,7 @@ pause; bind uses this same merge. Ready prefixes are constructed eagerly, as in
 the reference implementations. This is not element-by-element round robin.
 
 ```racket
-(require (prefix-in search: typed/microKanren/stream/stream)
+(require (prefix-in search: racket/stream/search)
          racket/stream)
 (define s
   (search:stream-merge
@@ -89,8 +89,8 @@ and pause positions before and after ordinary native stream consumption.
 From the repository root, with the usual Racket packages installed:
 
 ```sh
-raco test microKanren/stream/tests/main.rkt \
-          microKanren/stream/tests/scheduling.rkt \
-          microKanren/stream/tests/stream.rkt \
-          miniKanren/stream/trs2/tests/main.rkt
+raco test typed/microKanren/stream/tests/main.rkt \
+          racket/stream/tests/scheduling.rkt \
+          racket/stream/tests/stream.rkt \
+          typed/miniKanren/stream/trs2/tests/main.rkt
 ```

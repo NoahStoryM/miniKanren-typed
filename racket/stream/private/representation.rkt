@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require racket/stream racket/promise rackunit "stream-api.rkt")
+(require racket/stream racket/promise rackunit racket/stream/private/stream-api)
 (provide racket-stream-api suspend-stream stream-suspension?
          stream-force-one stream-head-forced? stream-rest/raw)
 
