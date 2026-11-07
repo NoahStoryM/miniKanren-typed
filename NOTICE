@@ -162,7 +162,7 @@ include. No Racket implementation source is copied into that search adapter.
 6. Isolated two-state Racket stream experiment
 
    Files:   experiments/stream-benchmarks/private/two-state-cons.rkt
-            racket/stream/private/stream-cons.rkt
+            private/racket/private/stream-cons.rkt
 
    Source:  Racket 9.3, collects/racket/private/stream-cons.rkt,
             https://github.com/racket/racket

@@ -7,7 +7,7 @@
 
 There are three separate layers:
 
-1. `racket/stream/main`: native stream constructors/consumers, plus non-forcing
+1. `private/racket/stream`: native stream constructors/consumers, plus non-forcing
    known-empty and first-forced queries, and stream-force-once.
 2. `private/stream-api.rkt`: representation-independent search algebra.
    `private/native-stream.rkt` implements its four primitives using layer 1.
@@ -73,11 +73,11 @@ branches. It checks the alternative pair/thunk backend, cached empty results,
 warming semantics, and interoperability with ordinary stream consumers.
 
 ```sh
-raco test racket/stream/tests/main.rkt \
+raco test private/racket/tests/stream.rkt \
           microKanren/stream/tests/main.rkt \
           microKanren/stream/tests/scheduling.rkt
 ```
 
-The separate `miniKanren/stream/trs2` backend still uses the historical adapter;
-this change migrates microKanren. Its shared abstract algebra is the same
-private/stream-api.rkt, so it is included in regression checks after relocation.
+`miniKanren/stream/trs2` now uses the same native adapter and abstract algebra.
+Its book tests include all ten chapter fixtures and arithmetic; its own README
+explains the representation-only observer view used for chapter 10.

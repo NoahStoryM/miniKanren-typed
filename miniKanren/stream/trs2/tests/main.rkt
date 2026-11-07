@@ -5,8 +5,7 @@
          (except-in rackunit fail)
          (only-in racket/list make-list)
          "../main.rkt"
-         (prefix-in native: racket/stream)
-         (prefix-in search: experiments/search-stream/main)
+         (prefix-in native: private/racket/stream)
          (for-syntax racket/base))
 
 (include "../../../../typed/miniKanren/trs2/tests/ch1.rktl")
@@ -22,17 +21,22 @@
 ;; Chapter 10 directly inspects pair/thunk representation. Translate those
 ;; observers, not its expected answers or the algorithms being tested.
 (define (view-pair? value)
-  (or (pair? value) (search:stream-head-forced? value)))
+  (or (pair? value)
+      (and (native:stream? value) (native:stream-first-forced? value))))
 (define (view-car value)
-  (if (search:stream-head-forced? value) (native:stream-first value) (car value)))
+  (if (pair? value) (car value) (native:stream-first value)))
 (define (view-cdr value)
-  (if (search:stream-head-forced? value) (search:stream-rest/raw value) (cdr value)))
+  (if (pair? value) (cdr value) (native:stream-rest value)))
+(define (pending-stream? value)
+  (and (native:stream? value)
+       (not (native:stream-empty/known? value))
+       (not (native:stream-first-forced? value))))
 (define (view-procedure? value)
-  (or (procedure? value) (search:stream-suspension? value)))
+  (or (procedure? value) (pending-stream? value)))
 (define (view-assert value predicate)
   (unless (predicate value) (error 'view-assert "unexpected shape: ~e" value))
-  (if (search:stream-suspension? value)
-      (lambda () (search:stream-force-one value))
+  (if (pending-stream? value)
+      (lambda () (native:stream-force-once value))
       value))
 (define-syntax-rule (view-check-equal? expression expected)
   (let ([actual expression])
@@ -40,7 +44,7 @@
                       (native:stream->list actual) actual)
                   expected)))
 (let-syntax ([lambda (syntax-rules ()
-                      [(_ () body ...) (search:stream-suspend body ...)]
+                      [(_ () body ...) (native:stream-lazy (begin body ...))]
                       [(_ args body ...) (λ args body ...)])])
   (let ([pair? view-pair?] [car view-car] [cdr view-cdr]
         [procedure? view-procedure?] [assert view-assert])

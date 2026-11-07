@@ -2,7 +2,7 @@
 
 (require rackunit racket/match
          (prefix-in stock: racket/stream)
-         (prefix-in new: racket/stream/main))
+         (prefix-in new: private/racket/stream))
 
 (define (observed-state source)
   (cond [(new:stream-empty/known? source) 'empty]
@@ -150,7 +150,7 @@
 
 ;; The facade exports exactly the stock interface plus the three new operations.
 (define-values (stock-values stock-syntax) (module->exports 'racket/stream))
-(define-values (new-values new-syntax) (module->exports 'racket/stream/main))
+(define-values (new-values new-syntax) (module->exports 'private/racket/stream))
 (define (phase-zero-names exports)
   (define entry (assv 0 exports))
   (if entry (map car (cdr entry)) '()))

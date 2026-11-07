@@ -15,7 +15,7 @@
 (require (for-syntax racket/base syntax/parse)
          racket/match
          microKanren/stream/private/stream-api
-         experiments/search-stream/private/representation)
+         microKanren/stream/private/native-stream)
 
 (provide (all-defined-out))
 
@@ -80,8 +80,8 @@
 
 ;;; Streams
 
-;; Native streams, with explicit logical pauses. These aliases document the
-;; unchecked prototype; they are not statically checked stream types.
+;; Native streams, observed through their current cache state. These aliases
+;; document the unchecked prototype, not statically checked stream types.
 (define-type (Streamof a) Any)
 (define-type Goal (→ Substitution (Streamof Substitution)))
 (define append-inf (stream-api-merge racket-stream-api))
@@ -90,6 +90,7 @@
 (define (take-inf n source)
   (if n ((stream-api-take racket-stream-api) n source)
       ((stream-api-take-all racket-stream-api) source)))
+(define empty-stream (stream-api-empty racket-stream-api))
 (define unit (stream-api-unit racket-stream-api))
 (define inspect (stream-api-inspect racket-stream-api))
 
@@ -98,13 +99,13 @@
 (: == (→ Term Term Goal))
 (define ((== u v) s)
   (let ([s (unify u v s)])
-    (if s (unit s) '())))
+    (if s (unit s) empty-stream)))
 
 (: succeed Goal)
 (define (succeed s) (unit s))
 
 (: fail Goal)
-(define (fail s) '())
+(define (fail s) empty-stream)
 
 (: disj2 (→ Goal Goal Goal))
 (define ((disj2 g1 g2) s)
@@ -128,7 +129,7 @@
 (define ((once g) s)
   (let loop ([source (g s)])
     (match (inspect source)
-      [(end) '()]
+      [(end) empty-stream]
       [(ready value _) (unit value)]
       [(paused resume) (suspend-stream (λ () (loop (resume))))])))
 
@@ -197,8 +198,8 @@
          [[x:id : t] arg]))
      #'(define (name param ...) : Goal
          (λ (s)
-           (suspend-stream (λ ()
-             ((conj g ...) s)))))]))
+           (suspend-stream
+            (λ () ((conj g ...) s)))))]))
 
 (define-syntax run
   (syntax-rules ()

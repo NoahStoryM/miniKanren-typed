@@ -1,5 +1,5 @@
 #lang typed/racket/no-check
-(require racket/include rackunit racket/stream/main
+(require racket/include rackunit private/racket/stream
          "../main.rkt" "../private/native-stream.rkt"
          (for-syntax racket/base))
 (define $car stream-first)

@@ -1,7 +1,8 @@
 > Historical history-preserving adapter. microKanren/stream now uses
-> racket/stream/main through its own native backend. The generic algebra moved
+> private/racket/stream through its own native backend. The generic algebra moved
 > to microKanren/stream/private/stream-api.rkt; this experiment still imports it.
-> miniKanren/stream/trs2 remains on this historical backend.
+> Both microKanren/stream and miniKanren/stream/trs2 have migrated to the
+> native backend; this adapter is retained only for historical comparisons.
 
 # Native Racket stream experiment
 
@@ -103,7 +104,7 @@ raco test microKanren/stream/tests/main.rkt \
 
 ## Native-library extension experiment
 
-`racket/stream/main` separately experiments with two additions to the native
+`private/racket/stream` separately experiments with two additions to the native
 library itself: non-forcing `stream-inspect` and `stream-force-one`. It retains
 the two-state primitive representation and reuses native private definitions and redefines only the affected definitions. It does not use the search adapter's history table or replace its API.
 See [../stream-benchmarks/README.md](../stream-benchmarks/README.md) for the changes, measurements,

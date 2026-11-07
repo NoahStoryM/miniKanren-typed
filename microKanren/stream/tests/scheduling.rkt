@@ -9,7 +9,7 @@
 (require rackunit racket/match racket/promise racket/stream
          microKanren/stream/private/stream-api microKanren/stream/private/native-stream
          microKanren/stream/private/core microKanren/stream/tests/workloads
-         (prefix-in native: racket/stream/main)
+         (prefix-in native: private/racket/stream)
          (prefix-in term: microKanren/stream/private/terms)
          (prefix-in syntax: microKanren/stream)
          (prefix-in ref: (submod "." reference)))

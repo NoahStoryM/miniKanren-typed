@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require racket/stream/main "stream-api.rkt")
+(require private/racket/stream "stream-api.rkt")
 (provide racket-stream-api suspend-stream)
 
 ;; The four search-stream primitives. Answer heads and tail objects are eager;

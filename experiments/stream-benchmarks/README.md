@@ -1,7 +1,7 @@
 # Two-state native-stream experiment (Racket 9.3 CS)
 
 Historical benchmark snapshot. Use `(require "two-state.rkt")` from this
-directory to reproduce it; the focused extension is now `racket/stream/main`.
+directory to reproduce it; the focused extension is now `private/racket/stream`.
 
 This is an isolated primitive fork for studying extensions to Racket itself.
 It does not install a patch into the running Racket distribution or replace
@@ -50,7 +50,7 @@ From repository root, compile first, then run sequentially:
 raco make experiments/stream-benchmarks/main.rkt experiments/stream-benchmarks/steps.rkt
 python experiments/stream-benchmarks/run.py /path/to/racket
 racket experiments/stream-benchmarks/steps.rkt
-raco test racket/stream/tests/main.rkt
+raco test private/racket/tests/stream.rkt
 ```
 
 Each stock/fork workload uses a fresh process, small and full warmups, seven
@@ -129,4 +129,4 @@ roots, exact evaluation counts, retained intermediate aliases, and compression
 of a long prefix created by cursor advancement.
 
 These saved measurements describe the full copied primitive snapshot here, not
-new timings of the private-definition-reusing `racket/stream/main` adapter.
+new timings of the private-definition-reusing `private/racket/stream` adapter.

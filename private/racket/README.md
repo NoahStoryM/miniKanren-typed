@@ -1,7 +1,7 @@
 # Native stream extension
 
 ```racket
-(require racket/stream/main)
+(require private/racket/stream)
 ```
 
 The facade exports the stock interface, replaces `stream-cons`, `stream-lazy`,
@@ -45,7 +45,7 @@ cannot inspect or step. The new protocol covers local delays and native cons
 nodes (and recognizes lists); custom streams are conservatively unknown. Tested
 on Racket 9.3 CS. This is not general gen:stream introspection.
 
-`tests/main.rkt` checks queries, exact exports, forcing, constructor choices,
+`tests/stream.rkt` checks queries, exact exports, forcing, constructor choices,
 sharing, and errors. `../../microKanren/stream/README.md` describes the search
 abstraction and the backend that now uses this module. Historical benchmark
 snapshots are under `../../experiments/stream-benchmarks/`; their old timings
