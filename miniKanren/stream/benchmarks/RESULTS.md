@@ -27,7 +27,11 @@ Inspection of expansion shows that the no-check predicate obtains
 `(flat-contract-predicate #f)`, while checked expansion replaces the lifted
 placeholder with the generated contract. This is a concrete semantic
 reproduction for the tested runtime, independent of the timing measurements.
-No upstream issue has been submitted.
+The same no-check defect was already reported in
+[typed-racket #316](https://github.com/racket/typed-racket/issues/316) on
+2016-03-02 and remains open when checked on 2026-11-07. Its report also
+identifies the unfilled #f contract placeholder. No upstream issue or comment
+has been submitted by this work; a duplicate no-check report is unnecessary.
 
 The stream implementations now spell out the same Data predicate explicitly,
 retaining its predicate type annotation. There are 38 new assertions comparing
@@ -106,6 +110,50 @@ different performance here. This is a reduced performance investigation, not
 proof of a compiler bug or a guarantee about other predicates. `define-predicate`
 explicitly asks for a runtime check even inside a typed module.
 
+
+## Scaling and upstream triage
+
+`predicate-scaling.rkt` constructs the inputs at run time and measures 10,000
+calls at each list length, three times. CPU medians (ms):
+
+| List length | Generated Data | Generated narrow type | Manual Data |
+| ---: | ---: | ---: | ---: |
+| 0 | 1 | 1 | 0 |
+| 1 | 9 | 4 | 0 |
+| 2 | 15 | 7 | 0 |
+| 4 | 30 | 14 | 0 |
+| 8 | 58 | 25 | 0 |
+| 16 | 120 | 49 | 1 |
+| 32 | 239 | 96 | 3 |
+| 64 | 504 | 218 | 4 |
+
+Raw samples are in `predicate-scaling-results-20261107.json`. Narrow means
+`(U Symbol Null (Pair Narrow Narrow))`. Small manual measurements fall below
+whole-millisecond timer resolution; use the longer predicate-cost experiment
+for that ratio. The 16/32/64 Data cases grow approximately linearly in this
+range, not quadratically or exponentially. This is empirical evidence over
+these inputs, not a proof about all recursive types or input graphs.
+
+Expanded Racket 9.3 code implements Data using flat recursive contracts and
+an or/c-style union of predicates. The numeric portion of the mixed union is
+expanded into many numeric subtypes instead of a single number? test. That is
+one source of avoidable-looking work, but it is not the whole gap: the narrow
+recursive type also has substantial cost. The recursive-contract first-order
+path also goes through generic contract machinery. No profile assigns an
+exact fraction of runtime to either mechanism.
+
+A standalone Number-generated predicate is close to number? in a separate
+1,000,000-call control: medians 3 vs 2 ms. The observation is therefore about
+these recursive union predicates, not every define-predicate expansion.
+
+The documentation promises a predicate for the specified type, not equality
+with handwritten-predicate performance. The measured gap is explainable by
+the current implementation, but does not appear to be a semantic requirement.
+It merits a separate performance/optimization issue with the fully typed,
+no-boundary reproductions. The performance searches did not find a clear
+matching issue. That report should not be conflated with known no-check
+correctness issue #316. Racket's development version has not been tested here.
+
 ## Scheduling and stream costs
 
 The implementations preserve the tested cold-run answer and pause order.
@@ -138,6 +186,8 @@ PLTCOLLECTS="$PWD:" python miniKanren/stream/benchmarks/compare.py \
 raco make miniKanren/stream/benchmarks/predicate-cost.rkt
 racket miniKanren/stream/benchmarks/predicate-cost.rkt
 racket miniKanren/stream/benchmarks/no-check-predicate-repro.rkt
+raco make miniKanren/stream/benchmarks/predicate-scaling.rkt
+racket miniKanren/stream/benchmarks/predicate-scaling.rkt
 ```
 
 Temporary copies are used for the comparison; the original implementations
