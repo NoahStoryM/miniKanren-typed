@@ -102,3 +102,43 @@
                   (stock:stream->list (original expression)))
     (check-equal? (stock:stream->list cursor) (stock:stream->list source))
     (check-eq? (new:stream-force source) (new:stream-force source))))
+
+;; Repeated steps from the same old root still execute exactly one new body.
+(define root-calls 0)
+(define (counted-chain n)
+  (if (zero? n) (new:stream-cons #:eager 'done #:eager new:empty-stream)
+      (new:stream-lazy
+       (begin (set! root-calls (add1 root-calls))
+              (counted-chain (sub1 n))))))
+(define old-root (counted-chain 100))
+(for ([i (in-range 100)])
+  (define result (new:stream-force-one old-root))
+  (check-equal? root-calls (add1 i))
+  (check-eq? (new:stream-inspect result) (if (= i 99) 'ready 'lazy)))
+(check-eq? (new:stream-inspect old-root) 'ready)
+(check-equal? (stock:stream->list old-root) '(done))
+(void (new:stream-force-one old-root))
+(check-equal? root-calls 100)
+
+;; An alias retained in the middle remains usable after another root compresses.
+(define shared-tail (new:stream-lazy (new:stream-lazy '(answer))))
+(define shared-root (new:stream-lazy shared-tail))
+(check-eq? (new:stream-force-one shared-root) shared-tail)
+(define shared-next (new:stream-force-one shared-root))
+(check-eq? (new:stream-inspect shared-tail) 'lazy)
+(check-equal? (new:stream-force-one shared-root) '(answer))
+(check-eq? (new:stream-inspect shared-tail) 'ready)
+(check-equal? (stock:stream->list shared-next) '(answer))
+
+;; Compress a long prefix built by advancing a cursor, then resume from its root.
+(define prefix-root (counted-chain 100))
+(define prefix-cursor
+  (for/fold ([cursor prefix-root]) ([i (in-range 50)])
+    (new:stream-force-one cursor)))
+(check-equal? root-calls 150)
+(void (new:stream-force-one prefix-root))
+(check-equal? root-calls 151)
+(check-eq? (new:stream-inspect prefix-cursor) 'lazy)
+(check-equal? (stock:stream->list prefix-root) '(done))
+(check-equal? root-calls 200)
+(check-equal? (stock:stream->list prefix-cursor) '(done))

@@ -169,5 +169,6 @@ include. No Racket implementation source is copied into that search adapter.
    The original copyright and permissive license are retained in the file.
    Changes: allow completed delays to cache an immediate delayed result;
    teach full forcing to follow and compress those links; add non-forcing
-   observation and one-step forcing. This is a separate experiment from the
+   observation and one-step forcing with cached-prefix compression.
+   This is a separate experiment from the
    require/expose search adapter above.

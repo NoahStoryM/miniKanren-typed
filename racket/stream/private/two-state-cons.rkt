@@ -221,6 +221,18 @@
     [(for:stream? s) 'unknown]
     [else (raise-argument-error 'stream-inspect "stream?" source)]))
 
+;; Compress only links already evaluated before this call. stop is the
+;; endpoint found before the step; target may be its newly cached result.
+;; A second traversal avoids allocating a list of visited nodes.
+(define (compress-cached-prefix! source stop target)
+  (let loop ([current source])
+    (when (and (not (eq? current stop))
+               (lazily-created-stream? current)
+               (not (lazily-created-stream-creator-if-unforced current)))
+      (define next (lazily-created-stream-thunk-or-stream current))
+      (set-lazily-created-stream-thunk-or-stream! current target)
+      (loop next))))
+
 (define (stream-force-one source)
   (define s (cached-endpoint source))
   (cond
@@ -243,6 +255,9 @@
           (check (lazily-created-stream-thunk-or-stream target))]))
      (set-lazily-created-stream-thunk-or-stream! s result)
      (set-lazily-created-stream-creator-if-unforced! s #f)
+     (compress-cached-prefix! source s result)
      result]
-    [(for:stream? s) s]
+    [(for:stream? s)
+     (compress-cached-prefix! source s s)
+     s]
     [else (raise-argument-error 'stream-force-one "stream?" source)]))
