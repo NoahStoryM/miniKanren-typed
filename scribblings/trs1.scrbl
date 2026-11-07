@@ -1,7 +1,6 @@
 #lang scribble/manual
 
 @(require (for-label typed/racket/base
-                     (only-in racket/function thunk)
                      typed/miniKanren/trs1)
           scribble/example
           "utils.rkt")
@@ -123,7 +122,7 @@ A stream is empty (@racket[Null]), contains exactly one answer wrapped
 in an immutable box (@racket[Boxof]), or contains one answer paired
 with a suspension that produces the rest.  The three cases correspond
 to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
-is a @racket[thunk] that produces a stream when called.
+is a thunk that produces a stream when called.
 
 The book uses a different representation: @racket[#f] for the empty
 stream, the answer itself for exactly one answer, and an answer paired
