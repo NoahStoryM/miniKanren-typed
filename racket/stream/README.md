@@ -6,7 +6,7 @@
 
 `main.rkt` exports everything provided by the installed `racket/stream`, replacing
 `stream-cons`, `stream-lazy`, and `stream-force`, and adding only
-`stream-inspect` and `stream-force-one`. It does not patch the installed module.
+`stream-inspect` and `stream-force-once`. It does not patch the installed module.
 
 Read `private/stream-cons.rkt` for the changes:
 
@@ -19,7 +19,7 @@ Read `private/stream-cons.rkt` for the changes:
    stream-cons delegates head evaluation and eager-tail cases to the native macro.
 4. Redefine stream-force to follow immediate cached delayed results, retaining
    ordinary full forcing and path compression.
-5. Add stream-inspect and stream-force-one, including cached-prefix compression.
+5. Add stream-inspect and stream-force-once, including cached-prefix compression.
 
 The observer executes no user code: empty / ready / head-lazy / lazy are normal
 states; blocked reflects the native running/broken guard; unknown covers stream

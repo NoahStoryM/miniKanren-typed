@@ -4,7 +4,7 @@
 (require (prefix-in for: racket/private/for)
          (only-in racket/private/stream-cons [stream-cons native-stream-cons])
          (only-in rackunit require/expose))
-(provide stream-cons stream-lazy stream-force stream-inspect stream-force-one)
+(provide stream-cons stream-lazy stream-force stream-inspect stream-force-once)
 
 ;; Unchanged native definitions: reuse rather than copy them.
 ;; native-stream-cons preserves head evaluation and multiple-value handling.
@@ -149,7 +149,7 @@
       (set-lazily-created-stream-thunk-or-stream! current target)
       (loop next))))
 
-(define (stream-force-one source)
+(define (stream-force-once source)
   (define s (cached-endpoint source))
   (cond
     [(lazily-created-stream? s)
@@ -176,4 +176,4 @@
     [(for:stream? s)
      (compress-cached-prefix! source s s)
      s]
-    [else (raise-argument-error 'stream-force-one "stream?" source)]))
+    [else (raise-argument-error 'stream-force-once "stream?" source)]))
