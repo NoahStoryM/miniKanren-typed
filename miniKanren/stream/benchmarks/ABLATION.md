@@ -116,3 +116,39 @@ PLTCOLLECTS="$PWD:" python miniKanren/stream/benchmarks/ablation.py \
 `ablation-results-20261107.json` contains 252 measured samples;
 `guard-ablation-results-20261107.json` contains 49. All have the expected
 answer counts, and each edition/workload's preview outputs agree.
+
+## Identity fast path with cycle protection retained
+
+A follow-up variant, stream-fast-cycle, preserves cache traversal and all
+forcing guards. It compares native nodes by eq? and uses impersonator-of?
+only when the target is wrapped or is a foreign stream implementation.
+The stream? predicate here is the primitive module's local recognizer for
+its own eager/delayed structures, not the public generic stream? predicate.
+
+Same-round TRS2 branching CPU medians (1000 queries, seven samples):
+
+| Variant | CPU (ms) | GC (ms) |
+| --- | ---: | ---: |
+| Original extension | 464 | 8 |
+| Identity fast path, checks retained | 279 | 5 |
+| Cycle check entirely omitted (diagnostic only) | 259 | 5 |
+
+The fast path improves this workload by approximately 40% while retaining
+cycle protection. Raw samples are in fast-cycle-results-20261107.json;
+all measured answer counts and preview answers agree. This selected workload
+does not establish an overall speedup for all Kanren queries.
+
+An isolated candidate collection passes all 833 stream assertions and all
+1284 Kanren assertions (2117 total), including direct/indirect native cycles,
+contract-wrapped self references, cached aliases, book answers, and suspension
+traces. The implementation change is isolated in
+[PR #18](https://github.com/NoahStoryM/miniKanren-typed/pull/18), targeting the
+stream-extension branch. No production stream source changes are mixed into
+this Kanren/benchmark branch.
+
+```sh
+PLTCOLLECTS="$PWD:" python miniKanren/stream/benchmarks/ablation.py \
+  "$(command -v racket)" --editions trs2 --workloads branching \
+  --variants stream stream-fast-cycle stream-no-cycle \
+  --output fast-cycle-local.json
+```

@@ -15,7 +15,7 @@ parser.add_argument('--rounds', type=int, default=7)
 parser.add_argument('--output', type=Path, required=True)
 parser.add_argument('--editions', nargs='+', choices=['trs1', 'trs2'], default=['trs1', 'trs2'])
 parser.add_argument('--workloads', nargs='+', choices=['answers', 'splits', 'branching'], default=['answers', 'splits', 'branching'])
-parser.add_argument('--variants', nargs='+', choices=['stream', 'stream-once', 'stream-no-cache', 'stream-no-guards', 'stream-no-cycle', 'stream-no-result', 'stream-no-reentrance'], default=['stream', 'stream-once', 'stream-no-cache', 'stream-no-guards'])
+parser.add_argument('--variants', nargs='+', choices=['stream', 'stream-once', 'stream-no-cache', 'stream-no-guards', 'stream-no-cycle', 'stream-no-result', 'stream-no-reentrance', 'stream-fast-cycle'], default=['stream', 'stream-once', 'stream-no-cache', 'stream-no-guards'])
 args = parser.parse_args()
 racket = args.racket.resolve()
 root = Path(__file__).resolve().parents[3]
@@ -72,6 +72,12 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
         primitive = (root / 'private/racket/private/stream-cons.rkt').read_text()
         start = primitive.index('(define (stream-force-once source)')
         prefix, force = primitive[:start], primitive[start:]
+        if variant == 'stream-fast-cycle':
+            force = force.replace('(impersonator-of? target s)',
+                                  '(or (eq? target s)\n'
+                                  '              (and (or (impersonator? target)\n'
+                                  '                       (not (stream? target)))\n'
+                                  '                   (impersonator-of? target s)))')
         if variant == 'stream-no-cache':
             force = force.replace('(set-lazily-created-stream-thunk-or-stream! s result)',
                                   '(set-lazily-created-stream-thunk-or-stream! s thunk)')
