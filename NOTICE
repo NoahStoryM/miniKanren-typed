@@ -156,4 +156,18 @@ The native-stream experiments under microKanren/stream/,
 miniKanren/stream/trs2/, and racket/stream/ adapt the same implementations
 listed in sections 3 and 5. They replace pair/thunk stream representation with racket/stream and
 explicit memoized suspension tracking, and reuse the corresponding tests via
-include. No Racket implementation source is copied into these experiments.
+include. No Racket implementation source is copied into that search adapter.
+
+
+6. Isolated two-state Racket stream experiment
+
+   File:    racket/stream/private/two-state-cons.rkt
+
+   Source:  Racket 9.3, collects/racket/private/stream-cons.rkt,
+            https://github.com/racket/racket
+
+   The original copyright and permissive license are retained in the file.
+   Changes: allow completed delays to cache an immediate delayed result;
+   teach full forcing to follow and compress those links; add non-forcing
+   observation and one-step forcing. This is a separate experiment from the
+   require/expose search adapter above.

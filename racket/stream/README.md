@@ -95,3 +95,12 @@ raco test microKanren/stream/tests/main.rkt \
           racket/stream/tests/stream.rkt \
           miniKanren/stream/trs2/tests/main.rkt
 ```
+
+## Native-library extension experiment
+
+`racket/stream/two-state` separately experiments with two additions to the native
+library itself: non-forcing `stream-inspect` and `stream-force-one`. It retains
+the two-state primitive representation and uses a small licensed Racket source
+fork. It does not use the search adapter's history table or replace its API.
+See [benchmarks/README.md](benchmarks/README.md) for the changes, measurements,
+limitations, and reproduction commands.

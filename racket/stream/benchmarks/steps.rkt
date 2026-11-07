@@ -1,0 +1,40 @@
+#lang racket/base
+
+(require racket/stream/two-state json)
+(define n 300000)
+(define kept #f)
+(define (gc!) (collect-garbage) (collect-garbage) (collect-garbage))
+(define (chain n)
+  (if (zero? n) (stream-cons #:eager 1 #:eager empty-stream)
+      (stream-lazy (chain (sub1 n)))))
+(define (exercise n)
+  (define source (chain n))
+  (define cursor
+    (for/fold ([cursor source]) ([i (in-range n)])
+      (stream-force-one cursor)))
+  (unless (eq? (stream-inspect cursor) 'ready) (error 'steps "not ready"))
+  ;; Preserve the source so normal force traverses the cached forwarding chain.
+  (unless (= (stream-first (stream-force source)) 1) (error 'steps "wrong result"))
+  n)
+(void (exercise n))
+(define times
+  (for/list ([i (in-range 7)])
+    (gc!)
+    (let-values ([(result cpu real gc) (time-apply exercise (list n))])
+      (hasheq 'cpu_ms cpu 'real_ms real 'gc_ms gc 'checksum (car result)))))
+;; Retained chain before versus after ordinary full forcing of its root.
+(gc!)
+(define before (current-memory-use))
+(set! kept (chain n))
+(let loop ([cursor kept] [left n])
+  (unless (zero? left) (loop (stream-force-one cursor) (sub1 left))))
+(gc!)
+(define stepped (current-memory-use))
+(void (stream-force kept))
+(gc!)
+(define compressed (current-memory-use))
+(unless (= (stream-first kept) 1) (error 'steps "lost root"))
+(write-json (hasheq 'racket_version (version) 'n n 'samples times
+                    'stepped_retained_bytes (- stepped before)
+                    'compressed_retained_bytes (- compressed before)))
+(newline)

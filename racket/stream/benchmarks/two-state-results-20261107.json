@@ -1,0 +1,684 @@
+{
+  "source_commit": "5eb96823e4480c46384403f1dfd371319b022a5f",
+  "machine": "x86_64",
+  "rounds": 7,
+  "method": "Sequential fresh processes; small and full warmups; medians of seven samples; full GC between samples. Memory is retained managed-heap delta after full GC with source retained, not peak RSS.",
+  "fork_sha256": "9e965d49bc8c725e2b36a1dc0288b13253a31b0e05f5995202e44045494ea5eb",
+  "stock_source_sha256": "9257e867e4ea455346768830757ac0bed940dad0bb5b2e8ae5143eb3800e73a7",
+  "results": [
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 140,
+          "gc_ms": 25,
+          "real_ms": 140
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 142,
+          "gc_ms": 25,
+          "real_ms": 142
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 140,
+          "gc_ms": 24,
+          "real_ms": 140
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 164,
+          "gc_ms": 28,
+          "real_ms": 164
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 146,
+          "gc_ms": 26,
+          "real_ms": 146
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 148,
+          "gc_ms": 25,
+          "real_ms": 148
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 152,
+          "gc_ms": 28,
+          "real_ms": 152
+        }
+      ],
+      "workload": "eager"
+    },
+    {
+      "backend": "fork",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 151,
+          "gc_ms": 30,
+          "real_ms": 151
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 153,
+          "gc_ms": 29,
+          "real_ms": 153
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 146,
+          "gc_ms": 29,
+          "real_ms": 146
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 163,
+          "gc_ms": 35,
+          "real_ms": 163
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 151,
+          "gc_ms": 28,
+          "real_ms": 151
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 146,
+          "gc_ms": 31,
+          "real_ms": 146
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 159,
+          "gc_ms": 34,
+          "real_ms": 159
+        }
+      ],
+      "workload": "eager"
+    },
+    {
+      "backend": "fork",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 250,
+          "gc_ms": 23,
+          "real_ms": 250
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 255,
+          "gc_ms": 24,
+          "real_ms": 255
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 262,
+          "gc_ms": 25,
+          "real_ms": 262
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 266,
+          "gc_ms": 27,
+          "real_ms": 266
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 261,
+          "gc_ms": 25,
+          "real_ms": 261
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 257,
+          "gc_ms": 26,
+          "real_ms": 257
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 293,
+          "gc_ms": 29,
+          "real_ms": 293
+        }
+      ],
+      "workload": "lazy-tail"
+    },
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 293,
+          "gc_ms": 28,
+          "real_ms": 293
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 296,
+          "gc_ms": 30,
+          "real_ms": 296
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 283,
+          "gc_ms": 30,
+          "real_ms": 283
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 269,
+          "gc_ms": 32,
+          "real_ms": 269
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 248,
+          "gc_ms": 24,
+          "real_ms": 248
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 257,
+          "gc_ms": 26,
+          "real_ms": 257
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 256,
+          "gc_ms": 27,
+          "real_ms": 256
+        }
+      ],
+      "workload": "lazy-tail"
+    },
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 262,
+          "gc_ms": 28,
+          "real_ms": 262
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 274,
+          "gc_ms": 27,
+          "real_ms": 274
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 276,
+          "gc_ms": 27,
+          "real_ms": 276
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 265,
+          "gc_ms": 26,
+          "real_ms": 265
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 288,
+          "gc_ms": 31,
+          "real_ms": 288
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 263,
+          "gc_ms": 25,
+          "real_ms": 263
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 265,
+          "gc_ms": 26,
+          "real_ms": 265
+        }
+      ],
+      "workload": "lazy-both"
+    },
+    {
+      "backend": "fork",
+      "n": 1000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 261,
+          "gc_ms": 26,
+          "real_ms": 261
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 312,
+          "gc_ms": 28,
+          "real_ms": 312
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 280,
+          "gc_ms": 28,
+          "real_ms": 280
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 272,
+          "gc_ms": 26,
+          "real_ms": 272
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 318,
+          "gc_ms": 34,
+          "real_ms": 318
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 281,
+          "gc_ms": 26,
+          "real_ms": 281
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 271,
+          "gc_ms": 25,
+          "real_ms": 271
+        }
+      ],
+      "workload": "lazy-both"
+    },
+    {
+      "backend": "fork",
+      "n": 2000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 1,
+          "cpu_ms": 184,
+          "gc_ms": 142,
+          "real_ms": 184
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 181,
+          "gc_ms": 139,
+          "real_ms": 181
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 186,
+          "gc_ms": 144,
+          "real_ms": 186
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 210,
+          "gc_ms": 159,
+          "real_ms": 210
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 196,
+          "gc_ms": 152,
+          "real_ms": 196
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 202,
+          "gc_ms": 155,
+          "real_ms": 202
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 203,
+          "gc_ms": 157,
+          "real_ms": 203
+        }
+      ],
+      "workload": "delay-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 2000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 1,
+          "cpu_ms": 194,
+          "gc_ms": 148,
+          "real_ms": 194
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 196,
+          "gc_ms": 151,
+          "real_ms": 196
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 194,
+          "gc_ms": 149,
+          "real_ms": 195
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 201,
+          "gc_ms": 154,
+          "real_ms": 201
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 200,
+          "gc_ms": 152,
+          "real_ms": 200
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 195,
+          "gc_ms": 151,
+          "real_ms": 195
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 212,
+          "gc_ms": 160,
+          "real_ms": 212
+        }
+      ],
+      "workload": "delay-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 5000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 5000000,
+          "cpu_ms": 366,
+          "gc_ms": 0,
+          "real_ms": 366
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 344,
+          "gc_ms": 0,
+          "real_ms": 344
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 360,
+          "gc_ms": 0,
+          "real_ms": 361
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 367,
+          "gc_ms": 0,
+          "real_ms": 367
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 382,
+          "gc_ms": 0,
+          "real_ms": 382
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 371,
+          "gc_ms": 0,
+          "real_ms": 371
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 375,
+          "gc_ms": 0,
+          "real_ms": 375
+        }
+      ],
+      "workload": "cached-head"
+    },
+    {
+      "backend": "fork",
+      "n": 5000000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "checksum": 5000000,
+          "cpu_ms": 405,
+          "gc_ms": 0,
+          "real_ms": 405
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 380,
+          "gc_ms": 0,
+          "real_ms": 380
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 400,
+          "gc_ms": 0,
+          "real_ms": 400
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 377,
+          "gc_ms": 0,
+          "real_ms": 377
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 405,
+          "gc_ms": 0,
+          "real_ms": 405
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 379,
+          "gc_ms": 0,
+          "real_ms": 379
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 382,
+          "gc_ms": 0,
+          "real_ms": 383
+        }
+      ],
+      "workload": "cached-head"
+    },
+    {
+      "backend": "fork",
+      "n": 100000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": -520
+        },
+        {
+          "retained_bytes": -520
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        }
+      ],
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 100000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": -520
+        },
+        {
+          "retained_bytes": -520
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -496
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        },
+        {
+          "retained_bytes": -544
+        }
+      ],
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 300000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": -1160
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        }
+      ],
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "fork",
+      "n": 300000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": -1160
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        },
+        {
+          "retained_bytes": -1136
+        }
+      ],
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "fork",
+      "n": 300000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": 19250816
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19186512
+        },
+        {
+          "retained_bytes": 19250904
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19186560
+        }
+      ],
+      "workload": "memory-tail"
+    },
+    {
+      "backend": "stock",
+      "n": 300000,
+      "racket_version": "9.3",
+      "samples": [
+        {
+          "retained_bytes": 19250816
+        },
+        {
+          "retained_bytes": 19186512
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19250904
+        },
+        {
+          "retained_bytes": 19186560
+        },
+        {
+          "retained_bytes": 19186560
+        }
+      ],
+      "workload": "memory-tail"
+    }
+  ]
+}
