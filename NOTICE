@@ -148,3 +148,20 @@ which remains under the terms of its own copyright holders.
    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
+
+
+6. Local copy of Racket streams
+
+   Files:   private/racket/stream.rkt
+            private/racket/private/stream-cons.rkt
+
+   Source:  Racket v9.3, https://github.com/racket/racket
+            racket/collects/racket/stream.rkt and
+            racket/collects/racket/private/stream-cons.rkt.
+
+   Racket is offered under the MIT or Apache-2.0 license; the MIT license
+   text is retained in private/racket/LICENSE-MIT.txt. The primitive file
+   also retains its original Philip L. Bewig copyright and license notice.
+   The baseline changes only three public-module import paths so its local
+   primitive module and the installed shared stream protocol interoperate.
+   Exact source blob IDs, hashes, and relocations are in UPSTREAM.json.

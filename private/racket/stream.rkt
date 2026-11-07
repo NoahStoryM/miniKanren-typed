@@ -7,16 +7,16 @@
          racket/function
          racket/generator
          racket/match
-         (rename-in "private/for.rkt"
+         (rename-in racket/private/for
                     [stream-ref stream-get-generics])
-         "private/sequence.rkt"
+         racket/private/sequence
          (only-in "private/stream-cons.rkt"
                   stream-cons
                   stream-lazy
                   stream-force
                   unpack-multivalue
                   thunk->multivalue)
-         "private/generic-methods.rkt"
+         racket/private/generic-methods
          (for-syntax racket/base))
 
 (provide empty-stream

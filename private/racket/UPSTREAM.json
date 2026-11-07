@@ -1,0 +1,33 @@
+{
+  "repository": "https://github.com/racket/racket",
+  "tag": "v9.3",
+  "tag_object": "e87751a74c47487eed021e5605ea38dc63e47445",
+  "racket_version": "9.3",
+  "files": [
+    {
+      "upstream_path": "racket/collects/racket/stream.rkt",
+      "local_path": "private/racket/stream.rkt",
+      "upstream_blob": "af5c71e3396eb77f98a4ac3d402649cdab7c5e3f",
+      "upstream_sha256": "38bbde90e60105672279f9ad9c0ff5fc772a2d7d562cc9bf9896adb68537c814",
+      "baseline_sha256": "94d1af528b87950be5ac5832014a1e5266a8884d01625560facd01d123b7ee9e"
+    },
+    {
+      "upstream_path": "racket/collects/racket/private/stream-cons.rkt",
+      "local_path": "private/racket/private/stream-cons.rkt",
+      "upstream_blob": "dbcbe7fd33fb5c2e50dee7b7564fa9dfcd557905",
+      "upstream_sha256": "9257e867e4ea455346768830757ac0bed940dad0bb5b2e8ae5143eb3800e73a7",
+      "baseline_sha256": "9257e867e4ea455346768830757ac0bed940dad0bb5b2e8ae5143eb3800e73a7"
+    }
+  ],
+  "relocations": {
+    "\"private/for.rkt\"": "racket/private/for",
+    "\"private/sequence.rkt\"": "racket/private/sequence",
+    "\"private/generic-methods.rkt\"": "racket/private/generic-methods"
+  },
+  "shared_dependencies": [
+    "racket/private/for",
+    "racket/private/sequence",
+    "racket/private/generic-methods"
+  ],
+  "note": "The primitive source is byte-identical. The public source differs only in the three import relocations. The complete copy commit precedes this relocation commit."
+}
