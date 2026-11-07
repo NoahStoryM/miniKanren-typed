@@ -193,16 +193,6 @@
 (define stream-null (lazily-created-stream #f '()))
 
 
-;; Read only links that are already cached. Do not force a stream or unwrap
-;; impersonators: direct field reads could bypass their contracts or handlers.
-(define (cached-endpoint source)
-  (let loop ([s source])
-    (if (and (not (impersonator? s))
-             (lazily-created-stream? s)
-             (not (lazily-created-stream-creator-if-unforced s)))
-        (loop (lazily-created-stream-thunk-or-stream s))
-        s)))
-
 ;; One cached link, not transitive normalization. #f means no exposed cache;
 ;; non-delayed streams are already values and are returned unchanged.
 (define (stream-peek source)
@@ -217,30 +207,34 @@
 
 ;; A list represents all cached values, including zero values and a #f value.
 ;; #f represents absence of a readable head (empty, pending, or opaque).
-(define (stream-peek-first source)
-  (define s (cached-endpoint source))
+(define (stream-peek-first s)
   (cond
-    [(and (impersonator? s) (for:stream? s)) #f]
     [(eagerly-created-stream? s)
-     (and (eagerly-created-stream-first-forced? s)
+     (and (not (impersonator? s))
+          (eagerly-created-stream-first-forced? s)
           (let ([v (eagerly-created-stream-first s)])
             (if (multivalue? v) (multivalue-content v) (list v))))]
-    [(and (pair? s) (list? s)) (list (car s))]
-    [(lazily-created-stream? s) #f]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-first (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (list (car s))]
     [(for:stream? s) #f]
-    [else (raise-argument-error 'stream-peek-first "stream?" source)]))
+    [else (raise-argument-error 'stream-peek-first "stream?" s)]))
 
 ;; A known cons node already stores a tail stream object. Returning that object
 ;; does not evaluate the rest expression: the object can still be delayed.
-(define (stream-peek-rest source)
-  (define s (cached-endpoint source))
+(define (stream-peek-rest s)
   (cond
-    [(and (impersonator? s) (for:stream? s)) #f]
-    [(eagerly-created-stream? s) (eagerly-created-stream-rest s)]
-    [(and (pair? s) (list? s)) (cdr s)]
-    [(lazily-created-stream? s) #f]
+    [(eagerly-created-stream? s)
+     (and (not (impersonator? s)) (eagerly-created-stream-rest s))]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-rest (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (cdr s)]
     [(for:stream? s) #f]
-    [else (raise-argument-error 'stream-peek-rest "stream?" source)]))
+    [else (raise-argument-error 'stream-peek-rest "stream?" s)]))
 
 ;; Compress the already-cached prefix in a second pass, without a visited list.
 (define (compress-cached-prefix! source stop target)
@@ -254,38 +248,41 @@
       (loop next))))
 
 (define (stream-force-once source)
-  (define s (cached-endpoint source))
-  (cond
-    [(and (not (impersonator? s)) (lazily-created-stream? s))
-     (define who (lazily-created-stream-creator-if-unforced s))
-     (define thunk (lazily-created-stream-thunk-or-stream s))
-     (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-     (define result (thunk))
-     (unless (for:stream? result)
-       (if (symbol? who)
-           (raise-arguments-error who "delayed expression produced a non-stream"
-                                  "result" result)
-           (raise-arguments-error* 'stream-cons 'racket/primitive
-                                   "rest expression produced a non-stream"
-                                   "rest result" result)))
-     ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
-     (let check ([target result])
+  (let loop ([s source])
+    (cond
+      [(and (not (impersonator? s)) (lazily-created-stream? s))
+       (define who (lazily-created-stream-creator-if-unforced s))
        (cond
-         ;; Native nodes need identity checks; keep the general comparison
-         ;; for wrappers and foreign stream implementations.
-         [(or (eq? target s)
-              (and (or (impersonator? target)
-                       (not (stream? target)))
-                   (impersonator-of? target s)))
-          (reentrant-error)]
-         [(and (lazily-created-stream? target)
-               (not (lazily-created-stream-creator-if-unforced target)))
-          (check (lazily-created-stream-thunk-or-stream target))]))
-     (set-lazily-created-stream-thunk-or-stream! s result)
-     (set-lazily-created-stream-creator-if-unforced! s #f)
-     (compress-cached-prefix! source s result)
-     result]
-    [(or (eagerly-created-stream? s) (for:stream? s))
-     (compress-cached-prefix! source s s)
-     s]
-    [else (raise-argument-error 'stream-force-once "stream?" source)]))
+         [who
+          (define thunk (lazily-created-stream-thunk-or-stream s))
+          (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
+          (define result (thunk))
+          (unless (for:stream? result)
+            (if (symbol? who)
+                (raise-arguments-error who "delayed expression produced a non-stream"
+                                       "result" result)
+                (raise-arguments-error* 'stream-cons 'racket/primitive
+                                        "rest expression produced a non-stream"
+                                        "rest result" result)))
+          ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
+          (let check ([target result])
+            (cond
+              ;; Native nodes need identity checks; keep the general comparison
+              ;; for wrappers and foreign stream implementations.
+              [(or (eq? target s)
+                   (and (or (impersonator? target)
+                            (not (stream? target)))
+                        (impersonator-of? target s)))
+               (reentrant-error)]
+              [(and (lazily-created-stream? target)
+                    (not (lazily-created-stream-creator-if-unforced target)))
+               (check (lazily-created-stream-thunk-or-stream target))]))
+          (set-lazily-created-stream-thunk-or-stream! s result)
+          (set-lazily-created-stream-creator-if-unforced! s #f)
+          (compress-cached-prefix! source s result)
+          result]
+         [else (loop (lazily-created-stream-thunk-or-stream s))])]
+      [(or (eagerly-created-stream? s) (for:stream? s))
+       (compress-cached-prefix! source s s)
+       s]
+      [else (raise-argument-error 'stream-force-once "stream?" source)])))
