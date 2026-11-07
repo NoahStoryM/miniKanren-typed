@@ -96,23 +96,27 @@
 ;; mplus: interleaves by swapping the two streams at each suspension.
 (: append-inf (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (append-inf s-inf t-inf)
+  (define cached (stream-peek s-inf))
   (cond
-    [(eq? (stream-peek s-inf) empty-stream) t-inf]
+    [(eq? cached empty-stream) t-inf]
     [(stream-peek-first s-inf)
-     (stream-cons #:eager (car (stream-peek-first s-inf))
-                  #:eager (append-inf (stream-peek-rest s-inf) t-inf))]
-    [(stream-peek s-inf) => (λ (s-inf) (append-inf s-inf t-inf))]
+     => (λ (vs)
+          (stream-cons #:eager (car vs)
+                       #:eager (append-inf (stream-peek-rest s-inf) t-inf)))]
+    [cached => (λ (s-inf) (append-inf s-inf t-inf))]
     [else (stream-lazy (append-inf t-inf (stream-force-once s-inf)))]))
 
 ;; bind, with the arguments in the order of append-map.
 (: append-map-inf (∀ (a b) (→ (→ a (Streamof b)) (Streamof a) (Streamof b))))
 (define (append-map-inf g s-inf)
+  (define cached (stream-peek s-inf))
   (cond
-    [(eq? (stream-peek s-inf) empty-stream) empty-stream]
+    [(eq? cached empty-stream) empty-stream]
     [(stream-peek-first s-inf)
-     (append-inf (g (car (stream-peek-first s-inf)))
-                 (append-map-inf g (stream-peek-rest s-inf)))]
-    [(stream-peek s-inf) => (λ (s-inf) (append-map-inf g s-inf))]
+     => (λ (vs)
+          (append-inf (g (car vs))
+                      (append-map-inf g (stream-peek-rest s-inf))))]
+    [cached => (λ (s-inf) (append-map-inf g s-inf))]
     [else (stream-lazy (append-map-inf g (stream-force-once s-inf)))]))
 
 (: take-inf (∀ (a) (→ (Option Natural) (Streamof a) (Listof a))))
@@ -121,8 +125,9 @@
     [(and n (zero? n)) '()]
     [(eq? (stream-peek s-inf) empty-stream) '()]
     [(stream-peek-first s-inf)
-     (cons (car (stream-peek-first s-inf))
-           (take-inf (and n (sub1 n)) (stream-peek-rest s-inf)))]
+     => (λ (vs)
+          (cons (car vs)
+                (take-inf (and n (sub1 n)) (stream-peek-rest s-inf))))]
     [(stream-peek s-inf) => (λ (s-inf) (take-inf n s-inf))]
     [else (take-inf n (stream-force-once s-inf))]))
 
@@ -155,20 +160,22 @@
 (: ifte (→ Goal Goal Goal Goal))
 (define ((ifte g1 g2 g3) s)
   (let loop ([s-inf (g1 s)])
+    (define cached (stream-peek s-inf))
     (cond
-      [(eq? (stream-peek s-inf) empty-stream) (g3 s)]
+      [(eq? cached empty-stream) (g3 s)]
       [(stream-peek-first s-inf) (append-map-inf g2 s-inf)]
-      [(stream-peek s-inf) => loop]
+      [cached => loop]
       [else (stream-lazy (loop (stream-force-once s-inf)))])))
 
 (: once (→ Goal Goal))
 (define ((once g) s)
   (let loop ([s-inf (g s)])
+    (define cached (stream-peek s-inf))
     (cond
-      [(eq? (stream-peek s-inf) empty-stream) empty-stream]
+      [(eq? cached empty-stream) empty-stream]
       [(stream-peek-first s-inf)
-       (stream-cons #:eager (car (stream-peek-first s-inf)) #:eager empty-stream)]
-      [(stream-peek s-inf) => loop]
+       => (λ (vs) (stream-cons #:eager (car vs) #:eager empty-stream))]
+      [cached => loop]
       [else (stream-lazy (loop (stream-force-once s-inf)))])))
 
 

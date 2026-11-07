@@ -58,22 +58,26 @@
 
 (: mplus (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (mplus $1 $2)
+  (define cached (stream-peek $1))
   (cond
-    [(eq? (stream-peek $1) empty-stream) $2]
+    [(eq? cached empty-stream) $2]
     [(stream-peek-first $1)
-     (stream-cons #:eager (car (stream-peek-first $1))
-                  #:eager (mplus (stream-peek-rest $1) $2))]
-    [(stream-peek $1) => (λ ($1) (mplus $1 $2))]
+     => (λ (vs)
+          (stream-cons #:eager (car vs)
+                       #:eager (mplus (stream-peek-rest $1) $2)))]
+    [cached => (λ ($1) (mplus $1 $2))]
     [else (stream-lazy (mplus $2 (stream-force-once $1)))]))
 
 (: bind (∀ (a b) (→ (Streamof a) (→ a (Streamof b)) (Streamof b))))
 (define (bind $ g)
+  (define cached (stream-peek $))
   (cond
-    [(eq? (stream-peek $) empty-stream) mzero]
+    [(eq? cached empty-stream) mzero]
     [(stream-peek-first $)
-     (mplus (g (car (stream-peek-first $)))
-            (bind (stream-peek-rest $) g))]
-    [(stream-peek $) => (λ ($) (bind $ g))]
+     => (λ (vs)
+          (mplus (g (car vs))
+                 (bind (stream-peek-rest $) g)))]
+    [cached => (λ ($) (bind $ g))]
     [else (stream-lazy (bind (stream-force-once $) g))]))
 
 

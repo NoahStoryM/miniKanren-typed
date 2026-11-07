@@ -137,12 +137,13 @@
     (cond
       [(stream-empty? a∞)
        on-zero]
-      [(eq? (stream-peek-rest a∞) empty-stream)
-       (let ([a^ (car (stream-peek-first a∞))])
-         on-one)]
       [else
-       (let ([a (car (stream-peek-first a∞))] [f (stream-peek-rest a∞)])
-         on-choice)])))
+       (let ([f^ (stream-peek-rest a∞)])
+         (if (eq? f^ empty-stream)
+             (let ([a^ (car (stream-peek-first a∞))])
+               on-one)
+             (let ([a (car (stream-peek-first a∞))] [f f^])
+               on-choice)))])))
 
 (define-syntax-rule (mzero) empty-stream)
 (define-syntax-rule (unit a) (stream-cons #:eager a #:eager empty-stream))
