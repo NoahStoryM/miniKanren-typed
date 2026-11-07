@@ -38,26 +38,11 @@ The differences from the first edition are:
 @itemlist[
 
 @item{@bold{Stream representation.}  The book uses @racket[#f] for
-the empty stream, the answer itself for exactly one answer, and a pair
-whose @racket[cdr] is a procedure for an answer followed by a suspended
-remainder.  Expressed in Typed Racket notation, the book's
-representation and this implementation's representation are:
-
-@racketblock[
-(code:comment2 "The book's representation, expressed in type notation:")
-(∪ False a (Pair a (Suspension a)))
-(code:comment2 "This implementation:")
-(∪ Null (Boxof a) (Pair a (Suspension a)))
-]
-
-The book requires that an answer be neither @racket[#f] nor a pair
-whose @racket[cdr] is a procedure, so that the three cases do not
-overlap.  Substitutions satisfy this restriction.  Here a single
-answer is wrapped in an immutable box and the empty stream is
-@racket['()].  This supports arbitrary answer types and lets Typed
-Racket distinguish the three cases without inspecting the answers.
-The change preserves the book's suspension points and search
-strategies.  See @racket[Streamof] and @racket[Suspension].}
+the empty stream and the answer itself for exactly one answer.  Here
+the empty stream is @racket['()] and a single answer is wrapped in an
+immutable box to support arbitrary answer types.  This preserves the
+book's suspension points and search strategies.  See @racket[Streamof]
+for the two representations and the book's restrictions on answers.}
 
 @item{@bold{Occurs check.}  The book's @racket[ext-s] never checks
 for circularity; a separate checked variant is introduced in Chapter 9.
@@ -124,7 +109,25 @@ that itself contains variables bound further along the list, and
 
 @deftogether[(@deftypeconstr[(Streamof a)]
               @deftypeconstr[(Suspension a)])]{
-The type of lazy streams of answers, defined as
+The types of lazy streams of answers and their suspensions.
+The book represents an empty stream by @racket[#f], exactly one answer
+by the answer itself, and an answer followed by a suspended remainder
+by a pair whose @racket[cdr] is a procedure.  Expressed in Typed Racket
+notation, using @racket[Suspension] as defined below, this is:
+
+@racketblock[
+(define-type (Streamof a)
+  (∪ False a (Pair a (Suspension a))))
+]
+
+The book requires that an answer be neither @racket[#f] nor a pair
+whose @racket[cdr] is a procedure, so that the three cases do not
+overlap.  Substitutions satisfy this restriction.
+
+This implementation instead wraps a single answer in an immutable box
+and uses @racket['()] for the empty stream.  This supports arbitrary
+answer types and lets Typed Racket distinguish the three cases without
+inspecting the answers.  The exported types are defined as:
 
 @racketblock[
 (define-type (Streamof a)
