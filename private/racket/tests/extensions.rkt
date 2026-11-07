@@ -149,3 +149,15 @@
     (for ([j (in-range (random 5))]) (set! cursor (stream-force-once cursor)))
     (check-equal? (stream->list source) (stock:stream->list (original expression)))
     (check-equal? (stream->list cursor) (stream->list source))))
+
+;; The public delta is exactly the four proposed operations.
+(define (export-names path)
+  (define-values (values syntax) (module->exports path))
+  (sort (apply append
+               (for/list ([phases (in-list (list values syntax))])
+                 (define entry (assv 0 phases))
+                 (if entry (map car (cdr entry)) '()))) symbol<?))
+(check-equal? (export-names 'private/racket/stream)
+              (sort (append (export-names 'racket/stream)
+                            '(stream-peek stream-peek-first stream-peek-rest stream-force-once))
+                    symbol<?))

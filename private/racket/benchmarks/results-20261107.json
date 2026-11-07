@@ -1,0 +1,946 @@
+{
+  "method": "Three backends, sequential fresh processes, shared compiled workload, small/full warmups, full GC between samples, CPU time includes GC; retained managed heap is not peak memory.",
+  "rounds": 7,
+  "baseline": {
+    "commit": "c2127b4fca7bca1fd85fcd53567823d959af25c3",
+    "sources": {
+      "stream.rkt": "94d1af528b87950be5ac5832014a1e5266a8884d01625560facd01d123b7ee9e",
+      "private/stream-cons.rkt": "9257e867e4ea455346768830757ac0bed940dad0bb5b2e8ae5143eb3800e73a7"
+    }
+  },
+  "candidate": {
+    "commit": "f2d6f048c1ae7228ce3cdb7cdc1294f2601791cd",
+    "sources": {
+      "stream.rkt": "decc81b1b5ea936643c16312a364288d0ff3927ea706882d83d7123e331018ae",
+      "private/stream-cons.rkt": "bb47e9bd415a23a3d272d2e7d4ab89b051ee1f61290770e68d6bfe56d8f9562d"
+    }
+  },
+  "results": [
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 131,
+          "gc_ms": 24,
+          "real_ms": 131
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 130,
+          "gc_ms": 23,
+          "real_ms": 130
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 23,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 129,
+          "gc_ms": 23,
+          "real_ms": 129
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 132,
+          "gc_ms": 23,
+          "real_ms": 132
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 24,
+          "real_ms": 133
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 22,
+          "real_ms": 133
+        }
+      ],
+      "version": "9.3",
+      "workload": "eager"
+    },
+    {
+      "backend": "baseline",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 25,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 135,
+          "gc_ms": 25,
+          "real_ms": 135
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 24,
+          "real_ms": 133
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 135,
+          "gc_ms": 25,
+          "real_ms": 135
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 24,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 24,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 25,
+          "real_ms": 133
+        }
+      ],
+      "version": "9.3",
+      "workload": "eager"
+    },
+    {
+      "backend": "candidate",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 138,
+          "gc_ms": 25,
+          "real_ms": 138
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 23,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 136,
+          "gc_ms": 24,
+          "real_ms": 136
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 133,
+          "gc_ms": 23,
+          "real_ms": 133
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 24,
+          "real_ms": 134
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 134,
+          "gc_ms": 24,
+          "real_ms": 135
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 132,
+          "gc_ms": 24,
+          "real_ms": 132
+        }
+      ],
+      "version": "9.3",
+      "workload": "eager"
+    },
+    {
+      "backend": "baseline",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 256,
+          "gc_ms": 22,
+          "real_ms": 256
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 259,
+          "gc_ms": 26,
+          "real_ms": 259
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 268,
+          "gc_ms": 28,
+          "real_ms": 268
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 265,
+          "gc_ms": 27,
+          "real_ms": 265
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 269,
+          "gc_ms": 27,
+          "real_ms": 269
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 258,
+          "gc_ms": 25,
+          "real_ms": 258
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 252,
+          "gc_ms": 23,
+          "real_ms": 252
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-tail"
+    },
+    {
+      "backend": "candidate",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 284,
+          "gc_ms": 29,
+          "real_ms": 284
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 259,
+          "gc_ms": 22,
+          "real_ms": 259
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 264,
+          "gc_ms": 25,
+          "real_ms": 264
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 276,
+          "gc_ms": 28,
+          "real_ms": 276
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 270,
+          "gc_ms": 24,
+          "real_ms": 270
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 266,
+          "gc_ms": 27,
+          "real_ms": 266
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 265,
+          "gc_ms": 25,
+          "real_ms": 265
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-tail"
+    },
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 282,
+          "gc_ms": 32,
+          "real_ms": 282
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 268,
+          "gc_ms": 27,
+          "real_ms": 268
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 274,
+          "gc_ms": 28,
+          "real_ms": 274
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 258,
+          "gc_ms": 26,
+          "real_ms": 258
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 262,
+          "gc_ms": 26,
+          "real_ms": 262
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 274,
+          "gc_ms": 27,
+          "real_ms": 274
+        },
+        {
+          "checksum": 500000500000,
+          "cpu_ms": 270,
+          "gc_ms": 26,
+          "real_ms": 270
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-tail"
+    },
+    {
+      "backend": "candidate",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 263,
+          "gc_ms": 25,
+          "real_ms": 263
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 265,
+          "gc_ms": 24,
+          "real_ms": 265
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 301,
+          "gc_ms": 31,
+          "real_ms": 301
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 286,
+          "gc_ms": 29,
+          "real_ms": 286
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 286,
+          "gc_ms": 30,
+          "real_ms": 286
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 291,
+          "gc_ms": 28,
+          "real_ms": 291
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 270,
+          "gc_ms": 28,
+          "real_ms": 270
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-both"
+    },
+    {
+      "backend": "stock",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 278,
+          "gc_ms": 29,
+          "real_ms": 278
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 288,
+          "gc_ms": 30,
+          "real_ms": 288
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 288,
+          "gc_ms": 29,
+          "real_ms": 288
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 314,
+          "gc_ms": 33,
+          "real_ms": 314
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 304,
+          "gc_ms": 36,
+          "real_ms": 304
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 281,
+          "gc_ms": 27,
+          "real_ms": 281
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 278,
+          "gc_ms": 25,
+          "real_ms": 278
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-both"
+    },
+    {
+      "backend": "baseline",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 282,
+          "gc_ms": 30,
+          "real_ms": 282
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 269,
+          "gc_ms": 28,
+          "real_ms": 269
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 277,
+          "gc_ms": 26,
+          "real_ms": 277
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 263,
+          "gc_ms": 25,
+          "real_ms": 263
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 267,
+          "gc_ms": 25,
+          "real_ms": 267
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 263,
+          "gc_ms": 24,
+          "real_ms": 263
+        },
+        {
+          "checksum": 500001500000,
+          "cpu_ms": 261,
+          "gc_ms": 24,
+          "real_ms": 261
+        }
+      ],
+      "version": "9.3",
+      "workload": "lazy-both"
+    },
+    {
+      "backend": "stock",
+      "n": 2000000,
+      "samples": [
+        {
+          "checksum": 1,
+          "cpu_ms": 191,
+          "gc_ms": 146,
+          "real_ms": 191
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 193,
+          "gc_ms": 148,
+          "real_ms": 193
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 194,
+          "gc_ms": 151,
+          "real_ms": 194
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 196,
+          "gc_ms": 152,
+          "real_ms": 196
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 191,
+          "gc_ms": 147,
+          "real_ms": 191
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 202,
+          "gc_ms": 154,
+          "real_ms": 202
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 190,
+          "gc_ms": 148,
+          "real_ms": 190
+        }
+      ],
+      "version": "9.3",
+      "workload": "delay-chain"
+    },
+    {
+      "backend": "baseline",
+      "n": 2000000,
+      "samples": [
+        {
+          "checksum": 1,
+          "cpu_ms": 217,
+          "gc_ms": 168,
+          "real_ms": 217
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 229,
+          "gc_ms": 175,
+          "real_ms": 229
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 213,
+          "gc_ms": 165,
+          "real_ms": 213
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 220,
+          "gc_ms": 170,
+          "real_ms": 221
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 213,
+          "gc_ms": 165,
+          "real_ms": 214
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 217,
+          "gc_ms": 167,
+          "real_ms": 217
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 226,
+          "gc_ms": 173,
+          "real_ms": 226
+        }
+      ],
+      "version": "9.3",
+      "workload": "delay-chain"
+    },
+    {
+      "backend": "candidate",
+      "n": 2000000,
+      "samples": [
+        {
+          "checksum": 1,
+          "cpu_ms": 210,
+          "gc_ms": 162,
+          "real_ms": 210
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 208,
+          "gc_ms": 160,
+          "real_ms": 208
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 209,
+          "gc_ms": 157,
+          "real_ms": 209
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 211,
+          "gc_ms": 161,
+          "real_ms": 211
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 215,
+          "gc_ms": 168,
+          "real_ms": 215
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 219,
+          "gc_ms": 168,
+          "real_ms": 219
+        },
+        {
+          "checksum": 1,
+          "cpu_ms": 241,
+          "gc_ms": 182,
+          "real_ms": 241
+        }
+      ],
+      "version": "9.3",
+      "workload": "delay-chain"
+    },
+    {
+      "backend": "baseline",
+      "n": 5000000,
+      "samples": [
+        {
+          "checksum": 5000000,
+          "cpu_ms": 372,
+          "gc_ms": 0,
+          "real_ms": 372
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 373,
+          "gc_ms": 0,
+          "real_ms": 373
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 381,
+          "gc_ms": 0,
+          "real_ms": 381
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 428,
+          "gc_ms": 0,
+          "real_ms": 428
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 391,
+          "gc_ms": 0,
+          "real_ms": 391
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 367,
+          "gc_ms": 0,
+          "real_ms": 367
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 377,
+          "gc_ms": 0,
+          "real_ms": 377
+        }
+      ],
+      "version": "9.3",
+      "workload": "cached-head"
+    },
+    {
+      "backend": "candidate",
+      "n": 5000000,
+      "samples": [
+        {
+          "checksum": 5000000,
+          "cpu_ms": 396,
+          "gc_ms": 0,
+          "real_ms": 396
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 379,
+          "gc_ms": 0,
+          "real_ms": 380
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 383,
+          "gc_ms": 0,
+          "real_ms": 383
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 393,
+          "gc_ms": 0,
+          "real_ms": 393
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 384,
+          "gc_ms": 0,
+          "real_ms": 384
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 388,
+          "gc_ms": 0,
+          "real_ms": 387
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 400,
+          "gc_ms": 0,
+          "real_ms": 401
+        }
+      ],
+      "version": "9.3",
+      "workload": "cached-head"
+    },
+    {
+      "backend": "stock",
+      "n": 5000000,
+      "samples": [
+        {
+          "checksum": 5000000,
+          "cpu_ms": 369,
+          "gc_ms": 0,
+          "real_ms": 369
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 366,
+          "gc_ms": 0,
+          "real_ms": 366
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 408,
+          "gc_ms": 0,
+          "real_ms": 408
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 365,
+          "gc_ms": 0,
+          "real_ms": 365
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 346,
+          "gc_ms": 0,
+          "real_ms": 346
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 338,
+          "gc_ms": 0,
+          "real_ms": 338
+        },
+        {
+          "checksum": 5000000,
+          "cpu_ms": 336,
+          "gc_ms": 0,
+          "real_ms": 336
+        }
+      ],
+      "version": "9.3",
+      "workload": "cached-head"
+    },
+    {
+      "backend": "candidate",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": -1192
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1192
+        },
+        {
+          "retained_bytes": -1208
+        },
+        {
+          "retained_bytes": -1208
+        },
+        {
+          "retained_bytes": -1208
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": -1192
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1184
+        },
+        {
+          "retained_bytes": -1184
+        },
+        {
+          "retained_bytes": -1176
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "baseline",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": -1192
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1176
+        },
+        {
+          "retained_bytes": -1208
+        },
+        {
+          "retained_bytes": -1208
+        },
+        {
+          "retained_bytes": -1208
+        },
+        {
+          "retained_bytes": -1168
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-chain"
+    },
+    {
+      "backend": "stock",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": 19186568
+        },
+        {
+          "retained_bytes": 19186552
+        },
+        {
+          "retained_bytes": 19186552
+        },
+        {
+          "retained_bytes": 19250896
+        },
+        {
+          "retained_bytes": 19186568
+        },
+        {
+          "retained_bytes": 19186568
+        },
+        {
+          "retained_bytes": 19186568
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-tail"
+    },
+    {
+      "backend": "baseline",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": 19186568
+        },
+        {
+          "retained_bytes": 19186552
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19250968
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19186584
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-tail"
+    },
+    {
+      "backend": "candidate",
+      "n": 300000,
+      "samples": [
+        {
+          "retained_bytes": 19186568
+        },
+        {
+          "retained_bytes": 19186552
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19250912
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19186584
+        },
+        {
+          "retained_bytes": 19186584
+        }
+      ],
+      "version": "9.3",
+      "workload": "memory-tail"
+    }
+  ],
+  "machine": "x86_64",
+  "os": "Linux"
+}
