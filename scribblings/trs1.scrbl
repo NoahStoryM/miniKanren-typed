@@ -44,9 +44,9 @@ remainder.  Expressed in Typed Racket notation, the book's
 representation and this implementation's representation are:
 
 @racketblock[
-;; The book's representation, expressed in type notation:
+(code:comment2 "The book's representation, expressed in type notation:")
 (∪ False a (Pair a (Suspension a)))
-;; This implementation:
+(code:comment2 "This implementation:")
 (∪ Null (Boxof a) (Pair a (Suspension a)))
 ]
 
