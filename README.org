@@ -48,15 +48,15 @@ The original work in this package is distributed under the MIT License;
 see [[file:LICENSE]].
 
 The package also contains third-party material that is *not* covered by
-that license: =miniKanren/trs1/main.rkt= is a Typed Racket rewrite of the
+that license: =typed/miniKanren/trs1/main.rkt= is a Typed Racket rewrite of the
 miniKanren implementation printed in /The Reasoned Schemer/, first
-edition (MIT Press, 2005), and the tests in =miniKanren/trs1/tests/= are
+edition (MIT Press, 2005), and the tests in =typed/miniKanren/trs1/tests/= are
 examples transcribed from that book, included for testing only.
-=miniKanren/trs2/main.rkt= is a Typed Racket rewrite of the
+=typed/miniKanren/trs2/main.rkt= is a Typed Racket rewrite of the
 [[https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd][official code]]
 of the second edition (MIT License, Copyright (c) 2018 Daniel P.
 Friedman, William E. Byrd, Oleg Kiselyov, and Jason Hemann).
-=microKanren/main.rkt= is a Typed Racket rewrite of
+=typed/microKanren/main.rkt= is a Typed Racket rewrite of
 [[https://github.com/jasonhemann/microKanren][microKanren]] (MIT
 License, Copyright (C) 2013 Jason Hemann and Daniel P. Friedman).  See
 [[file:NOTICE]] for the sources, the copyright holders, and the license
