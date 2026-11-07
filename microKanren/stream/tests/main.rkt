@@ -11,6 +11,6 @@
 (let-syntax ([λ (syntax-rules ()
                  [(_ () body ...) (suspend-stream (lambda () body ...))]
                  [(_ args body ...) (lambda args body ...)])])
-  (include "../../tests/programs.rktl")
-  (include "../../tests/core.rktl")
-  (include "../../tests/wrappers.rktl"))
+  (include "../../../typed/microKanren/tests/programs.rktl")
+  (include "../../../typed/microKanren/tests/core.rktl")
+  (include "../../../typed/microKanren/tests/wrappers.rktl"))

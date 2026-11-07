@@ -9,16 +9,16 @@
          (prefix-in search: racket/stream/search)
          (for-syntax racket/base))
 
-(include "../../../trs2/tests/ch1.rktl")
-(include "../../../trs2/tests/ch2.rktl")
-(include "../../../trs2/tests/ch3.rktl")
-(include "../../../trs2/tests/ch4.rktl")
-(include "../../../trs2/tests/ch5.rktl")
-(include "../../../trs2/tests/ch6.rktl")
-(include "../../../trs2/tests/arith.rktl")
-(include "../../../trs2/tests/ch7.rktl")
-(include "../../../trs2/tests/ch8.rktl")
-(include "../../../trs2/tests/ch9.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch1.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch2.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch3.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch4.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch5.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch6.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/arith.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch7.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch8.rktl")
+(include "../../../../typed/miniKanren/trs2/tests/ch9.rktl")
 ;; Chapter 10 directly inspects pair/thunk representation. Translate those
 ;; observers, not its expected answers or the algorithms being tested.
 (define (view-pair? value)
@@ -45,4 +45,4 @@
   (let ([pair? view-pair?] [car view-car] [cdr view-cdr]
         [procedure? view-procedure?] [assert view-assert])
     (let-syntax ([check-equal? (make-rename-transformer #'view-check-equal?)])
-      (include "../../../trs2/tests/ch10.rktl"))))
+      (include "../../../../typed/miniKanren/trs2/tests/ch10.rktl"))))

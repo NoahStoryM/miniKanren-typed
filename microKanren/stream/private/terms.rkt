@@ -1,6 +1,6 @@
 #lang racket/base
 
-;; Untyped term operations adapted from ../../main.rkt.
+;; Untyped term operations adapted from typed/microKanren/main.rkt.
 ;; Original microKanren: Hemann and Friedman, 2013, MIT. See NOTICE.
 (require racket/list)
 (provide (all-defined-out))

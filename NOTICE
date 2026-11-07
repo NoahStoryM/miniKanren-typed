@@ -46,7 +46,7 @@ which remains under the terms of its own copyright holders.
 3. The miniKanren implementation of The Reasoned Schemer, second edition
 
    Files:   typed/miniKanren/trs2/main.rkt
-            typed/miniKanren/stream/trs2/main.rkt
+            miniKanren/stream/trs2/main.rkt
             typed/miniKanren/trs2/tests/arith.rktl
 
    Source:  https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd
@@ -111,8 +111,8 @@ which remains under the terms of its own copyright holders.
 5. microKanren
 
    Files:   typed/microKanren/main.rkt
-            typed/microKanren/stream/private/terms.rkt
-            typed/microKanren/stream/tests/workloads.rkt
+            microKanren/stream/private/terms.rkt
+            microKanren/stream/tests/workloads.rkt
             typed/microKanren/tests/programs.rktl, core.rktl, wrappers.rktl
 
    Source:  https://github.com/jasonhemann/microKanren
@@ -152,8 +152,8 @@ which remains under the terms of its own copyright holders.
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
 
-The native-stream experiments under typed/microKanren/stream/,
-typed/miniKanren/stream/trs2/, and racket/stream/ adapt the same implementations
+The native-stream experiments under microKanren/stream/,
+miniKanren/stream/trs2/, and racket/stream/ adapt the same implementations
 listed in sections 3 and 5. They replace pair/thunk stream representation with racket/stream and
 explicit memoized suspension tracking, and reuse the corresponding tests via
 include. No Racket implementation source is copied into these experiments.

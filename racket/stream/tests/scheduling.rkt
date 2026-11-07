@@ -8,10 +8,10 @@
 
 (require rackunit racket/match racket/promise racket/stream
          racket/stream/private/stream-api racket/stream/private/representation
-         typed/microKanren/stream/private/core typed/microKanren/stream/tests/workloads
+         microKanren/stream/private/core microKanren/stream/tests/workloads
          (prefix-in native: racket/stream/private/representation)
-         (prefix-in term: typed/microKanren/stream/private/terms)
-         (prefix-in syntax: typed/microKanren/stream)
+         (prefix-in term: microKanren/stream/private/terms)
+         (prefix-in syntax: microKanren/stream)
          (prefix-in ref: (submod "." reference)))
 
 (define (reference-trace n source [project values])
