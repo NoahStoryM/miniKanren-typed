@@ -109,25 +109,7 @@ that itself contains variables bound further along the list, and
 
 @deftogether[(@deftypeconstr[(Streamof a)]
               @deftypeconstr[(Suspension a)])]{
-The types of lazy streams of answers and their suspensions.
-The book represents an empty stream by @racket[#f], exactly one answer
-by the answer itself, and an answer followed by a suspended remainder
-by a pair whose @racket[cdr] is a procedure.  Expressed in Typed Racket
-notation, using @racket[Suspension] as defined below, this is:
-
-@racketblock[
-(define-type (Streamof a)
-  (∪ False a (Pair a (Suspension a))))
-]
-
-The book requires that an answer be neither @racket[#f] nor a pair
-whose @racket[cdr] is a procedure, so that the three cases do not
-overlap.  Substitutions satisfy this restriction.
-
-This implementation instead wraps a single answer in an immutable box
-and uses @racket['()] for the empty stream.  This supports arbitrary
-answer types and lets Typed Racket distinguish the three cases without
-inspecting the answers.  The exported types are defined as:
+The types of lazy streams of answers and their suspensions, defined as:
 
 @racketblock[
 (define-type (Streamof a)
@@ -136,11 +118,28 @@ inspecting the answers.  The exported types are defined as:
   (→ (Streamof a)))
 ]
 
-A stream is empty, contains exactly one answer, or contains one answer
-followed by a suspended computation (a thunk) that produces the rest.
-The middle case is the book's @emph{unit}; the last is its
-@emph{choice}.
-A suspension is a thunk that produces a stream when called.
+A stream is empty (@racket[Null]), contains exactly one answer wrapped
+in an immutable box (@racket[Boxof]), or contains one answer paired
+with a suspension that produces the rest.  The three cases correspond
+to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
+is a thunk that produces a stream when called.
+
+The book uses a different representation: @racket[#f] for the empty
+stream, the answer itself for exactly one answer, and a pair whose
+@racket[cdr] is a procedure for an answer followed by a suspended
+remainder.  Expressed in Typed Racket notation, this is:
+
+@racketblock[
+(define-type (Streamof a)
+  (∪ False a (Pair a (Suspension a))))
+]
+
+The book requires that an answer be neither @racket[#f] nor a pair
+whose @racket[cdr] is a procedure, so that the three cases do not
+overlap.  Substitutions satisfy this restriction.  By wrapping single
+answers in immutable boxes, this implementation supports arbitrary
+answer types and lets Typed Racket distinguish the three cases without
+inspecting the answers.
 }
 
 @deftype[Goal]{
