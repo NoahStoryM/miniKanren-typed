@@ -1,5 +1,8 @@
 # Native stream overhead diagnostics (2026-11-07)
 
+For the final integrated code, see [FINAL.md](FINAL.md). This report preserves
+the earlier experiments and their recorded source revisions.
+
 Racket 9.3 CS, Linux x86_64. Production implementation commit:
 `9b69a0a3918d087f45199e0c34bbe7d0fe73cd37` (runtime sources unchanged since
 the Data-predicate correction). These experiments change temporary copies,

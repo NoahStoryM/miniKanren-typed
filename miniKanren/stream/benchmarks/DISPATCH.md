@@ -1,5 +1,8 @@
 # Cache-query dispatch experiment (2026-11-07)
 
+For the final integrated code, see [FINAL.md](FINAL.md). This report preserves
+the earlier experiments and their recorded source revisions.
+
 The baseline includes the merged identity-cycle fast path from #18:
 stream-extension commit `1e1896b3adf54182305129353add21f87d055b63`, integrated
 into Kanren research commit `009a67781825a27d6701f88436f16f928a5e82c7`.
@@ -155,7 +158,7 @@ PLTCOLLECTS="$PWD:" python3 miniKanren/stream/benchmarks/ablation.py \
 
 ## Fuse cached traversal and single-step dispatch (2026-11-08)
 
-The current PR #19 head, `d05d40715dacf025f66ed59bdef1a6143ee95293`, combines
+The force-loop revision in PR #19, `d05d40715dacf025f66ed59bdef1a6143ee95293`, combines
 the local endpoint walk and forcing cond into one tail loop. Its first branch
 recognizes a plain local delayed node and reads creator-if-unforced once:
 #f follows the cached link; a non-#f marker enters the existing forcing body.

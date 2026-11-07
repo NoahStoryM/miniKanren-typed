@@ -1,5 +1,8 @@
 # Kanren runtime comparison, corrected (2026-11-07)
 
+For the final integrated code, see [FINAL.md](FINAL.md). This report preserves
+the earlier experiments and their recorded source revisions.
+
 Measured implementation commit: `a3a775adc57ee5fef34b7d7cfa8fa3a55b420a21`.
 Racket 9.3 CS, Linux x86_64. Raw samples, CPU/real/GC times, answer counts,
 preview hashes, and source SHA256 hashes are in `results-20261107.json`.

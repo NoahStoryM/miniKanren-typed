@@ -108,6 +108,10 @@ infinite branches, cached inputs, and untouched tails.
 
 ## Runtime comparison
 
-See [the benchmark results](benchmarks/RESULTS.md) for a three-way comparison
-of the checked original, the original changed only to no-check, and this
-stream version. Reproducible scripts and raw samples are included.
+See [the final integrated benchmark results](benchmarks/FINAL.md) for the
+six-workload TRS1/TRS2 comparison after integration of the final stream
+extensions. Checked-original and no-check-original controls use the same
+handwritten Data predicate as the stream implementation. Compilation and
+loading are excluded, and independent process results are recorded separately.
+Reproducible scripts and raw samples are included. Earlier predicate and
+optimization experiments remain available through the linked historical reports.
