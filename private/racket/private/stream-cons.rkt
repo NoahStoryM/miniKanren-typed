@@ -250,45 +250,41 @@
       (loop next))))
 
 (define (stream-force-once source)
-  ;; Read only cached links, without forcing or unwrapping impersonators.
-  (define s
-    (let loop ([s source])
-      (if (and (not (impersonator? s))
-               (lazily-created-stream? s)
-               (not (lazily-created-stream-creator-if-unforced s)))
-          (loop (lazily-created-stream-thunk-or-stream s))
-          s)))
-  (cond
-    [(and (not (impersonator? s)) (lazily-created-stream? s))
-     (define who (lazily-created-stream-creator-if-unforced s))
-     (define thunk (lazily-created-stream-thunk-or-stream s))
-     (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-     (define result (thunk))
-     (unless (for:stream? result)
-       (if (symbol? who)
-           (raise-arguments-error who "delayed expression produced a non-stream"
-                                  "result" result)
-           (raise-arguments-error* 'stream-cons 'racket/primitive
-                                   "rest expression produced a non-stream"
-                                   "rest result" result)))
-     ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
-     (let check ([target result])
+  (let loop ([s source])
+    (cond
+      [(and (not (impersonator? s)) (lazily-created-stream? s))
+       (define who (lazily-created-stream-creator-if-unforced s))
        (cond
-         ;; Native nodes need identity checks; keep the general comparison
-         ;; for wrappers and foreign stream implementations.
-         [(or (eq? target s)
-              (and (or (impersonator? target)
-                       (not (stream? target)))
-                   (impersonator-of? target s)))
-          (reentrant-error)]
-         [(and (lazily-created-stream? target)
-               (not (lazily-created-stream-creator-if-unforced target)))
-          (check (lazily-created-stream-thunk-or-stream target))]))
-     (set-lazily-created-stream-thunk-or-stream! s result)
-     (set-lazily-created-stream-creator-if-unforced! s #f)
-     (compress-cached-prefix! source s result)
-     result]
-    [(or (eagerly-created-stream? s) (for:stream? s))
-     (compress-cached-prefix! source s s)
-     s]
-    [else (raise-argument-error 'stream-force-once "stream?" source)]))
+         [who
+          (define thunk (lazily-created-stream-thunk-or-stream s))
+          (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
+          (define result (thunk))
+          (unless (for:stream? result)
+            (if (symbol? who)
+                (raise-arguments-error who "delayed expression produced a non-stream"
+                                       "result" result)
+                (raise-arguments-error* 'stream-cons 'racket/primitive
+                                        "rest expression produced a non-stream"
+                                        "rest result" result)))
+          ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
+          (let check ([target result])
+            (cond
+              ;; Native nodes need identity checks; keep the general comparison
+              ;; for wrappers and foreign stream implementations.
+              [(or (eq? target s)
+                   (and (or (impersonator? target)
+                            (not (stream? target)))
+                        (impersonator-of? target s)))
+               (reentrant-error)]
+              [(and (lazily-created-stream? target)
+                    (not (lazily-created-stream-creator-if-unforced target)))
+               (check (lazily-created-stream-thunk-or-stream target))]))
+          (set-lazily-created-stream-thunk-or-stream! s result)
+          (set-lazily-created-stream-creator-if-unforced! s #f)
+          (compress-cached-prefix! source s result)
+          result]
+         [else (loop (lazily-created-stream-thunk-or-stream s))])]
+      [(or (eagerly-created-stream? s) (for:stream? s))
+       (compress-cached-prefix! source s s)
+       s]
+      [else (raise-argument-error 'stream-force-once "stream?" source)])))
