@@ -6,7 +6,7 @@
 
 (define pkg-desc "Typed miniKanren")
 
-(define deps '("base" "typed-racket-lib"))
+(define deps '("base" "typed-racket-lib" "rackunit-lib"))
 (define build-deps
   '("at-exp-lib"
     "rackunit-typed"
