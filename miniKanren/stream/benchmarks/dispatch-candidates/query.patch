@@ -1,0 +1,51 @@
+diff --git a/private/racket/private/stream-cons.rkt b/private/racket/private/stream-cons.rkt
+index a8c8b29..17ca678 100644
+--- a/private/racket/private/stream-cons.rkt
++++ b/private/racket/private/stream-cons.rkt
+@@ -218,28 +218,32 @@
+ ;; A list represents all cached values, including zero values and a #f value.
+ ;; #f represents absence of a readable head (empty, pending, or opaque).
+ (define (stream-peek-first source)
+-  (define s (cached-endpoint source))
+   (cond
+-    [(and (impersonator? s) (for:stream? s)) #f]
+-    [(eagerly-created-stream? s)
+-     (and (eagerly-created-stream-first-forced? s)
+-          (let ([v (eagerly-created-stream-first s)])
++    [(eagerly-created-stream? source)
++     (and (not (impersonator? source))
++          (eagerly-created-stream-first-forced? source)
++          (let ([v (eagerly-created-stream-first source)])
+             (if (multivalue? v) (multivalue-content v) (list v))))]
+-    [(and (pair? s) (list? s)) (list (car s))]
+-    [(lazily-created-stream? s) #f]
+-    [(for:stream? s) #f]
++    [(lazily-created-stream? source)
++     (and (not (impersonator? source))
++          (not (lazily-created-stream-creator-if-unforced source))
++          (stream-peek-first (lazily-created-stream-thunk-or-stream source)))]
++    [(and (not (impersonator? source)) (pair? source) (list? source)) (list (car source))]
++    [(for:stream? source) #f]
+     [else (raise-argument-error 'stream-peek-first "stream?" source)]))
+ 
+ ;; A known cons node already stores a tail stream object. Returning that object
+ ;; does not evaluate the rest expression: the object can still be delayed.
+ (define (stream-peek-rest source)
+-  (define s (cached-endpoint source))
+   (cond
+-    [(and (impersonator? s) (for:stream? s)) #f]
+-    [(eagerly-created-stream? s) (eagerly-created-stream-rest s)]
+-    [(and (pair? s) (list? s)) (cdr s)]
+-    [(lazily-created-stream? s) #f]
+-    [(for:stream? s) #f]
++    [(eagerly-created-stream? source)
++     (and (not (impersonator? source)) (eagerly-created-stream-rest source))]
++    [(lazily-created-stream? source)
++     (and (not (impersonator? source))
++          (not (lazily-created-stream-creator-if-unforced source))
++          (stream-peek-rest (lazily-created-stream-thunk-or-stream source)))]
++    [(and (not (impersonator? source)) (pair? source) (list? source)) (cdr source)]
++    [(for:stream? source) #f]
+     [else (raise-argument-error 'stream-peek-rest "stream?" source)]))
+ 
+ ;; Compress the already-cached prefix in a second pass, without a visited list.

@@ -152,3 +152,11 @@ PLTCOLLECTS="$PWD:" python miniKanren/stream/benchmarks/ablation.py \
   --variants stream stream-fast-cycle stream-no-cycle \
   --output fast-cycle-local.json
 ```
+
+## Subsequent dispatch experiments
+
+After merging #18, the query/force dispatch candidates were compared against
+that new baseline. [DISPATCH.md](DISPATCH.md) records both screening rounds,
+three-process validation, saved candidate patches, and the narrower query-only
+change proposed in PR #19. Its results include workload regressions and cases
+with no consistent gain, rather than extending #18's speedup to all queries.
