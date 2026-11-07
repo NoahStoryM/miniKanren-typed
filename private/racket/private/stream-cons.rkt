@@ -93,9 +93,9 @@
                   (set-lazily-created-stream-thunk-or-stream! dep-s v))
                 v))]
          [else
-          (define thk (lazily-created-stream-thunk-or-stream s))
+          (define thunk (lazily-created-stream-thunk-or-stream s))
           (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-          (define v (thk))
+          (define v (thunk))
           (cond
             [(lazily-created-stream? v)
              ;; try again
@@ -203,14 +203,10 @@
         (loop (lazily-created-stream-thunk-or-stream s))
         s)))
 
-(define (check-peek-source who source)
-  (unless (for:stream? source)
-    (raise-argument-error who "stream?" source)))
-
 ;; One cached link, not transitive normalization. #f means no exposed cache;
 ;; non-delayed streams are already values and are returned unchanged.
 (define (stream-peek source)
-  (check-peek-source 'stream-peek source)
+  (unless (for:stream? source) (raise-argument-error 'stream-peek "stream?" source))
   (cond
     [(impersonator? source) #f]
     [(lazily-created-stream? source)
@@ -221,7 +217,7 @@
 ;; A list represents all cached values, including zero values and a #f value.
 ;; #f represents absence of a readable head (empty, pending, or opaque).
 (define (stream-peek-first source)
-  (check-peek-source 'stream-peek-first source)
+  (unless (for:stream? source) (raise-argument-error 'stream-peek-first "stream?" source))
   (define s (cached-endpoint source))
   (cond
     [(impersonator? s) #f]
@@ -235,7 +231,7 @@
 ;; A known cons node already stores a tail stream object. Returning that object
 ;; does not evaluate the rest expression: the object can still be delayed.
 (define (stream-peek-rest source)
-  (check-peek-source 'stream-peek-rest source)
+  (unless (for:stream? source) (raise-argument-error 'stream-peek-rest "stream?" source))
   (define s (cached-endpoint source))
   (cond
     [(impersonator? s) #f]
@@ -255,14 +251,14 @@
       (loop next))))
 
 (define (stream-force-once source)
-  (check-peek-source 'stream-force-once source)
+  (unless (for:stream? source) (raise-argument-error 'stream-force-once "stream?" source))
   (define s (cached-endpoint source))
   (cond
     [(and (not (impersonator? s)) (lazily-created-stream? s))
      (define who (lazily-created-stream-creator-if-unforced s))
-     (define thk (lazily-created-stream-thunk-or-stream s))
+     (define thunk (lazily-created-stream-thunk-or-stream s))
      (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-     (define result (thk))
+     (define result (thunk))
      (unless (for:stream? result)
        (if (symbol? who)
            (raise-arguments-error who "delayed expression produced a non-stream"
