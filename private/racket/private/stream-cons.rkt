@@ -193,16 +193,6 @@
 (define stream-null (lazily-created-stream #f '()))
 
 
-;; Read only links that are already cached. Do not force a stream or unwrap
-;; impersonators: direct field reads could bypass their contracts or handlers.
-(define (cached-endpoint source)
-  (let loop ([s source])
-    (if (and (not (impersonator? s))
-             (lazily-created-stream? s)
-             (not (lazily-created-stream-creator-if-unforced s)))
-        (loop (lazily-created-stream-thunk-or-stream s))
-        s)))
-
 ;; One cached link, not transitive normalization. #f means no exposed cache;
 ;; non-delayed streams are already values and are returned unchanged.
 (define (stream-peek source)
@@ -260,7 +250,14 @@
       (loop next))))
 
 (define (stream-force-once source)
-  (define s (cached-endpoint source))
+  ;; Read only cached links, without forcing or unwrapping impersonators.
+  (define s
+    (let loop ([s source])
+      (if (and (not (impersonator? s))
+               (lazily-created-stream? s)
+               (not (lazily-created-stream-creator-if-unforced s)))
+          (loop (lazily-created-stream-thunk-or-stream s))
+          s)))
   (cond
     [(and (not (impersonator? s)) (lazily-created-stream? s))
      (define who (lazily-created-stream-creator-if-unforced s))
