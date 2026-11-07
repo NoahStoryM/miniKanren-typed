@@ -11,6 +11,7 @@ which remains under the terms of its own copyright holders.
 1. The miniKanren implementation of The Reasoned Schemer, first edition
 
    Files:   typed/miniKanren/trs1/main.rkt
+            miniKanren/stream/trs1/main.rkt
 
    Source:  Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov,
             The Reasoned Schemer, MIT Press, 2005: chapter 9
@@ -46,6 +47,7 @@ which remains under the terms of its own copyright holders.
 3. The miniKanren implementation of The Reasoned Schemer, second edition
 
    Files:   typed/miniKanren/trs2/main.rkt
+            miniKanren/stream/trs2/main.rkt
             typed/miniKanren/trs2/tests/arith.rktl
 
    Source:  https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd
@@ -110,6 +112,7 @@ which remains under the terms of its own copyright holders.
 5. microKanren
 
    Files:   typed/microKanren/main.rkt
+            microKanren/stream/main.rkt
             typed/microKanren/tests/programs.rktl, core.rktl, wrappers.rktl
 
    Source:  https://github.com/jasonhemann/microKanren
@@ -165,3 +168,17 @@ which remains under the terms of its own copyright holders.
    The baseline changes only three public-module import paths so its local
    primitive module and the installed shared stream protocol interoperate.
    Exact source blob IDs, hashes, and relocations are in UPSTREAM.json.
+
+
+7. Direct stream-backed Kanren variants
+
+   microKanren/stream/main.rkt and miniKanren/stream/trs1/main.rkt and
+   trs2/main.rkt adapt the corresponding typed implementations listed
+   above. They remove type annotations, spell the ground-term predicate
+   explicitly, and replace the stream representation with the local
+   Racket stream implementation. Goal scheduling, unification, variable
+   representation, and reification otherwise follow those implementations.
+   The copyright and license terms in sections 1, 3, and 5 still apply.
+   Tests include the existing fixtures without changing expected answers;
+   pair/thunk-specific observations and explicit thunk construction are
+   adapted at the test entry points.
