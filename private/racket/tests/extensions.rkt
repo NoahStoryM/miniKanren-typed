@@ -121,7 +121,8 @@
 (check-exn #rx"non-stream" (lambda () (stream-force-once broken)))
 (check-exn #rx"reentrant or broken" (lambda () (stream-force-once broken)))
 (for ([operation (in-list (list stream-peek stream-peek-first stream-peek-rest stream-force-once))])
-  (check-exn exn:fail:contract? (lambda () (operation 42))))
+  (check-exn exn:fail:contract? (lambda () (operation 42)))
+  (check-exn exn:fail:contract? (lambda () (operation '(1 . 2)))))
 
 ;; Seeded finite streams agree with stock after partial native forcing.
 (define-syntax-rule (define-interpreter name lazy-form cons-form empty-value)

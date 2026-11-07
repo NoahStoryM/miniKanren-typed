@@ -80,7 +80,7 @@ Run compatibility and extension tests with Racket 9.3:
 raco test private/racket/tests/compatibility.rkt private/racket/tests/extensions.rkt
 ```
 
-There are 829 passing assertions across the shared stock/copy compatibility
+There are 833 passing assertions across the shared stock/copy compatibility
 fixtures and extension cases: values, false/procedure heads, tail laziness,
 read-only cached links, copied derived operators, contracts, opaque streams,
 cycle/failure protection, old-root compression, and seeded finite expressions.
