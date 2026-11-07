@@ -192,3 +192,10 @@ racket miniKanren/stream/benchmarks/predicate-scaling.rkt
 
 Temporary copies are used for the comparison; the original implementations
 remain unchanged.
+
+## Further overhead diagnostics
+
+See [ABLATION.md](ABLATION.md) for a fresh comparison against the checked
+manual-predicate original, plus temporary variants separating repeated first
+queries, single-step cache maintenance, and forcing guards. Production code
+is unchanged by those diagnostics.
