@@ -1,6 +1,7 @@
 #lang scribble/manual
 
 @(require (for-label typed/racket/base
+                     (only-in racket/function thunk)
                      typed/miniKanren/trs1)
           scribble/example
           "utils.rkt")
@@ -122,12 +123,12 @@ A stream is empty (@racket[Null]), contains exactly one answer wrapped
 in an immutable box (@racket[Boxof]), or contains one answer paired
 with a suspension that produces the rest.  The three cases correspond
 to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
-is a thunk that produces a stream when called.
+is a @racket[thunk] that produces a stream when called.
 
 The book uses a different representation: @racket[#f] for the empty
-stream, the answer itself for exactly one answer, and a pair whose
-@racket[cdr] is a procedure for an answer followed by a suspended
-remainder.  Expressed in Typed Racket notation, this is:
+stream, the answer itself for exactly one answer, and an answer paired
+with a suspension for the remaining stream.  Expressed in Typed Racket
+notation, this is:
 
 @racketblock[
 (define-type (Streamof a)
@@ -136,9 +137,11 @@ remainder.  Expressed in Typed Racket notation, this is:
 
 The book requires that an answer be neither @racket[#f] nor a pair
 whose @racket[cdr] is a procedure, so that the three cases do not
-overlap.  Substitutions satisfy this restriction.  By wrapping single
-answers in immutable boxes, this implementation supports arbitrary
-answer types and lets Typed Racket distinguish the three cases without
+overlap.  Substitutions satisfy this restriction.
+
+The boxed @racket[Streamof] defined above has no such restriction:
+@racket[unit] wraps each answer in an immutable box, so Typed Racket
+can distinguish the three stream cases for any answer type without
 inspecting the answers.
 }
 
