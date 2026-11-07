@@ -93,9 +93,9 @@
                   (set-lazily-created-stream-thunk-or-stream! dep-s v))
                 v))]
          [else
-          (define thunk (lazily-created-stream-thunk-or-stream s))
+          (define thk (lazily-created-stream-thunk-or-stream s))
           (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-          (define v (thunk))
+          (define v (thk))
           (cond
             [(lazily-created-stream? v)
              ;; try again
@@ -260,9 +260,9 @@
   (cond
     [(and (not (impersonator? s)) (lazily-created-stream? s))
      (define who (lazily-created-stream-creator-if-unforced s))
-     (define thunk (lazily-created-stream-thunk-or-stream s))
+     (define thk (lazily-created-stream-thunk-or-stream s))
      (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
-     (define result (thunk))
+     (define result (thk))
      (unless (for:stream? result)
        (if (symbol? who)
            (raise-arguments-error who "delayed expression produced a non-stream"
