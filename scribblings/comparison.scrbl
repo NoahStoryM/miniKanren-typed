@@ -45,7 +45,7 @@ an answer followed by a suspension.
 
 @trs1-block[
 (define-type (Streamof a)
-  (∪ Null (Boxof a) (Pair a (→ (Streamof a)))))
+  (∪ Null (Boxof a) (Pair a (Suspension a))))
 ]
 
 The second edition also has three, but a suspension stands on its own:

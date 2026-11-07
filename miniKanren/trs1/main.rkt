@@ -18,7 +18,8 @@
 (define-type Data (∪ Literal (Pair Data Data)))
 (define-type Term (∪ Literal Var (Pair Term Term)))
 (define-type Substitution (Listof (Pair Var Term)))
-(define-type (Streamof a) (∪ Null (Boxof a) (Pair a (→ (Streamof a)))))
+(define-type (Streamof a) (∪ Null (Boxof a) (Pair a (Suspension a))))
+(define-type (Suspension a) (→ (Streamof a)))
 (define-type Goal (→ Substitution (Streamof Substitution)))
 
 (struct var ([name : Symbol])
@@ -102,7 +103,7 @@
 (define-syntax λF
   (syntax-rules (:)
     [(_ : a body ...)
-     (λ () : (Streamof a) body ...)]))
+     (ann (λ () body ...) (Suspension a))]))
 (define-syntax-rule (λG (x) body ...)
   (ann (λ (x) body ...) Goal))
 
@@ -188,7 +189,7 @@
 (define-syntax-rule (alli g ...) (all-aux bindi g ...))
 
 
-(: mplus (∀ (a) (→ (Streamof a) (→ (Streamof a)) (Streamof a))))
+(: mplus (∀ (a) (→ (Streamof a) (Suspension a) (Streamof a))))
 (define (mplus a∞ f)
   (case∞ a∞
     [() (f)]
@@ -202,7 +203,7 @@
     [(a) (g a)]
     [(a f) (mplus (g a) (λF : a (bind (f) g)))]))
 
-(: mplusi (∀ (a) (→ (Streamof a) (→ (Streamof a)) (Streamof a))))
+(: mplusi (∀ (a) (→ (Streamof a) (Suspension a) (Streamof a))))
 (define (mplusi a∞ f)
   (case∞ a∞
     [() (f)]

@@ -107,19 +107,22 @@ that itself contains variables bound further along the list, and
 @racket[walk] follows those links.
 }
 
-@deftypeconstr[(Streamof a)]{
+@deftogether[(@deftypeconstr[(Streamof a)]
+              @deftypeconstr[(Suspension a)])]{
 The type of lazy streams of answers, defined as
 
 @racketblock[
-(∪ Null
-   (Boxof a)
-   (Pair a (→ (Streamof a))))
+(define-type (Streamof a)
+  (∪ Null (Boxof a) (Pair a (Suspension a))))
+(define-type (Suspension a)
+  (→ (Streamof a)))
 ]
 
 A stream is empty, contains exactly one answer, or contains one answer
 followed by a suspended computation (a thunk) that produces the rest.
 The middle case is the book's @emph{unit}; the last is its
 @emph{choice}.
+A suspension is a thunk that produces a stream when called.
 }
 
 @deftype[Goal]{
@@ -370,7 +373,7 @@ level of streams.
               @defform[#:literals (:) (λF : a body ...+)])]{
 @racket[λG] builds a @racket[Goal] whose substitution argument is
 @racket[s].  @racket[λF] builds a thunk of type
-@racket[(→ (Streamof a))], used to suspend the rest of a stream.
+@racket[(Suspension a)], used to suspend the rest of a stream.
 }
 
 @deftogether[(@defform[(mzero)]
@@ -402,7 +405,7 @@ the stream as needed.  This is what @racket[run] uses.
 ]
 }
 
-@deftogether[(@defproc[(mplus [a∞ (Streamof a)] [f (→ (Streamof a))])
+@deftogether[(@defproc[(mplus [a∞ (Streamof a)] [f (Suspension a)])
                        (Streamof a)]
               @defproc[(bind [a∞ (Streamof a)] [g (→ a (Streamof a))])
                        (Streamof a)])]{
@@ -413,7 +416,7 @@ with @racket[unit] and @racket[mzero] they form the stream monad on
 which @racket[conde] and @racket[all] are built.
 }
 
-@deftogether[(@defproc[(mplusi [a∞ (Streamof a)] [f (→ (Streamof a))])
+@deftogether[(@defproc[(mplusi [a∞ (Streamof a)] [f (Suspension a)])
                        (Streamof a)]
               @defproc[(bindi [a∞ (Streamof a)] [g (→ a (Streamof a))])
                        (Streamof a)])]{
