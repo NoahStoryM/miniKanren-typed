@@ -8,7 +8,7 @@ into these candidates.
 
 ## Candidates
 
-The patches in `dispatch-candidates/` apply to the extension baseline above.
+The four original patches in `dispatch-candidates/` apply to the extension baseline above.
 The candidate-library hashes in the raw reports identify their exact contents.
 
 - `query.patch`: self-recursive first/rest peeks combine cached-link traversal
@@ -113,3 +113,42 @@ The driver copies each candidate library to an isolated temporary directory;
 no package replacement or global installation changes are required. The
 stream-fast-cycle diagnostic is now a no-op on a baseline that already has
 #18, rather than nesting its fast path again.
+
+## Localize the sole remaining endpoint walk (2026-11-08)
+
+After the query-loop change, only stream-force-once used cached-endpoint.
+Commit `67181269c1134c0cbb2e18247949b9737e913591` removes that module-level
+helper and places the same tail loop in stream-force-once's local definition
+of s. The traversal and forcing dispatch remain separate stages. No additional
+state checks or forcing-branch fusion from force.patch are adopted.
+
+`dispatch-candidates/local-scope.patch` applies to the preceding query-loop
+commit `3a782e9a530848100ad384e56e7a67d85cd67a46`, rather than the #18 baseline.
+All 833 stream and 1284 Kanren assertions pass again with this final candidate.
+
+`local-scope-results-20261108.json` spot-checks the force-heavy TRS2 branching
+workload with three independent processes and five samples each. This is a
+separate before/after scope check, not a repeat of the entire six-case matrix.
+CPU medians in ms:
+
+| Process | Before localization | Local walk |
+| --- | ---: | ---: |
+| 1 | 252 | 261 |
+| 2 | 241 | 241 |
+| 3 | 247 | 239 |
+
+The process medians vary in both directions; this check establishes neither
+a consistent regression nor a new speedup. Compilation and loading remain
+excluded, and CPU includes GC. All 60 measured samples (including the checked
+original and no-check controls) have matching counts and preview answers.
+
+To repeat, create worktrees of the before/after commits, then use:
+
+```sh
+PLTCOLLECTS="$PWD:" python3 miniKanren/stream/benchmarks/ablation.py \
+  "$(command -v racket)" --editions trs2 --workloads branching \
+  --processes 3 --rounds 5 --variants stream-before stream-local \
+  --library-variant stream-before=/path/to/query-loop-checkout \
+  --library-variant stream-local=/path/to/local-scope-checkout \
+  --output local-scope-local.json
+```

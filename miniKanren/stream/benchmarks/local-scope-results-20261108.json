@@ -1,0 +1,568 @@
+{
+  "driver_sha256": "33fbd9e17b094e80b847bf077c642557913c2a2b5822f263cb63fd52024271c6",
+  "commit": "8e1e45b261b6fd8ada33c79f44204b1f9fc59cc7",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "rounds": 5,
+  "processes": 3,
+  "method": "Compile before timing. Each edition/backend/workload runs in a fresh process. Both small and full warmups precede samples. Three full collections precede each sample. Timers run inside the implementation module; no typed/untyped contracts are crossed inside the timed region. Every sample builds a fresh goal/result; no stream is reused between samples. CPU includes GC. Source module loading and compilation are excluded. Backend order rotates across workloads and independent process repetitions. Ablations: stream-once reads first only once in ready clauses; stream-no-cache restores the thunk rather than saving its result, retaining safety checks; stream-no-guards keeps caching but omits reentrancy/result/cycle guards in single-step forcing.",
+  "sources": {
+    "trs2": {
+      "original": "b0221d8b7ccb3a3b4c10b368de04b63c6353e1f0e0792888e24ee0e4f6e3fd66",
+      "stream": "4e24ba5e0aff3931371c7c14813bbca13a05ba98844ddbb5f6140dfbeae2da2d"
+    }
+  },
+  "results": [
+    {
+      "process_index": 0,
+      "edition": "trs2",
+      "backend": "typed-manual",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 86,
+          "real_ms": 85.383544921875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 86,
+          "real_ms": 85.740966796875,
+          "gc_ms": 2,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 86,
+          "real_ms": 85.7939453125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 84,
+          "real_ms": 84.353759765625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 79,
+          "real_ms": 79.238525390625,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 86,
+      "median_real_ms": 85.383544921875,
+      "median_gc_ms": 1
+    },
+    {
+      "process_index": 0,
+      "edition": "trs2",
+      "backend": "no-check",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 93,
+          "real_ms": 92.6982421875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 83,
+          "real_ms": 83.474365234375,
+          "gc_ms": 0,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 80,
+          "real_ms": 79.618408203125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 84,
+          "real_ms": 84.145751953125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 91,
+          "real_ms": 91.55517578125,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 84,
+      "median_real_ms": 84.145751953125,
+      "median_gc_ms": 1
+    },
+    {
+      "process_index": 0,
+      "edition": "trs2",
+      "backend": "stream-before",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 269,
+          "real_ms": 268.804931640625,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 246,
+          "real_ms": 246.32080078125,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 252,
+          "real_ms": 252.26953125,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 271,
+          "real_ms": 271.324462890625,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 251,
+          "real_ms": 250.3291015625,
+          "gc_ms": 5,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 252,
+      "median_real_ms": 252.26953125,
+      "median_gc_ms": 5
+    },
+    {
+      "process_index": 0,
+      "edition": "trs2",
+      "backend": "stream-local",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 261,
+          "real_ms": 260.935546875,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 279,
+          "real_ms": 279.51123046875,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 272,
+          "real_ms": 271.9365234375,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 228,
+          "real_ms": 228.286376953125,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 231,
+          "real_ms": 231.858642578125,
+          "gc_ms": 4,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 261,
+      "median_real_ms": 260.935546875,
+      "median_gc_ms": 5
+    },
+    {
+      "process_index": 1,
+      "edition": "trs2",
+      "backend": "no-check",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 91,
+          "real_ms": 91.179443359375,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 93,
+          "real_ms": 93.353759765625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 89,
+          "real_ms": 88.973388671875,
+          "gc_ms": 0,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 83,
+          "real_ms": 83.361572265625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 90,
+          "real_ms": 90.013916015625,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 90,
+      "median_real_ms": 90.013916015625,
+      "median_gc_ms": 1
+    },
+    {
+      "process_index": 1,
+      "edition": "trs2",
+      "backend": "stream-before",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 241,
+          "real_ms": 240.9912109375,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 242,
+          "real_ms": 242.155029296875,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 241,
+          "real_ms": 241.158203125,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 257,
+          "real_ms": 256.647705078125,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 239,
+          "real_ms": 239.488525390625,
+          "gc_ms": 4,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 241,
+      "median_real_ms": 241.158203125,
+      "median_gc_ms": 6
+    },
+    {
+      "process_index": 1,
+      "edition": "trs2",
+      "backend": "stream-local",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 243,
+          "real_ms": 242.572265625,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 243,
+          "real_ms": 242.967041015625,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 241,
+          "real_ms": 241.0791015625,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 234,
+          "real_ms": 233.120849609375,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 236,
+          "real_ms": 236.470703125,
+          "gc_ms": 4,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 241,
+      "median_real_ms": 241.0791015625,
+      "median_gc_ms": 4
+    },
+    {
+      "process_index": 1,
+      "edition": "trs2",
+      "backend": "typed-manual",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 78,
+          "real_ms": 78.514892578125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 78,
+          "real_ms": 78.020751953125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 77,
+          "real_ms": 76.7978515625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 75,
+          "real_ms": 75.835693359375,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 122,
+          "real_ms": 121.923583984375,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 78,
+      "median_real_ms": 78.020751953125,
+      "median_gc_ms": 1
+    },
+    {
+      "process_index": 2,
+      "edition": "trs2",
+      "backend": "stream-before",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 247,
+          "real_ms": 246.599609375,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 239,
+          "real_ms": 239.41064453125,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 246,
+          "real_ms": 246.4697265625,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 256,
+          "real_ms": 255.968017578125,
+          "gc_ms": 9,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 252,
+          "real_ms": 252.659912109375,
+          "gc_ms": 6,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 247,
+      "median_real_ms": 246.599609375,
+      "median_gc_ms": 6
+    },
+    {
+      "process_index": 2,
+      "edition": "trs2",
+      "backend": "stream-local",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 239,
+          "real_ms": 239.77197265625,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 237,
+          "real_ms": 236.40234375,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 238,
+          "real_ms": 237.85595703125,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 240,
+          "real_ms": 240.01123046875,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 250,
+          "real_ms": 249.3896484375,
+          "gc_ms": 6,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 239,
+      "median_real_ms": 239.77197265625,
+      "median_gc_ms": 5
+    },
+    {
+      "process_index": 2,
+      "edition": "trs2",
+      "backend": "typed-manual",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 78,
+          "real_ms": 78.642578125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 77,
+          "real_ms": 77.76513671875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 79,
+          "real_ms": 79.297119140625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 76,
+          "real_ms": 76.518310546875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 80,
+          "real_ms": 79.328125,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 78,
+      "median_real_ms": 78.642578125,
+      "median_gc_ms": 1
+    },
+    {
+      "process_index": 2,
+      "edition": "trs2",
+      "backend": "no-check",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 87,
+          "real_ms": 87.336181640625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 88,
+          "real_ms": 87.821044921875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 90,
+          "real_ms": 89.8828125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 95,
+          "real_ms": 94.24169921875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 87,
+          "real_ms": 86.3173828125,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 88,
+      "median_real_ms": 87.821044921875,
+      "median_gc_ms": 1
+    }
+  ],
+  "warning": "Diagnostic variants intentionally change invalid-input or memoization behavior. Only cold benchmark queries are compared; timings are not an additive cost decomposition.",
+  "variants": [
+    "stream-before",
+    "stream-local"
+  ],
+  "editions": [
+    "trs2"
+  ],
+  "workloads": [
+    "branching"
+  ],
+  "predicate_control": "Every backend uses the same explicit Data predicate. typed-manual enables type checking; no-check uses the original pair/thunk representation without checking.",
+  "candidate_libraries": {
+    "stream-before": {
+      "commit": "3a782e9a530848100ad384e56e7a67d85cd67a46",
+      "primitive_sha256": "181a8c46456bd7f9f6fd54b6d032e5ec384f689c8be48b2c1c6c68f5245427fd"
+    },
+    "stream-local": {
+      "commit": "3a782e9a530848100ad384e56e7a67d85cd67a46",
+      "primitive_sha256": "bb47a4e3a53a379790c3547dc870b291e31a17802089ed80f2869ddbaee43880"
+    }
+  },
+  "answers_verified": true
+}
