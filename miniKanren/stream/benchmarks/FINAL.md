@@ -120,3 +120,7 @@ PLTCOLLECTS="$PWD:" raco test \
 
 Both commands use the integrated library directly. No candidate collection
 override, stream-source replacement, or ablation is needed.
+
+For a follow-up diagnostic of residual overhead on the same runtime, see
+[COSTS.md](COSTS.md). Its temporary variants and same-round timings are separate
+from the final production comparison above.
