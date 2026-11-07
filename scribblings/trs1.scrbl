@@ -37,12 +37,27 @@ The differences from the first edition are:
 
 @itemlist[
 
-@item{@bold{Stream representation.}  The book represents ``exactly
-one answer'' by the answer itself and ``an answer followed by more''
-by a pair whose @racket[cdr] is a procedure.  That union cannot be
-discriminated by occurrence typing for an arbitrary answer type, so
-here a single answer is wrapped in an immutable box and the empty
-stream is @racket['()].  See @racket[Streamof].}
+@item{@bold{Stream representation.}  The book uses @racket[#f] for
+the empty stream, the answer itself for exactly one answer, and a pair
+whose @racket[cdr] is a procedure for an answer followed by a suspended
+remainder.  Expressed in Typed Racket notation, the book's
+representation and this implementation's representation are:
+
+@racketblock[
+;; The book's representation, expressed in type notation:
+(∪ False a (Pair a (Suspension a)))
+;; This implementation:
+(∪ Null (Boxof a) (Pair a (Suspension a)))
+]
+
+The book requires that an answer be neither @racket[#f] nor a pair
+whose @racket[cdr] is a procedure, so that the three cases do not
+overlap.  Substitutions satisfy this restriction.  Here a single
+answer is wrapped in an immutable box and the empty stream is
+@racket['()].  This supports arbitrary answer types and lets Typed
+Racket distinguish the three cases without inspecting the answers.
+The change preserves the book's suspension points and search
+strategies.  See @racket[Streamof] and @racket[Suspension].}
 
 @item{@bold{Occurs check.}  The book's @racket[ext-s] never checks
 for circularity; a separate checked variant is introduced in Chapter 9.
