@@ -1,0 +1,13 @@
+diff --git a/miniKanren/stream/trs1/main.rkt b/miniKanren/stream/trs1/main.rkt
+index d16a3a3..7284f87 100644
+--- a/miniKanren/stream/trs1/main.rkt
++++ b/miniKanren/stream/trs1/main.rkt
+@@ -138,7 +138,7 @@
+       [(stream-empty? a∞)
+        on-zero]
+       [else
+-       (let ([f^ (stream-peek-rest a∞)])
++       (let ([f^ (stream-rest a∞)])
+          (if (eq? f^ empty-stream)
+              (let ([a^ (car (stream-peek-first a∞))])
+                on-one)

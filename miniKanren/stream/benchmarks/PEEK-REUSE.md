@@ -120,3 +120,8 @@ stream-first in this command names the same source variant labelled stream in
 the stored report. The driver copies the common stream library and each Kanren
 source into isolated temporary modules. No package replacement or #16 changes
 are required. Native source hashes allow checking that the variants match.
+
+A subsequent [official-reader experiment](OFFICIAL-READERS.md) checks whether
+TRS1's already-mature nodes benefit from standard stream-first/rest. Those
+candidates pass their functional checks but are not adopted because the
+measured overall performance regresses. The retained runtime above is unchanged.
