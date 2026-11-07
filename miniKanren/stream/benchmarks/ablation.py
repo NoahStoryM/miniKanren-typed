@@ -19,6 +19,7 @@ parser.add_argument('--workloads', nargs='+', choices=['answers', 'splits', 'bra
 parser.add_argument('--variants', nargs='+', default=['stream', 'stream-once', 'stream-no-cache', 'stream-no-guards'])
 parser.add_argument('--candidate-library', type=Path, help='checkout containing private/racket/stream.rkt for stream-candidate')
 parser.add_argument('--library-variant', action='append', default=[], metavar='NAME=CHECKOUT')
+parser.add_argument('--kanren-variant', action='append', default=[], metavar='NAME=CHECKOUT')
 args = parser.parse_args()
 if args.rounds < 1 or args.processes < 1:
     parser.error("--rounds and --processes must be positive")
@@ -30,10 +31,16 @@ for item in args.library_variant:
     if not separator or not name.startswith('stream-') or '/' in name or not checkout:
         parser.error('--library-variant requires stream-NAME=CHECKOUT')
     libraries[name] = Path(checkout)
+kanren_sources = {}
+for item in args.kanren_variant:
+    name, separator, checkout = item.partition('=')
+    if not separator or not name.startswith('stream-') or '/' in name or not checkout:
+        parser.error('--kanren-variant requires stream-NAME=CHECKOUT')
+    kanren_sources[name] = Path(checkout)
 known = {'stream', 'stream-once', 'stream-no-cache', 'stream-no-guards',
          'stream-no-cycle', 'stream-no-result', 'stream-no-reentrance', 'stream-fast-cycle'}
 for variant in args.variants:
-    if variant not in known and variant not in libraries:
+    if variant not in known and variant not in libraries and variant not in kanren_sources:
         parser.error('unknown variant: ' + variant)
 racket = args.racket.resolve()
 root = Path(__file__).resolve().parents[3]
@@ -127,7 +134,16 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
                                       for label, path in [('original', original), ('stream', candidate)]}
         backends = ['typed-manual', 'no-check', *variants]
         for backend in backends:
-            source = (candidate if backend.startswith('stream') else original).read_text()
+            source_path = candidate if backend.startswith('stream') else original
+            if backend in kanren_sources:
+                source_path = kanren_sources[backend].resolve() / candidate.relative_to(root)
+            source = source_path.read_text()
+            if backend.startswith('stream'):
+                report.setdefault('native_sources', {}).setdefault(edition, {})[backend] = {
+                    'sha256': hashlib.sha256(source.encode()).hexdigest(),
+                    'checkout_commit': subprocess.check_output(
+                        ['git', 'rev-parse', 'HEAD'], cwd=source_path.parent, text=True).strip(),
+                }
             if backend.startswith('stream'):
                 lib = directory / backend / 'stream.rkt'
                 source = source.replace('private/racket/stream', '(file ' + json.dumps(str(lib)) + ')')

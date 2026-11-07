@@ -124,3 +124,7 @@ override, stream-source replacement, or ablation is needed.
 For a follow-up diagnostic of residual overhead on the same runtime, see
 [COSTS.md](COSTS.md). Its temporary variants and same-round timings are separate
 from the final production comparison above.
+
+Subsequent caller-side query reuse, with the stream library unchanged, is
+recorded in [PEEK-REUSE.md](PEEK-REUSE.md). That report contains the latest
+Kanren source and same-round measurements.

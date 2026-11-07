@@ -108,10 +108,11 @@ infinite branches, cached inputs, and untouched tails.
 
 ## Runtime comparison
 
-See [the final integrated benchmark results](benchmarks/FINAL.md) for the
-six-workload TRS1/TRS2 comparison after integration of the final stream
-extensions. Checked-original and no-check-original controls use the same
-handwritten Data predicate as the stream implementation. Compilation and
-loading are excluded, and independent process results are recorded separately.
-Reproducible scripts and raw samples are included. Earlier predicate and
-optimization experiments remain available through the linked historical reports.
+See [the latest caller-side query-reuse results](benchmarks/PEEK-REUSE.md)
+for the current TRS1/TRS2 comparison. The stream-library integration baseline
+is preserved in [FINAL.md](benchmarks/FINAL.md). Checked-original and
+no-check-original controls use the same handwritten Data predicate as the
+stream implementation. Compilation and loading are excluded; independent
+process results, source hashes, reproducible scripts, and raw samples are
+included. Historical predicate/dispatch experiments retain their recorded
+source revisions.

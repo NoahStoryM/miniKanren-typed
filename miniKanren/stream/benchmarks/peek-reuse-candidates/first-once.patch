@@ -1,0 +1,77 @@
+diff --git a/microKanren/stream/main.rkt b/microKanren/stream/main.rkt
+index 9f3cece..d9ca7ca 100644
+--- a/microKanren/stream/main.rkt
++++ b/microKanren/stream/main.rkt
+@@ -61,8 +61,9 @@
+   (cond
+     [(eq? (stream-peek $1) empty-stream) $2]
+     [(stream-peek-first $1)
+-     (stream-cons #:eager (car (stream-peek-first $1))
+-                  #:eager (mplus (stream-peek-rest $1) $2))]
++     => (λ (vs)
++          (stream-cons #:eager (car vs)
++                       #:eager (mplus (stream-peek-rest $1) $2)))]
+     [(stream-peek $1) => (λ ($1) (mplus $1 $2))]
+     [else (stream-lazy (mplus $2 (stream-force-once $1)))]))
+ 
+@@ -71,8 +72,9 @@
+   (cond
+     [(eq? (stream-peek $) empty-stream) mzero]
+     [(stream-peek-first $)
+-     (mplus (g (car (stream-peek-first $)))
+-            (bind (stream-peek-rest $) g))]
++     => (λ (vs)
++          (mplus (g (car vs))
++                 (bind (stream-peek-rest $) g)))]
+     [(stream-peek $) => (λ ($) (bind $ g))]
+     [else (stream-lazy (bind (stream-force-once $) g))]))
+ 
+diff --git a/miniKanren/stream/trs2/main.rkt b/miniKanren/stream/trs2/main.rkt
+index 64b75f9..9c43ace 100644
+--- a/miniKanren/stream/trs2/main.rkt
++++ b/miniKanren/stream/trs2/main.rkt
+@@ -99,8 +99,9 @@
+   (cond
+     [(eq? (stream-peek s-inf) empty-stream) t-inf]
+     [(stream-peek-first s-inf)
+-     (stream-cons #:eager (car (stream-peek-first s-inf))
+-                  #:eager (append-inf (stream-peek-rest s-inf) t-inf))]
++     => (λ (vs)
++          (stream-cons #:eager (car vs)
++                       #:eager (append-inf (stream-peek-rest s-inf) t-inf)))]
+     [(stream-peek s-inf) => (λ (s-inf) (append-inf s-inf t-inf))]
+     [else (stream-lazy (append-inf t-inf (stream-force-once s-inf)))]))
+ 
+@@ -110,8 +111,9 @@
+   (cond
+     [(eq? (stream-peek s-inf) empty-stream) empty-stream]
+     [(stream-peek-first s-inf)
+-     (append-inf (g (car (stream-peek-first s-inf)))
+-                 (append-map-inf g (stream-peek-rest s-inf)))]
++     => (λ (vs)
++          (append-inf (g (car vs))
++                      (append-map-inf g (stream-peek-rest s-inf))))]
+     [(stream-peek s-inf) => (λ (s-inf) (append-map-inf g s-inf))]
+     [else (stream-lazy (append-map-inf g (stream-force-once s-inf)))]))
+ 
+@@ -121,8 +123,9 @@
+     [(and n (zero? n)) '()]
+     [(eq? (stream-peek s-inf) empty-stream) '()]
+     [(stream-peek-first s-inf)
+-     (cons (car (stream-peek-first s-inf))
+-           (take-inf (and n (sub1 n)) (stream-peek-rest s-inf)))]
++     => (λ (vs)
++          (cons (car vs)
++                (take-inf (and n (sub1 n)) (stream-peek-rest s-inf))))]
+     [(stream-peek s-inf) => (λ (s-inf) (take-inf n s-inf))]
+     [else (take-inf n (stream-force-once s-inf))]))
+ 
+@@ -167,7 +170,7 @@
+     (cond
+       [(eq? (stream-peek s-inf) empty-stream) empty-stream]
+       [(stream-peek-first s-inf)
+-       (stream-cons #:eager (car (stream-peek-first s-inf)) #:eager empty-stream)]
++       => (λ (vs) (stream-cons #:eager (car vs) #:eager empty-stream))]
+       [(stream-peek s-inf) => loop]
+       [else (stream-lazy (loop (stream-force-once s-inf)))])))
+ 
