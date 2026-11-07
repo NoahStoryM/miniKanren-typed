@@ -14,7 +14,7 @@
 
 (require (for-syntax racket/base syntax/parse)
          racket/match
-         experiments/search-stream/private/stream-api
+         microKanren/stream/private/stream-api
          experiments/search-stream/private/representation)
 
 (provide (all-defined-out))

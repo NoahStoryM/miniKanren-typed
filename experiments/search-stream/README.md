@@ -1,3 +1,8 @@
+> Historical history-preserving adapter. microKanren/stream now uses
+> racket/stream/main through its own native backend. The generic algebra moved
+> to microKanren/stream/private/stream-api.rkt; this experiment still imports it.
+> miniKanren/stream/trs2 remains on this historical backend.
+
 # Native Racket stream experiment
 
 This experiment uses the installed `racket/stream`; it does not copy or patch
@@ -17,7 +22,7 @@ type annotations under
 ## Read the layers
 
 - `search.rkt`: the API for exploring search streams.
-- `private/stream-api.rkt`: representation-independent merge, bind, and observers.
+- `../../microKanren/stream/private/stream-api.rkt`: representation-independent merge, bind, and observers.
 - `private/representation.rkt`: native stream constructors and private queries.
 - `../../microKanren/stream/private/core.rkt`: microKanren parametrized by the stream API.
 - `../../microKanren/stream/main.rkt`: microKanren syntax and reification.

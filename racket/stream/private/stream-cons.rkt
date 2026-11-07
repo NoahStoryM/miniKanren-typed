@@ -4,13 +4,13 @@
 (require (prefix-in for: racket/private/for)
          (only-in racket/private/stream-cons [stream-cons native-stream-cons])
          (only-in rackunit require/expose))
-(provide stream-cons stream-lazy stream-force stream-inspect stream-force-once)
+(provide stream-cons stream-lazy stream-force stream-empty/known? stream-first-forced? stream-force-once)
 
 ;; Unchanged native definitions: reuse rather than copy them.
 ;; native-stream-cons preserves head evaluation and multiple-value handling.
 (require/expose racket/private/stream-cons
   (eagerly-created-stream?
-   eagerly-created-stream-first-forced? eagerly-created-stream-first
+   eagerly-created-stream-first-forced?
    eagerly-created-stream-rest stream-force-first reentrant-error))
 
 ;; Redefine the delayed structure because its stream methods must call our
@@ -121,21 +121,25 @@
         (loop (lazily-created-stream-thunk-or-stream source))
         source)))
 
-(define (stream-inspect source)
+;; Queries are conservative: #f means not currently known, including foreign
+;; streams whose implementation does not expose its evaluation state.
+(define (stream-empty/known? source)
+  (define s (cached-endpoint source))
+  (cond
+    [(or (null? s) (eq? s for:empty-stream)) #t]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-empty/known? "stream?" source)]))
+
+(define (stream-first-forced? source)
   (define s (cached-endpoint source))
   (cond
     [(eagerly-created-stream? s)
-     (cond [(eagerly-created-stream-first-forced? s) 'ready]
-           [(eq? (eagerly-created-stream-first s) reentrant-error) 'blocked]
-           [else 'head-lazy])]
-    [(lazily-created-stream? s)
-     (if (eq? (lazily-created-stream-thunk-or-stream s) reentrant-error)
-         'blocked 'lazy)]
-    [(or (null? s) (eq? s for:empty-stream)) 'empty]
-    [(pair? s) (if (list? s) 'ready
-                   (raise-argument-error 'stream-inspect "stream?" source))]
-    [(for:stream? s) 'unknown]
-    [else (raise-argument-error 'stream-inspect "stream?" source)]))
+     (eagerly-created-stream-first-forced? s)]
+    [(pair? s)
+     (if (list? s) #t
+         (raise-argument-error 'stream-first-forced? "stream?" source))]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-first-forced? "stream?" source)]))
 
 ;; Compress only links already evaluated before this call. stop is the
 ;; endpoint found before the step; target may be its newly cached result.

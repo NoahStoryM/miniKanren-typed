@@ -1,39 +1,52 @@
-# Minimal native-stream extension
+# Native stream extension
 
 ```racket
 (require racket/stream/main)
 ```
 
-`main.rkt` exports everything provided by the installed `racket/stream`, replacing
-`stream-cons`, `stream-lazy`, and `stream-force`, and adding only
-`stream-inspect` and `stream-force-once`. It does not patch the installed module.
+The facade exports the stock interface, replaces `stream-cons`, `stream-lazy`,
+and `stream-force`, and adds three operations:
 
-Read `private/stream-cons.rkt` for the changes:
+| Operation | Meaning |
+| --- | --- |
+| `stream-empty/known?` | True only if the stream is already known to be empty. |
+| `stream-first-forced?` | True only if a first element is already available. |
+| `stream-force-once` | Evaluate at most one pending local stream delay, cache its direct result, and return it. |
 
-1. Require/expose the unchanged native cons predicate/accessors, head evaluator,
-   and reentrant guard; import the native stream-cons macro normally.
-2. Redefine the delayed-node structure with the same two fields. Its stream
-   methods must call the new force implementation; native method closures retain
-   the original binding, so merely defining another stream-force is insufficient.
-3. Redefine stream-cons and stream-lazy to construct those delayed nodes.
-   stream-cons delegates head evaluation and eager-tail cases to the native macro.
-4. Redefine stream-force to follow immediate cached delayed results, retaining
-   ordinary full forcing and path compression.
-5. Add stream-inspect and stream-force-once, including cached-prefix compression.
+Both queries follow existing cached links without evaluating user expressions
+or changing caches. False means "not known", including unsupported stream
+implementations. Empty streams have no first element, so first-forced? is false.
+A wrapper caching empty-stream is known empty even though it is not eq? to that
+object. Heads that are themselves promises are returned as values, not forced.
 
-The observer executes no user code: empty / ready / head-lazy / lazy are normal
-states; blocked reflects the native running/broken guard; unknown covers stream
-implementations whose state this module cannot inspect. The single-step operator
-executes at most one pending local delayed expression, caches its immediate
-result, and compresses previously cached links. It never forces a lazy head.
+Ordinary `stream-empty?` may force outer delays; the known-empty query does not.
+Ordinary `stream-force` crosses a chain of local delays; force-once stops after
+one new evaluation. Neither operation forces a cons node's lazy head. Successful
+force-once also compresses its pre-existing cached prefix without a visited-node
+list. There is no permanent pause history or side table. The enum-style
+stream-inspect interface is no longer exported.
 
-Stock derived operators and macros retain their original bindings and can
-produce stock delayed nodes, which report unknown here. The new observation and
-stepping protocol applies to delays made by this module's constructors; the
-ordinary stream protocol remains usable in both directions. This private adapter
-was tested with Racket 9.3 CS; it is not a general gen:stream introspection API.
+## Definitions to read
 
-Tests are in `tests/main.rkt`. Historical benchmarks and the full primitive
-snapshot are in `../../experiments/stream-benchmarks/`. The earlier search API
-and its separate history-tracking adapter are in
-`../../experiments/search-stream/`; they are not part of this module's exports.
+`private/stream-cons.rkt` imports the native cons macro and uses require/expose
+for unchanged predicates/accessors, the head evaluator, and reentrant guard.
+It redefines only the affected pieces:
+
+1. The two-field delayed structure: its stream methods must close over the new
+   stream-force; native method closures retain their original binding.
+2. stream-cons and stream-lazy: construct local delays while delegating head
+   evaluation and eager-tail cases to the native cons macro.
+3. stream-force: follow cached immediate delayed results and compress links.
+4. The three additions above, with private cache traversal/compression helpers.
+
+The installed Racket module is not mutated. Stock derived operators/macros keep
+their bindings and may produce stock delayed nodes, whose state this adapter
+cannot inspect or step. The new protocol covers local delays and native cons
+nodes (and recognizes lists); custom streams are conservatively unknown. Tested
+on Racket 9.3 CS. This is not general gen:stream introspection.
+
+`tests/main.rkt` checks queries, exact exports, forcing, constructor choices,
+sharing, and errors. `../../microKanren/stream/README.md` describes the search
+abstraction and the backend that now uses this module. Historical benchmark
+snapshots are under `../../experiments/stream-benchmarks/`; their old timings
+are not fresh measurements of this adapter.

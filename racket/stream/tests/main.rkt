@@ -4,6 +4,11 @@
          (prefix-in stock: racket/stream)
          (prefix-in new: racket/stream/main))
 
+(define (observed-state source)
+  (cond [(new:stream-empty/known? source) 'empty]
+        [(new:stream-first-forced? source) 'ready]
+        [else 'pending]))
+
 (define calls 0)
 (define inner
   (new:stream-lazy
@@ -12,16 +17,16 @@
      (new:stream-cons #:eager 'a #:eager new:empty-stream))))
 (define outer
   (new:stream-lazy (begin (set! calls (add1 calls)) inner)))
-(check-eq? (new:stream-inspect outer) 'lazy)
+(check-eq? (observed-state outer) 'pending)
 (check-equal? calls 0)
 (check-eq? (new:stream-force-once outer) inner)
 (check-equal? calls 1)
-(check-eq? (new:stream-inspect outer) 'lazy)
+(check-eq? (observed-state outer) 'pending)
 (check-equal? calls 1)
 ;; Existing generic consumers finish partially evaluated streams.
 (check-equal? (stock:stream->list outer) '(a))
 (check-equal? calls 2)
-(check-eq? (new:stream-inspect outer) 'ready)
+(check-eq? (observed-state outer) 'ready)
 (check-eq? (new:stream-force outer) (new:stream-force inner))
 (check-equal? (stock:stream->list (new:stream-force-once outer)) '(a))
 (check-equal? calls 2)
@@ -31,22 +36,22 @@
 (define cell
   (new:stream-cons (begin (set! head-calls (add1 head-calls)) 'head)
                    (begin (set! tail-calls (add1 tail-calls)) new:empty-stream)))
-(check-eq? (new:stream-inspect cell) 'head-lazy)
+(check-eq? (observed-state cell) 'pending)
 (check-eq? (new:stream-force-once cell) cell)
 (check-equal? head-calls 0)
 (check-equal? tail-calls 0)
 (check-equal? (stock:stream-first cell) 'head)
-(check-eq? (new:stream-inspect cell) 'ready)
+(check-eq? (observed-state cell) 'ready)
 (check-equal? head-calls 1)
 (define tail (stock:stream-rest cell))
-(check-eq? (new:stream-inspect tail) 'lazy)
+(check-eq? (observed-state tail) 'pending)
 (check-equal? tail-calls 0)
 (check-eq? (new:stream-force-once tail) new:empty-stream)
 (check-equal? tail-calls 1)
-(check-eq? (new:stream-inspect tail) 'empty)
-(check-eq? (new:stream-inspect '()) 'empty)
-(check-eq? (new:stream-inspect '(1 2)) 'ready)
-(check-eq? (new:stream-inspect (stock:stream-lazy '())) 'unknown)
+(check-eq? (observed-state tail) 'empty)
+(check-eq? (observed-state '()) 'empty)
+(check-eq? (observed-state '(1 2)) 'ready)
+(check-eq? (observed-state (stock:stream-lazy '())) 'pending)
 (define literal '(1 2))
 (check-eq? (new:stream-force-once literal) literal)
 (check-equal?
@@ -58,7 +63,7 @@
 ;; The stock reentrant/broken guard is retained, including after single steps.
 (define self (new:stream-lazy self))
 (check-exn #rx"reentrant or broken" (lambda () (new:stream-force-once self)))
-(check-eq? (new:stream-inspect self) 'blocked)
+(check-eq? (observed-state self) 'pending)
 (check-exn #rx"reentrant or broken" (lambda () (new:stream-force self)))
 (define a (new:stream-lazy b))
 (define b (new:stream-lazy a))
@@ -114,8 +119,8 @@
 (for ([i (in-range 100)])
   (define result (new:stream-force-once old-root))
   (check-equal? root-calls (add1 i))
-  (check-eq? (new:stream-inspect result) (if (= i 99) 'ready 'lazy)))
-(check-eq? (new:stream-inspect old-root) 'ready)
+  (check-eq? (observed-state result) (if (= i 99) 'ready 'pending)))
+(check-eq? (observed-state old-root) 'ready)
 (check-equal? (stock:stream->list old-root) '(done))
 (void (new:stream-force-once old-root))
 (check-equal? root-calls 100)
@@ -125,9 +130,9 @@
 (define shared-root (new:stream-lazy shared-tail))
 (check-eq? (new:stream-force-once shared-root) shared-tail)
 (define shared-next (new:stream-force-once shared-root))
-(check-eq? (new:stream-inspect shared-tail) 'lazy)
+(check-eq? (observed-state shared-tail) 'pending)
 (check-equal? (new:stream-force-once shared-root) '(answer))
-(check-eq? (new:stream-inspect shared-tail) 'ready)
+(check-eq? (observed-state shared-tail) 'ready)
 (check-equal? (stock:stream->list shared-next) '(answer))
 
 ;; Compress a long prefix built by advancing a cursor, then resume from its root.
@@ -138,12 +143,12 @@
 (check-equal? root-calls 150)
 (void (new:stream-force-once prefix-root))
 (check-equal? root-calls 151)
-(check-eq? (new:stream-inspect prefix-cursor) 'lazy)
+(check-eq? (observed-state prefix-cursor) 'pending)
 (check-equal? (stock:stream->list prefix-root) '(done))
 (check-equal? root-calls 200)
 (check-equal? (stock:stream->list prefix-cursor) '(done))
 
-;; The facade exports exactly the stock interface plus the two new operations.
+;; The facade exports exactly the stock interface plus the three new operations.
 (define-values (stock-values stock-syntax) (module->exports 'racket/stream))
 (define-values (new-values new-syntax) (module->exports 'racket/stream/main))
 (define (phase-zero-names exports)
@@ -151,7 +156,7 @@
   (if entry (map car (cdr entry)) '()))
 (check-equal? (sort (append (phase-zero-names new-values)
                             (phase-zero-names new-syntax)) symbol<?)
-              (sort (append '(stream-inspect stream-force-once)
+              (sort (append '(stream-empty/known? stream-first-forced? stream-force-once)
                             (phase-zero-names stock-values)
                             (phase-zero-names stock-syntax)) symbol<?))
 (check-eq? new:stream-map stock:stream-map)
@@ -176,3 +181,33 @@
   (check-equal? tails (if (memq mode '(tail both)) 1 0))
   (check-equal? (new:stream->list source) '(7))
   (check-equal? (list heads tails) '(1 1)))
+
+;; A cached empty result is known without comparing the wrapper's identity.
+(define empty-calls 0)
+(define delayed-empty
+  (new:stream-lazy
+   (begin (set! empty-calls (add1 empty-calls)) new:empty-stream)))
+(check-false (new:stream-empty/known? delayed-empty))
+(check-false (new:stream-first-forced? delayed-empty))
+(check-equal? empty-calls 0)
+(check-eq? (new:stream-force-once delayed-empty) new:empty-stream)
+(check-false (eq? delayed-empty new:empty-stream))
+(check-true (new:stream-empty/known? delayed-empty))
+(check-false (new:stream-first-forced? delayed-empty))
+(check-equal? empty-calls 1)
+(check-true (new:stream-empty/known? new:empty-stream))
+(check-false (new:stream-first-forced? new:empty-stream))
+(check-true (new:stream-empty/known? '()))
+(check-true (new:stream-first-forced? '(1 2)))
+(check-false (new:stream-empty/known? '(1 2)))
+(check-exn exn:fail:contract? (lambda () (new:stream-empty/known? 42)))
+(check-exn exn:fail:contract? (lambda () (new:stream-first-forced? 42)))
+
+;; Unknown custom streams are not probed by invoking their methods.
+(struct foreign ()
+  #:property stock:prop:stream
+  (vector (lambda (_) (error 'foreign "empty method was called"))
+          (lambda (_) (error 'foreign "first method was called"))
+          (lambda (_) (error 'foreign "rest method was called"))))
+(check-false (new:stream-empty/known? (foreign)))
+(check-false (new:stream-first-forced? (foreign)))

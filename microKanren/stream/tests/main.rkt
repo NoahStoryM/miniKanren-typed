@@ -1,10 +1,12 @@
 #lang typed/racket/no-check
-(require racket/include rackunit racket/stream
-         "../main.rkt" experiments/search-stream/private/representation
+(require racket/include rackunit racket/stream/main
+         "../main.rkt" "../private/native-stream.rkt"
          (for-syntax racket/base))
 (define $car stream-first)
-(define $cdr stream-rest/raw)
-(define $force stream-force-one)
+(define ($cdr source)
+  (define rest (stream-rest source))
+  (if (stream-empty/known? rest) '() rest))
+(define $force stream-force-once)
 
 ;; The reference programs spell suspension as (λ () ...). Adapt only that
 ;; constructor, leaving the shared programs and assertions unchanged.

@@ -1,7 +1,7 @@
 #lang racket/base
 
 ;; Experimental, untyped microKanren using Racket's native streams.
-(require experiments/search-stream/private/stream-api experiments/search-stream/private/representation
+(require "private/stream-api.rkt" "private/native-stream.rkt"
          "private/core.rkt" "private/terms.rkt")
 (provide (all-defined-out) (all-from-out "private/terms.rkt"))
 

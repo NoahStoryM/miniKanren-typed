@@ -7,7 +7,7 @@
                   empty-state take var? var-c))
 
 (require rackunit racket/match racket/promise racket/stream
-         experiments/search-stream/private/stream-api experiments/search-stream/private/representation
+         microKanren/stream/private/stream-api experiments/search-stream/private/representation
          microKanren/stream/private/core microKanren/stream/tests/workloads
          (prefix-in native: experiments/search-stream/private/representation)
          (prefix-in term: microKanren/stream/private/terms)
