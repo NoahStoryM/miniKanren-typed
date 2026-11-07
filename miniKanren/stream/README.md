@@ -6,14 +6,26 @@
 (require miniKanren/stream/trs2)  ; second edition
 ```
 
-Use one implementation per module, or prefix the imports. These are untyped
-Racket implementations, copied from the corresponding `typed/` sources.
+Use one implementation per module, or prefix the imports. The implementations
+and entry modules use `typed/racket/no-check`, retaining the corresponding
+`typed/` source's type annotations, typed parameters, `ann`, `define-predicate`,
+and macro forms for comparison. No type checking is performed, and no
+`typed-racket-stream` dependency is introduced.
+
 There is no new stream algebra, backend interface, or shared Kanren core.
 Each `main.rkt` keeps the original definitions in their original order.
-Unification, substitutions, variable identity, goal composition, and reification
-are unchanged apart from removing type syntax. The generated `data?` predicate
-in TRS1/TRS2 is written explicitly, recognizing the same ground terms.
-TRS2 `defrel` still accepts annotated fixture arguments, discarding the types.
+Unification, substitutions, variable identity, goal composition, reification,
+and the generated ground-data predicates retain their original definitions.
+TRS2 `defrel` again supplies the original parameter and result annotations.
+
+`Streamof` uses `(Sequenceof a)` as a conservative description of the native,
+single-valued streams constructed here. It also admits other sequences: this
+alias does not characterize the representation precisely or make those other
+sequences valid search-stream inputs. `Suspension` aliases `Streamof`, since a
+suspension is now a delayed stream object rather than a function. The types do
+not distinguish pending, cached, empty, or ready streams. μKanren's `mzero` is
+annotated `(Streamof Nothing)`, and `pull` returns `Streamof` rather than a
+pair/null union. These are design annotations, not checked stream bindings.
 
 ## Source comparisons
 

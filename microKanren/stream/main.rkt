@@ -1,6 +1,6 @@
-#lang racket/base
+#lang typed/racket/no-check
 
-;; microKanren, using private/racket/stream.
+;; microKanren, using private/racket/stream with unchecked type annotations.
 ;;
 ;; Source: https://github.com/jasonhemann/microKanren -- microKanren.scm
 ;; (the core) and miniKanren-wrappers.scm (the user-level forms), from
@@ -16,26 +16,47 @@
 
 ;;; Terms, substitutions, and states
 
+(define-type Literal (∪ Boolean Number Char Bytes String Keyword Null Symbol))
+(define-type Term (∪ Literal Var (Pair Term Term)))
+(define-type Substitution (Listof (Pair Var Term)))
+;; A state is a substitution and the counter for the next fresh variable.
+(define-type State (Pair Substitution Natural))
+
 ;; A variable is identified by its counter.
-(struct var (c)
+(struct var ([c : Natural])
+  #:type-name Var
   #:transparent)
 
+(: var=? (→ Var Var Boolean))
 (define (var=? x1 x2) (= (var-c x1) (var-c x2)))
 
+(: walk (→ Term Substitution Term))
 (define (walk u s)
-  (let ([pr (and (var? u) (assf (λ (v) (var=? u v)) s))])
+  (let ([pr (and (var? u) (assf (λ ([v : Var]) (var=? u v)) s))])
     (if pr (walk (cdr pr) s) u)))
 
+(: ext-s (→ Var Term Substitution Substitution))
 (define (ext-s x v s) (cons (cons x v) s))
 
 
 ;;; Streams
 
-;; Answers and tails are eager; only stream-lazy introduces a suspension.
+;; Streamof is a conservative type description for the native, single-valued
+;; streams used here. Sequenceof also includes non-stream sequences; no-check
+;; does not verify this representation or distinguish its cache states.
+(define-type (Streamof a) (Sequenceof a))
+;; A suspension is now a delayed stream object, not a callable thunk.
+(define-type (Suspension a) (Streamof a))
+
+(define-type Goal (→ State (Streamof State)))
+
+(: unit (∀ (a) (→ a (Streamof a))))
 (define (unit s/c) (stream-cons #:eager s/c #:eager mzero))
 
+(: mzero (Streamof Nothing))
 (define mzero empty-stream)
 
+(: mplus (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (mplus $1 $2)
   (cond
     [(eq? (stream-peek $1) empty-stream) $2]
@@ -45,6 +66,7 @@
     [(stream-peek $1) => (λ ($1) (mplus $1 $2))]
     [else (stream-lazy (mplus $2 (stream-force-once $1)))]))
 
+(: bind (∀ (a b) (→ (Streamof a) (→ a (Streamof b)) (Streamof b))))
 (define (bind $ g)
   (cond
     [(eq? (stream-peek $) empty-stream) mzero]
@@ -57,10 +79,12 @@
 
 ;;; Goals
 
+(: == (→ Term Term Goal))
 (define ((== u v) s/c)
   (let ([s (unify u v (car s/c))])
     (if s (unit (cons s (cdr s/c))) mzero)))
 
+(: unify (→ Term Term Substitution (Option Substitution)))
 (define (unify u v s)
   (let ([u (walk u s)] [v (walk v s)])
     (cond
@@ -72,12 +96,15 @@
          (and s (unify (cdr u) (cdr v) s)))]
       [else (and (equal? u v) s)])))
 
+(: call/fresh (→ (→ Var Goal) Goal))
 (define ((call/fresh f) s/c)
   (let ([c (cdr s/c)])
     ((f (var c)) (cons (car s/c) (+ c 1)))))
 
+(: disj (→ Goal Goal Goal))
 (define ((disj g1 g2) s/c) (mplus (g1 s/c) (g2 s/c)))
 
+(: conj (→ Goal Goal Goal))
 (define ((conj g1 g2) s/c) (bind (g1 s/c) g2))
 
 
@@ -86,7 +113,7 @@
 ;; Inverse-η-delay: suspends the goal, so that a recursive relation
 ;; produces an immature stream instead of looping.
 (define-syntax-rule (Zzz g)
-  (λ (s/c) (stream-lazy (g s/c))))
+  (λ ([s/c : State]) (stream-lazy (g s/c))))
 
 (define-syntax conj+
   (syntax-rules ()
@@ -103,7 +130,7 @@
     [(_ () g0 g ...) (conj+ g0 g ...)]
     [(_ (x0 x ...) g0 g ...)
      (call/fresh
-      (λ (x0)
+      (λ ([x0 : Var])
         (fresh (x ...) g0 g ...)))]))
 
 (define-syntax-rule (conde [g0 g ...] ...)
@@ -115,15 +142,18 @@
 (define-syntax-rule (run* (x ...) g0 g ...)
   (map reify-1st (take-all (call/goal (fresh (x ...) g0 g ...)))))
 
-;; A state is a substitution and the counter for the next fresh variable.
+(: empty-state State)
 (define empty-state (cons '() 0))
 
+(: call/goal (→ Goal (Streamof State)))
 (define (call/goal g) (g empty-state))
 
 ;; Forces a stream until it is mature or empty.
+(: pull (∀ (a) (→ (Streamof a) (Streamof a))))
 (define (pull $)
   (stream-force $))
 
+(: take-all (∀ (a) (→ (Streamof a) (Listof a))))
 (define (take-all $)
   (let ([$ (pull $)])
     (if (stream-empty? $)
@@ -131,6 +161,7 @@
         (cons (car (stream-peek-first $))
               (take-all (stream-peek-rest $))))))
 
+(: take (∀ (a) (→ Natural (Streamof a) (Listof a))))
 (define (take n $)
   (if (zero? n)
       '()
@@ -141,10 +172,12 @@
                   (take (- n 1) (stream-peek-rest $)))))))
 
 ;; The value of the first variable, with its fresh variables reified.
+(: reify-1st (→ State Term))
 (define (reify-1st s/c)
   (let ([v (walk* (var 0) (car s/c))])
     (walk* v (reify-s v '()))))
 
+(: walk* (→ Term Substitution Term))
 (define (walk* v s)
   (let ([v (walk v s)])
     (cond
@@ -152,6 +185,7 @@
       [(pair? v) (cons (walk* (car v) s) (walk* (cdr v) s))]
       [else v])))
 
+(: reify-s (→ Term Substitution Substitution))
 (define (reify-s v s)
   (let ([v (walk v s)])
     (cond
@@ -161,14 +195,16 @@
       [(pair? v) (reify-s (cdr v) (reify-s (car v) s))]
       [else s])))
 
+(: reify-name (→ Natural Symbol))
 (define (reify-name n)
   (string->symbol (string-append "_" "." (number->string n))))
 
 ;; Applies f to n fresh variables.
+(: fresh/nf (→ Natural (→ Var * Goal) Goal))
 (define (fresh/nf n f)
-  (let app-f/v* ([n n] [v* '()])
+  (let app-f/v* ([n : Natural n] [v* : (Listof Var) '()])
     (cond
       [(zero? n) (apply f (reverse v*))]
       [else (call/fresh
-             (λ (x)
+             (λ ([x : Var])
                (app-f/v* (- n 1) (cons x v*))))])))

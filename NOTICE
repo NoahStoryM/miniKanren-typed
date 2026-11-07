@@ -174,9 +174,10 @@ which remains under the terms of its own copyright holders.
 
    microKanren/stream/main.rkt and miniKanren/stream/trs1/main.rkt and
    trs2/main.rkt adapt the corresponding typed implementations listed
-   above. They remove type annotations, spell the ground-term predicate
-   explicitly, and replace the stream representation with the local
-   Racket stream implementation. Goal scheduling, unification, variable
+   above. They retain type annotations under typed/racket/no-check and
+   replace the stream representation with the local Racket stream
+   implementation. Streamof uses Sequenceof as a conservative type
+   description; Suspension denotes a delayed stream instead of a thunk. Goal scheduling, unification, variable
    representation, and reification otherwise follow those implementations.
    The copyright and license terms in sections 1, 3, and 5 still apply.
    Tests include the existing fixtures without changing expected answers;

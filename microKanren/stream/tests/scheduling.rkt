@@ -83,13 +83,13 @@
   (define (old-row v)
     (cons v (lambda () (box-immutable (+ v 10)))))
   (define (row v)
-    (trs1:choice v (trs1:λF (trs1:unit (+ v 10)))))
+    (trs1:choice v (trs1:λF : Integer (trs1:unit (+ v 10)))))
   (check-equal?
-   (trs1:map∞ #f values (trs1:mplus (row n) (trs1:λF (row (+ n 1)))))
+   (trs1:map∞ #f values (trs1:mplus (row n) (trs1:λF : Integer (row (+ n 1)))))
    (old-trs1:map∞ #f values
                   (old-trs1:mplus (old-row n) (lambda () (old-row (+ n 1))))))
   (check-equal?
-   (trs1:map∞ #f values (trs1:mplusi (row n) (trs1:λF (row (+ n 1)))))
+   (trs1:map∞ #f values (trs1:mplusi (row n) (trs1:λF : Integer (row (+ n 1)))))
    (old-trs1:map∞ #f values
                   (old-trs1:mplusi (old-row n) (lambda () (old-row (+ n 1))))))
   (check-equal? (trs1:map∞ #f values (trs1:bind (row n) row))
