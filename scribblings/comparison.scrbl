@@ -45,7 +45,7 @@ an answer followed by a suspension.
 
 @trs1-block[
 (define-type (Streamof a)
-  (∪ Null (Boxof a) (Pair a (→ (Streamof a)))))
+  (∪ Null (Boxof a) (Pair a (Suspension a))))
 ]
 
 The second edition also has three, but a suspension stands on its own:
@@ -60,10 +60,12 @@ has produced an answer; in the second, it can give up control at any
 call to a relation defined with @trs2[defrel].  This has two
 consequences.  The first is for types: in the first edition, ``one
 answer'' and ``an answer and a suspension'' cannot be told apart for
-an arbitrary answer type, so @racketmodname[typed/miniKanren/trs1]
-needs a box; in the second edition, the three cases are told apart by
-the shape of the stream alone.  The second consequence is for search,
-and is shown next.
+an arbitrary answer type.  The book restricts the allowed answer
+values; @racketmodname[typed/miniKanren/trs1] instead wraps a single
+answer in an immutable box to support arbitrary answer types (see
+@secref["trs1-basis"]).  In the second edition, the three cases are
+told apart by the shape of the stream alone.  The second consequence
+is for search, and is shown next.
 
 @section[#:tag "comparison-search"]{Search}
 

@@ -37,12 +37,12 @@ The differences from the first edition are:
 
 @itemlist[
 
-@item{@bold{Stream representation.}  The book represents ``exactly
-one answer'' by the answer itself and ``an answer followed by more''
-by a pair whose @racket[cdr] is a procedure.  That union cannot be
-discriminated by occurrence typing for an arbitrary answer type, so
-here a single answer is wrapped in an immutable box and the empty
-stream is @racket['()].  See @racket[Streamof].}
+@item{@bold{Stream representation.}  The book uses @racket[#f] for
+the empty stream and the answer itself for exactly one answer.  Here
+the empty stream is @racket['()] and a single answer is wrapped in an
+immutable box to support arbitrary answer types.  This preserves the
+book's suspension points and search strategies.  See @racket[Streamof]
+for the two representations and the book's restrictions on answers.}
 
 @item{@bold{Occurs check.}  The book's @racket[ext-s] never checks
 for circularity; a separate checked variant is introduced in Chapter 9.
@@ -107,19 +107,41 @@ that itself contains variables bound further along the list, and
 @racket[walk] follows those links.
 }
 
-@deftypeconstr[(Streamof a)]{
-The type of lazy streams of answers, defined as
+@deftogether[(@deftypeconstr[(Streamof a)]
+              @deftypeconstr[(Suspension a)])]{
+The types of lazy streams of answers and their suspensions, defined as:
 
 @racketblock[
-(∪ Null
-   (Boxof a)
-   (Pair a (→ (Streamof a))))
+(define-type (Streamof a)
+  (∪ Null (Boxof a) (Pair a (Suspension a))))
+(define-type (Suspension a)
+  (→ (Streamof a)))
 ]
 
-A stream is empty, contains exactly one answer, or contains one answer
-followed by a suspended computation (a thunk) that produces the rest.
-The middle case is the book's @emph{unit}; the last is its
-@emph{choice}.
+A stream is empty (@racket[Null]), contains exactly one answer wrapped
+in an immutable box (@racket[Boxof]), or contains one answer paired
+with a suspension that produces the rest.  The three cases correspond
+to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
+is a thunk that produces a stream when called.
+
+The book uses a different representation: @racket[#f] for the empty
+stream, the answer itself for exactly one answer, and an answer paired
+with a suspension for the remaining stream.  Expressed in Typed Racket
+notation, this is:
+
+@racketblock[
+(define-type (Streamof a)
+  (∪ False a (Pair a (Suspension a))))
+]
+
+The book requires that an answer be neither @racket[#f] nor a pair
+whose @racket[cdr] is a procedure, so that the three cases do not
+overlap.  Substitutions satisfy this restriction.
+
+The boxed @racket[Streamof] defined above has no such restriction:
+@racket[unit] wraps each answer in an immutable box, so Typed Racket
+can distinguish the three stream cases for any answer type without
+inspecting the answers.
 }
 
 @deftype[Goal]{
@@ -370,7 +392,7 @@ level of streams.
               @defform[#:literals (:) (λF : a body ...+)])]{
 @racket[λG] builds a @racket[Goal] whose substitution argument is
 @racket[s].  @racket[λF] builds a thunk of type
-@racket[(→ (Streamof a))], used to suspend the rest of a stream.
+@racket[(Suspension a)], used to suspend the rest of a stream.
 }
 
 @deftogether[(@defform[(mzero)]
@@ -402,7 +424,7 @@ the stream as needed.  This is what @racket[run] uses.
 ]
 }
 
-@deftogether[(@defproc[(mplus [a∞ (Streamof a)] [f (→ (Streamof a))])
+@deftogether[(@defproc[(mplus [a∞ (Streamof a)] [f (Suspension a)])
                        (Streamof a)]
               @defproc[(bind [a∞ (Streamof a)] [g (→ a (Streamof a))])
                        (Streamof a)])]{
@@ -413,7 +435,7 @@ with @racket[unit] and @racket[mzero] they form the stream monad on
 which @racket[conde] and @racket[all] are built.
 }
 
-@deftogether[(@defproc[(mplusi [a∞ (Streamof a)] [f (→ (Streamof a))])
+@deftogether[(@defproc[(mplusi [a∞ (Streamof a)] [f (Suspension a)])
                        (Streamof a)]
               @defproc[(bindi [a∞ (Streamof a)] [g (→ a (Streamof a))])
                        (Streamof a)])]{
