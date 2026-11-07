@@ -207,36 +207,34 @@
 
 ;; A list represents all cached values, including zero values and a #f value.
 ;; #f represents absence of a readable head (empty, pending, or opaque).
-(define (stream-peek-first source)
-  (let loop ([s source])
-    (cond
-      [(eagerly-created-stream? s)
-       (and (not (impersonator? s))
-            (eagerly-created-stream-first-forced? s)
-            (let ([v (eagerly-created-stream-first s)])
-              (if (multivalue? v) (multivalue-content v) (list v))))]
-      [(lazily-created-stream? s)
-       (and (not (impersonator? s))
-            (not (lazily-created-stream-creator-if-unforced s))
-            (loop (lazily-created-stream-thunk-or-stream s)))]
-      [(and (not (impersonator? s)) (pair? s) (list? s)) (list (car s))]
-      [(for:stream? s) #f]
-      [else (raise-argument-error 'stream-peek-first "stream?" s)])))
+(define (stream-peek-first s)
+  (cond
+    [(eagerly-created-stream? s)
+     (and (not (impersonator? s))
+          (eagerly-created-stream-first-forced? s)
+          (let ([v (eagerly-created-stream-first s)])
+            (if (multivalue? v) (multivalue-content v) (list v))))]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-first (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (list (car s))]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-peek-first "stream?" s)]))
 
 ;; A known cons node already stores a tail stream object. Returning that object
 ;; does not evaluate the rest expression: the object can still be delayed.
-(define (stream-peek-rest source)
-  (let loop ([s source])
-    (cond
-      [(eagerly-created-stream? s)
-       (and (not (impersonator? s)) (eagerly-created-stream-rest s))]
-      [(lazily-created-stream? s)
-       (and (not (impersonator? s))
-            (not (lazily-created-stream-creator-if-unforced s))
-            (loop (lazily-created-stream-thunk-or-stream s)))]
-      [(and (not (impersonator? s)) (pair? s) (list? s)) (cdr s)]
-      [(for:stream? s) #f]
-      [else (raise-argument-error 'stream-peek-rest "stream?" s)])))
+(define (stream-peek-rest s)
+  (cond
+    [(eagerly-created-stream? s)
+     (and (not (impersonator? s)) (eagerly-created-stream-rest s))]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-rest (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (cdr s)]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-peek-rest "stream?" s)]))
 
 ;; Compress the already-cached prefix in a second pass, without a visited list.
 (define (compress-cached-prefix! source stop target)
