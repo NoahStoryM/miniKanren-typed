@@ -101,3 +101,9 @@ explicit suspension construction; earlier chapters need no representation
 adapters. The separate scheduling tests operate directly on native streams,
 compare cold answer/pause traces with the original implementations, and cover
 infinite branches, cached inputs, and untouched tails.
+
+## Runtime comparison
+
+See [the benchmark results](benchmarks/RESULTS.md) for a three-way comparison
+of the checked original, the original changed only to no-check, and this
+stream version. Reproducible scripts and raw samples are included.
