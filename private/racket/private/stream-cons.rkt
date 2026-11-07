@@ -271,7 +271,13 @@
      ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
      (let check ([target result])
        (cond
-         [(impersonator-of? target s) (reentrant-error)]
+         ;; Native nodes need identity checks; keep the general comparison
+         ;; for wrappers and foreign stream implementations.
+         [(or (eq? target s)
+              (and (or (impersonator? target)
+                       (not (stream? target)))
+                   (impersonator-of? target s)))
+          (reentrant-error)]
          [(and (lazily-created-stream? target)
                (not (lazily-created-stream-creator-if-unforced target)))
           (check (lazily-created-stream-thunk-or-stream target))]))
