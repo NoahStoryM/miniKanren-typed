@@ -177,7 +177,9 @@ which remains under the terms of its own copyright holders.
    above. They retain type annotations under typed/racket/no-check and
    replace the stream representation with the local Racket stream
    implementation. Streamof uses Sequenceof as a conservative type
-   description; Suspension denotes a delayed stream instead of a thunk. Goal scheduling, unification, variable
+   description; Suspension denotes a delayed stream instead of a thunk.
+   The Data predicate is written explicitly because define-predicate does
+   not generate the requested predicate under no-check in Racket 9.3. Goal scheduling, unification, variable
    representation, and reification otherwise follow those implementations.
    The copyright and license terms in sections 1, 3, and 5 still apply.
    Tests include the existing fixtures without changing expected answers;

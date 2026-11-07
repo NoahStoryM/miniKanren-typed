@@ -22,6 +22,7 @@ report = {
     'rounds': args.rounds,
     'method': 'Compile before timing. Each edition/backend/workload runs in a fresh process. Both small and full warmups precede samples. Three full collections precede each sample. Timers run inside the implementation module; no typed/untyped contracts are crossed inside the timed region. Every sample builds a fresh goal/result; no stream is reused between samples. CPU includes GC. Source module loading and compilation are excluded. Backend order rotates across workloads.',
     'sources': {}, 'results': [],
+    'predicate_control': 'TRS1/TRS2 typed-manual, no-check, and stream use the same explicit Data predicate. The typed backend retains the original generated predicate. micro has no Data predicate.',
 }
 
 with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
@@ -31,8 +32,15 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
         candidate = root / ('microKanren/stream/main.rkt' if edition == 'micro' else f'miniKanren/stream/{edition}/main.rkt')
         report['sources'][edition] = {label: hashlib.sha256(path.read_bytes()).hexdigest()
                                       for label, path in [('original', original), ('stream', candidate)]}
-        for backend in ['typed', 'no-check', 'stream']:
+        backends = ['typed', 'no-check', 'stream'] if edition == 'micro' else ['typed', 'typed-manual', 'no-check', 'stream']
+        for backend in backends:
             source = (candidate if backend == 'stream' else original).read_text()
+            if edition != 'micro' and backend in ['typed-manual', 'no-check']:
+                source = source.replace('(define-predicate data? Data)', '''(: data? (→ Any Boolean : Data))
+(define (data? v)
+  (or (boolean? v) (number? v) (char? v) (bytes? v) (string? v)
+      (keyword? v) (null? v) (symbol? v)
+      (and (pair? v) (data? (car v)) (data? (cdr v)))))''')
             if backend == 'no-check':
                 source = source.replace('#lang typed/racket/base', '#lang typed/racket/no-check', 1)
             if edition == 'trs2':
@@ -49,6 +57,7 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
                 run_answers = '(run n (q) (repeat-o q))'
                 run_splits = "(run* (q) (fresh (l t) (== (list l t) q) (append-o l t '(a b c d e f g h i j k l))))"
                 run_bits = '(run* (q) (bits-o 7 q))'
+            predicate_check = '' if edition == 'micro' else "(unless (and (data? #t) (data? 1) (data? '()) (data? '(a b)) (not (data? (var 'x)))) (error 'preview \"Data predicate differs\"))"
             fixtures = f'''
 ;; Benchmark relations execute within the implementation's own module.
 {repeat}
@@ -79,6 +88,7 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
 
 (: preview (→ Symbol String))
 (define (preview kind)
+  {predicate_check}
   (define n 12)
   (format "~s"
           (case kind
@@ -119,7 +129,7 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
     cases = [('answers', 1000000), ('splits', 5000), ('branching', 250)]
     for edition in ['micro', 'trs1', 'trs2']:
         for index, (workload, count) in enumerate(cases):
-            order = ['typed', 'no-check', 'stream']
+            order = ['typed', 'no-check', 'stream'] if edition == 'micro' else ['typed', 'typed-manual', 'no-check', 'stream']
             order = order[index:] + order[:index]
             previews = set()
             for backend in order:
@@ -140,8 +150,9 @@ with tempfile.TemporaryDirectory(prefix='kanren-compare-') as directory:
                 print(f"{edition:5} {workload:9} {backend:8} CPU {result['median_cpu_ms']:6} ms, GC {result['median_gc_ms']:5} ms", flush=True)
             if len(previews) != 1:
                 raise RuntimeError(f'Preview answers differ for {edition}/{workload}')
-            checksums = {r['samples'][0]['checksum'] for r in report['results']
-                         if r['edition'] == edition and r['workload'] == workload}
+            checksums = {sample['checksum'] for r in report['results']
+                         if r['edition'] == edition and r['workload'] == workload
+                         for sample in r['samples']}
             if len(checksums) != 1:
                 raise RuntimeError(f'Answer counts differ for {edition}/{workload}')
     report['answers_verified'] = True

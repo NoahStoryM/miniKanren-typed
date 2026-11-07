@@ -166,3 +166,12 @@
                  '()))
  '(#f))
 (check-false (stream-peek unused-tail))
+
+;; Type-derived predicates must also agree, independently of query answers.
+;; A broken data? can be hidden by ext-s falling back to the occurs check.
+(for ([v (in-list (list #f #t 0 1/3 +inf.0 2+3i #\a #"bytes" "text"
+                        '#:key '() 'x '(a #t 1) '(a . b)
+                        (trs1:var 'x) (trs2:var 'x)
+                        (cons 'a (trs2:var 'x)) (vector 1) (box 1)))])
+  (check-equal? (trs1:data? v) (old-trs1:data? v))
+  (check-equal? (trs2:data? v) (old-trs2:data? v)))

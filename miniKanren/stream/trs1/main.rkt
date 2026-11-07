@@ -32,7 +32,13 @@
   #:type-name Var
   #:transparent)
 
-(define-predicate data? Data)
+;; define-predicate does not generate the Data predicate in no-check mode.
+;; Spell out the same ground-term test while retaining its type description.
+(: data? (→ Any Boolean : Data))
+(define (data? v)
+  (or (boolean? v) (number? v) (char? v) (bytes? v) (string? v)
+      (keyword? v) (null? v) (symbol? v)
+      (and (pair? v) (data? (car v)) (data? (cdr v)))))
 
 (: empty-s Substitution)
 (: size-s (→ Substitution Index))

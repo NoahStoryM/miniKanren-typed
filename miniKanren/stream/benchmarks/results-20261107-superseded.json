@@ -1505,5 +1505,6 @@
       "median_gc_ms": 0
     }
   ],
-  "answers_verified": true
+  "answers_verified": true,
+  "superseded_reason": "TRS1/TRS2 define-predicate expands differently under no-check: Data accepts only #f, changing the ext-s fast path. Those rows do not isolate type-mode or stream-representation overhead."
 }

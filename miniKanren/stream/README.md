@@ -8,14 +8,18 @@
 
 Use one implementation per module, or prefix the imports. The implementations
 and entry modules use `typed/racket/no-check`, retaining the corresponding
-`typed/` source's type annotations, typed parameters, `ann`, `define-predicate`,
+`typed/` source's type annotations, typed parameters, `ann`,
 and macro forms for comparison. No type checking is performed, and no
 `typed-racket-stream` dependency is introduced.
 
 There is no new stream algebra, backend interface, or shared Kanren core.
 Each `main.rkt` keeps the original definitions in their original order.
-Unification, substitutions, variable identity, goal composition, reification,
-and the generated ground-data predicates retain their original definitions.
+Unification, substitutions, variable identity, goal composition, and reification
+retain their original definitions. The ground-data predicate is the exception:
+Racket 9.3's `define-predicate` does not generate the requested predicate under
+no-check. `data?` therefore spells out the same ground-term test explicitly,
+with its original predicate type annotation. Regression tests compare its
+results with the original checked predicate independently of query answers.
 TRS2 `defrel` again supplies the original parameter and result annotations.
 
 `Streamof` uses `(Sequenceof a)` as a conservative description of the native,
