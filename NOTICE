@@ -10,7 +10,7 @@ which remains under the terms of its own copyright holders.
 
 1. The miniKanren implementation of The Reasoned Schemer, first edition
 
-   Files:   miniKanren/trs1/main.rkt
+   Files:   typed/miniKanren/trs1/main.rkt
 
    Source:  Daniel P. Friedman, William E. Byrd, and Oleg Kiselyov,
             The Reasoned Schemer, MIT Press, 2005: chapter 9
@@ -21,7 +21,7 @@ which remains under the terms of its own copyright holders.
 
    Copyright (C) 2005 Massachusetts Institute of Technology.
 
-   miniKanren/trs1/main.rkt is a Typed Racket rewrite of that code.  The
+   typed/miniKanren/trs1/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout; a single
    answer in a stream is represented by an immutable box and the empty
    stream by '(); ext-s performs the occurs check (so == is the checked
@@ -31,7 +31,7 @@ which remains under the terms of its own copyright holders.
 
 2. Examples from The Reasoned Schemer, first edition
 
-   Files:   miniKanren/trs1/tests/ch1.rktl ... ch10.rktl
+   Files:   typed/miniKanren/trs1/tests/ch1.rktl ... ch10.rktl
 
    Source:  The Reasoned Schemer, MIT Press, 2005, chapters 1-10.
 
@@ -45,8 +45,9 @@ which remains under the terms of its own copyright holders.
 
 3. The miniKanren implementation of The Reasoned Schemer, second edition
 
-   Files:   miniKanren/trs2/main.rkt
-            miniKanren/trs2/tests/arith.rktl
+   Files:   typed/miniKanren/trs2/main.rkt
+            miniKanren/stream/trs2/main.rkt
+            typed/miniKanren/trs2/tests/arith.rktl
 
    Source:  https://github.com/TheReasonedSchemer2ndEd/CodeFromTheReasonedSchemer2ndEd
             (trs2-impl.scm and trs2-arith.scm), the code of chapters
@@ -55,13 +56,13 @@ which remains under the terms of its own copyright holders.
             Jason Hemann, The Reasoned Schemer, second edition, MIT
             Press, 2018.
 
-   miniKanren/trs2/main.rkt is a Typed Racket rewrite of that code.  The
+   typed/miniKanren/trs2/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout (defrel
    gives an argument the type Term unless it is annotated, and the
    result the type Goal); variables are structs compared with eq? and
    named after the fresh identifier; literals are compared with equal?
    instead of eqv?; and ext-s skips the occurs check for ground terms.
-   miniKanren/trs2/tests/arith.rktl adapts the arithmetic code with a
+   typed/miniKanren/trs2/tests/arith.rktl adapts the arithmetic code with a
    type annotation for build-num; the shared list helpers are provided
    by the chapter tests.  The code is distributed under the following
    license:
@@ -94,7 +95,7 @@ which remains under the terms of its own copyright holders.
 
 4. Examples from The Reasoned Schemer, second edition
 
-   Files:   miniKanren/trs2/tests/ch1.rktl ... ch10.rktl
+   Files:   typed/miniKanren/trs2/tests/ch1.rktl ... ch10.rktl
 
    Source:  The Reasoned Schemer, second edition, MIT Press, 2018,
             chapters 1-10.
@@ -109,8 +110,10 @@ which remains under the terms of its own copyright holders.
 
 5. microKanren
 
-   Files:   microKanren/main.rkt
-            microKanren/tests/programs.rktl, core.rktl, wrappers.rktl
+   Files:   typed/microKanren/main.rkt
+            microKanren/stream/private/terms.rkt
+            microKanren/stream/tests/workloads.rkt
+            typed/microKanren/tests/programs.rktl, core.rktl, wrappers.rktl
 
    Source:  https://github.com/jasonhemann/microKanren
             (microKanren.scm, miniKanren-wrappers.scm,
@@ -119,7 +122,7 @@ which remains under the terms of its own copyright holders.
             Functional Core for Relational Programming", Scheme
             Workshop 2013.
 
-   microKanren/main.rkt is a Typed Racket rewrite of microKanren.scm
+   typed/microKanren/main.rkt is a Typed Racket rewrite of microKanren.scm
    and miniKanren-wrappers.scm.  The changes are: type definitions and
    annotations throughout; variables are structs holding their counter
    instead of vectors; and literals are compared with equal? instead of
@@ -148,3 +151,28 @@ which remains under the terms of its own copyright holders.
    ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
    CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
    SOFTWARE.
+
+The native-stream experiments under microKanren/stream/,
+miniKanren/stream/trs2/, and experiments/search-stream/ adapt the same implementations
+listed in sections 3 and 5. They replace pair/thunk stream representation with racket/stream and
+explicit memoized suspension tracking, and reuse the corresponding tests via
+include. No Racket implementation source is copied into that search adapter.
+
+
+6. Isolated two-state Racket stream experiment
+
+   Files:   experiments/stream-benchmarks/private/two-state-cons.rkt
+            private/racket/private/stream-cons.rkt
+
+   Source:  Racket 9.3, collects/racket/private/stream-cons.rkt,
+            https://github.com/racket/racket
+
+   The original copyright and permissive license are retained in the snapshot.
+   The focused private adapter derives its changed definitions from that source
+   and refers to this notice for attribution and license. The source license is
+   reproduced in full in the snapshot file.
+   Changes: allow completed delays to cache an immediate delayed result;
+   teach full forcing to follow and compress those links; add non-forcing
+   observation and one-step forcing with cached-prefix compression.
+   This is a separate experiment from the
+   require/expose search adapter above.

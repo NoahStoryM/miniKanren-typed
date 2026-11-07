@@ -1,0 +1,610 @@
+{
+  "racket": "/workspace/scratch/8431fd74551b/racket-runtime/bin/racket",
+  "baseline_commit": "87cf037987bb7c234871f455543e6003b5ea9276",
+  "baseline_sha256": "9e965d49bc8c725e2b36a1dc0288b13253a31b0e05f5995202e44045494ea5eb",
+  "candidate_sha256": "cb6e8fd953de6cdbe08c9ac6ed0f75d099a92383e92bee1b05539879b1562b83",
+  "rounds": 7,
+  "method": "Sequential fresh processes; compile first; small and full warmups; seven CPU-time samples including GC with full GC between samples; root and cursor both fully force the root at the end.",
+  "results": [
+    {
+      "backend": "before",
+      "mode": "cursor",
+      "n": 300000,
+      "samples": [
+        {
+          "checksum": 300000,
+          "cpu_ms": 16,
+          "gc_ms": 4,
+          "real_ms": 16
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 16,
+          "gc_ms": 4,
+          "real_ms": 16
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 16,
+          "gc_ms": 4,
+          "real_ms": 16
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 25,
+          "gc_ms": 8,
+          "real_ms": 25
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 16,
+          "gc_ms": 4,
+          "real_ms": 16
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 16,
+          "gc_ms": 4,
+          "real_ms": 16
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 15,
+          "gc_ms": 4,
+          "real_ms": 15
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "cursor",
+      "n": 300000,
+      "samples": [
+        {
+          "checksum": 300000,
+          "cpu_ms": 27,
+          "gc_ms": 5,
+          "real_ms": 27
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 4,
+          "real_ms": 17
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 19,
+          "gc_ms": 4,
+          "real_ms": 19
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 4,
+          "real_ms": 17
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 15,
+          "gc_ms": 3,
+          "real_ms": 15
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 4,
+          "real_ms": 17
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 4,
+          "real_ms": 17
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "cursor",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 1000000,
+          "cpu_ms": 97,
+          "gc_ms": 52,
+          "real_ms": 97
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 107,
+          "gc_ms": 63,
+          "real_ms": 107
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 89,
+          "gc_ms": 48,
+          "real_ms": 89
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 84,
+          "gc_ms": 44,
+          "real_ms": 84
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 82,
+          "gc_ms": 44,
+          "real_ms": 82
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 81,
+          "gc_ms": 43,
+          "real_ms": 81
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 82,
+          "gc_ms": 44,
+          "real_ms": 82
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "before",
+      "mode": "cursor",
+      "n": 1000000,
+      "samples": [
+        {
+          "checksum": 1000000,
+          "cpu_ms": 90,
+          "gc_ms": 49,
+          "real_ms": 90
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 89,
+          "gc_ms": 52,
+          "real_ms": 89
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 99,
+          "gc_ms": 58,
+          "real_ms": 99
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 89,
+          "gc_ms": 47,
+          "real_ms": 89
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 91,
+          "gc_ms": 50,
+          "real_ms": 91
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 93,
+          "gc_ms": 51,
+          "real_ms": 93
+        },
+        {
+          "checksum": 1000000,
+          "cpu_ms": 86,
+          "gc_ms": 47,
+          "real_ms": 86
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "before",
+      "mode": "root",
+      "n": 5000,
+      "samples": [
+        {
+          "checksum": 5000,
+          "cpu_ms": 43,
+          "gc_ms": 0,
+          "real_ms": 43
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 42,
+          "gc_ms": 0,
+          "real_ms": 42
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 43,
+          "gc_ms": 0,
+          "real_ms": 43
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 44,
+          "gc_ms": 0,
+          "real_ms": 44
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 44,
+          "gc_ms": 0,
+          "real_ms": 44
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 47,
+          "gc_ms": 0,
+          "real_ms": 47
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 48,
+          "gc_ms": 0,
+          "real_ms": 48
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "root",
+      "n": 5000,
+      "samples": [
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 5000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "root",
+      "n": 10000,
+      "samples": [
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "before",
+      "mode": "root",
+      "n": 10000,
+      "samples": [
+        {
+          "checksum": 10000,
+          "cpu_ms": 230,
+          "gc_ms": 0,
+          "real_ms": 230
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 224,
+          "gc_ms": 0,
+          "real_ms": 224
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 204,
+          "gc_ms": 0,
+          "real_ms": 204
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 199,
+          "gc_ms": 0,
+          "real_ms": 199
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 192,
+          "gc_ms": 0,
+          "real_ms": 192
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 194,
+          "gc_ms": 0,
+          "real_ms": 194
+        },
+        {
+          "checksum": 10000,
+          "cpu_ms": 200,
+          "gc_ms": 0,
+          "real_ms": 200
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "before",
+      "mode": "root",
+      "n": 20000,
+      "samples": [
+        {
+          "checksum": 20000,
+          "cpu_ms": 995,
+          "gc_ms": 0,
+          "real_ms": 995
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 978,
+          "gc_ms": 0,
+          "real_ms": 979
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 975,
+          "gc_ms": 0,
+          "real_ms": 975
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 1012,
+          "gc_ms": 0,
+          "real_ms": 1012
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 997,
+          "gc_ms": 0,
+          "real_ms": 997
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 1022,
+          "gc_ms": 0,
+          "real_ms": 1022
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 1005,
+          "gc_ms": 0,
+          "real_ms": 1005
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "root",
+      "n": 20000,
+      "samples": [
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        },
+        {
+          "checksum": 20000,
+          "cpu_ms": 0,
+          "gc_ms": 0,
+          "real_ms": 0
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "root",
+      "n": 300000,
+      "samples": [
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 4,
+          "real_ms": 17
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 15,
+          "gc_ms": 1,
+          "real_ms": 15
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 17,
+          "gc_ms": 2,
+          "real_ms": 17
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 12,
+          "gc_ms": 1,
+          "real_ms": 12
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 13,
+          "gc_ms": 1,
+          "real_ms": 13
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 12,
+          "gc_ms": 1,
+          "real_ms": 12
+        },
+        {
+          "checksum": 300000,
+          "cpu_ms": 13,
+          "gc_ms": 1,
+          "real_ms": 13
+        }
+      ],
+      "version": "9.3"
+    },
+    {
+      "backend": "after",
+      "mode": "root",
+      "n": 600000,
+      "samples": [
+        {
+          "checksum": 600000,
+          "cpu_ms": 26,
+          "gc_ms": 4,
+          "real_ms": 26
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 27,
+          "gc_ms": 4,
+          "real_ms": 27
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 28,
+          "gc_ms": 4,
+          "real_ms": 28
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 28,
+          "gc_ms": 4,
+          "real_ms": 28
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 28,
+          "gc_ms": 4,
+          "real_ms": 28
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 26,
+          "gc_ms": 4,
+          "real_ms": 26
+        },
+        {
+          "checksum": 600000,
+          "cpu_ms": 28,
+          "gc_ms": 4,
+          "real_ms": 28
+        }
+      ],
+      "version": "9.3"
+    }
+  ]
+}
