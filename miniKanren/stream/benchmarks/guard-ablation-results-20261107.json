@@ -1,0 +1,416 @@
+{
+  "commit": "9b69a0a3918d087f45199e0c34bbe7d0fe73cd37",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.39",
+  "machine": "x86_64",
+  "rounds": 7,
+  "method": "Compile before timing. Each edition/backend/workload runs in a fresh process. Both small and full warmups precede samples. Three full collections precede each sample. Timers run inside the implementation module; no typed/untyped contracts are crossed inside the timed region. Every sample builds a fresh goal/result; no stream is reused between samples. CPU includes GC. Source module loading and compilation are excluded. Backend order rotates across workloads. Ablations: stream-once reads first only once in ready clauses; stream-no-cache restores the thunk rather than saving its result, retaining safety checks; stream-no-guards keeps caching but omits reentrancy/result/cycle guards in single-step forcing.",
+  "sources": {
+    "trs2": {
+      "original": "b0221d8b7ccb3a3b4c10b368de04b63c6353e1f0e0792888e24ee0e4f6e3fd66",
+      "stream": "4e24ba5e0aff3931371c7c14813bbca13a05ba98844ddbb5f6140dfbeae2da2d"
+    }
+  },
+  "results": [
+    {
+      "edition": "trs2",
+      "backend": "typed-manual",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 82,
+          "real_ms": 81.451416015625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 93,
+          "real_ms": 93.142333984375,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 97,
+          "real_ms": 96.272705078125,
+          "gc_ms": 2,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 80,
+          "real_ms": 80.142333984375,
+          "gc_ms": 0,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 80,
+          "real_ms": 79.347900390625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 92,
+          "real_ms": 91.953857421875,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 86,
+          "real_ms": 85.998291015625,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 86,
+      "median_real_ms": 85.998291015625,
+      "median_gc_ms": 1
+    },
+    {
+      "edition": "trs2",
+      "backend": "no-check",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 89,
+          "real_ms": 88.910888671875,
+          "gc_ms": 2,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 86,
+          "real_ms": 85.460693359375,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 88,
+          "real_ms": 87.500244140625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 91,
+          "real_ms": 91.470947265625,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 83,
+          "real_ms": 82.761474609375,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 120,
+          "real_ms": 119.524658203125,
+          "gc_ms": 1,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 114,
+          "real_ms": 114.1181640625,
+          "gc_ms": 1,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 89,
+      "median_real_ms": 88.910888671875,
+      "median_gc_ms": 1
+    },
+    {
+      "edition": "trs2",
+      "backend": "stream",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 447,
+          "real_ms": 447.6298828125,
+          "gc_ms": 8,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 449,
+          "real_ms": 449.46044921875,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 438,
+          "real_ms": 437.431884765625,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 438,
+          "real_ms": 438.597412109375,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 487,
+          "real_ms": 487.937744140625,
+          "gc_ms": 12,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 484,
+          "real_ms": 483.774658203125,
+          "gc_ms": 10,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 475,
+          "real_ms": 474.504150390625,
+          "gc_ms": 10,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 449,
+      "median_real_ms": 449.46044921875,
+      "median_gc_ms": 8
+    },
+    {
+      "edition": "trs2",
+      "backend": "stream-no-cycle",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 250,
+          "real_ms": 250.349365234375,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 234,
+          "real_ms": 233.418212890625,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 243,
+          "real_ms": 243.639404296875,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 242,
+          "real_ms": 241.452392578125,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 239,
+          "real_ms": 238.761962890625,
+          "gc_ms": 3,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 249,
+          "real_ms": 249.41015625,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 270,
+          "real_ms": 269.481689453125,
+          "gc_ms": 7,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 243,
+      "median_real_ms": 243.639404296875,
+      "median_gc_ms": 4
+    },
+    {
+      "edition": "trs2",
+      "backend": "stream-no-result",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 418,
+          "real_ms": 418.45361328125,
+          "gc_ms": 9,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 468,
+          "real_ms": 467.394287109375,
+          "gc_ms": 10,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 422,
+          "real_ms": 421.505859375,
+          "gc_ms": 9,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 415,
+          "real_ms": 415.14208984375,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 419,
+          "real_ms": 419.02197265625,
+          "gc_ms": 9,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 387,
+          "real_ms": 387.55126953125,
+          "gc_ms": 5,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 399,
+          "real_ms": 399.404052734375,
+          "gc_ms": 5,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 418,
+      "median_real_ms": 418.45361328125,
+      "median_gc_ms": 9
+    },
+    {
+      "edition": "trs2",
+      "backend": "stream-no-reentrance",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 414,
+          "real_ms": 413.53515625,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 446,
+          "real_ms": 446.72314453125,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 419,
+          "real_ms": 418.502197265625,
+          "gc_ms": 7,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 410,
+          "real_ms": 410.0302734375,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 410,
+          "real_ms": 409.507080078125,
+          "gc_ms": 6,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 463,
+          "real_ms": 462.8818359375,
+          "gc_ms": 8,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 428,
+          "real_ms": 428.621337890625,
+          "gc_ms": 7,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 419,
+      "median_real_ms": 418.502197265625,
+      "median_gc_ms": 7
+    },
+    {
+      "edition": "trs2",
+      "backend": "stream-no-guards",
+      "workload": "branching",
+      "n": 1000,
+      "preview_sha256": "ddb126c4d6d0cf1d35d9c7c015bc17a7121c31edc4860fc4aae257e0d0178516",
+      "version": "9.3",
+      "samples": [
+        {
+          "cpu_ms": 214,
+          "real_ms": 213.721435546875,
+          "gc_ms": 3,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 211,
+          "real_ms": 211.19482421875,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 211,
+          "real_ms": 210.932861328125,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 215,
+          "real_ms": 215.5380859375,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 218,
+          "real_ms": 217.861572265625,
+          "gc_ms": 4,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 219,
+          "real_ms": 219.631103515625,
+          "gc_ms": 3,
+          "checksum": 128000
+        },
+        {
+          "cpu_ms": 220,
+          "real_ms": 220.800537109375,
+          "gc_ms": 4,
+          "checksum": 128000
+        }
+      ],
+      "median_cpu_ms": 215,
+      "median_real_ms": 215.5380859375,
+      "median_gc_ms": 4
+    }
+  ],
+  "warning": "Diagnostic variants intentionally change invalid-input or memoization behavior. Only cold benchmark queries are compared; timings are not an additive cost decomposition.",
+  "variants": [
+    "stream",
+    "stream-no-cycle",
+    "stream-no-result",
+    "stream-no-reentrance",
+    "stream-no-guards"
+  ],
+  "editions": [
+    "trs2"
+  ],
+  "workloads": [
+    "branching"
+  ],
+  "predicate_control": "Every backend uses the same explicit Data predicate. typed-manual enables type checking; no-check uses the original pair/thunk representation without checking.",
+  "answers_verified": true
+}
