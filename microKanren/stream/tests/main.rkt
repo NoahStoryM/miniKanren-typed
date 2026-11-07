@@ -1,6 +1,6 @@
 #lang typed/racket/no-check
 (require racket/include rackunit racket/stream
-         "../main.rkt" racket/stream/private/representation
+         "../main.rkt" experiments/search-stream/private/representation
          (for-syntax racket/base))
 (define $car stream-first)
 (define $cdr stream-rest/raw)

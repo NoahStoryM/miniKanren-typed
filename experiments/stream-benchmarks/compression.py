@@ -9,21 +9,21 @@ import sys
 import tempfile
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
+REPO = HERE.parents[1]
 RACKET = Path(sys.argv[1]).resolve()
 BASE = "87cf037987bb7c234871f455543e6003b5ea9276"
 source = subprocess.check_output(
     ["git", "show", BASE + ":racket/stream/private/two-state-cons.rkt"], cwd=REPO)
 report = {"racket": str(RACKET), "baseline_commit": BASE,
           "baseline_sha256": hashlib.sha256(source).hexdigest(),
-          "candidate_sha256": hashlib.sha256((HERE.parent / "private/two-state-cons.rkt").read_bytes()).hexdigest(),
+          "candidate_sha256": hashlib.sha256((HERE / "private/two-state-cons.rkt").read_bytes()).hexdigest(),
           "rounds": 7,
           "method": "Sequential fresh processes; compile first; small and full warmups; seven CPU-time samples including GC with full GC between samples; root and cursor both fully force the root at the end.",
           "results": []}
 with tempfile.TemporaryDirectory(prefix="stream-compression-") as directory:
     tmp = Path(directory)
     (tmp / "baseline-cons.rkt").write_bytes(source)
-    facade = (HERE.parent / "two-state.rkt").read_text().replace(
+    facade = (HERE / "two-state.rkt").read_text().replace(
         '"private/two-state-cons.rkt"', '(file ' + json.dumps(str(tmp / "baseline-cons.rkt")) + ')')
     (tmp / "baseline.rkt").write_text(facade)
     harness = f'''#lang racket/base
@@ -31,7 +31,7 @@ with tempfile.TemporaryDirectory(prefix="stream-compression-") as directory:
   (require racket/include (file {json.dumps(str(tmp / "baseline.rkt"))}))
   (include (file {json.dumps(str(HERE / "compression-workloads.rktl"))})))
 (module after racket/base
-  (require racket/include racket/stream/two-state)
+  (require racket/include (file {json.dumps(str(HERE / "two-state.rkt"))}))
   (include (file {json.dumps(str(HERE / "compression-workloads.rktl"))})))
 (require json racket/match
          (prefix-in before: (submod "." before))

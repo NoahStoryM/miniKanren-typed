@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require racket/stream/two-state json)
+(require "two-state.rkt" json)
 (define n 300000)
 (define kept #f)
 (define (gc!) (collect-garbage) (collect-garbage) (collect-garbage))

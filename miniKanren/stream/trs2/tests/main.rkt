@@ -6,7 +6,7 @@
          (only-in racket/list make-list)
          "../main.rkt"
          (prefix-in native: racket/stream)
-         (prefix-in search: racket/stream/search)
+         (prefix-in search: experiments/search-stream/main)
          (for-syntax racket/base))
 
 (include "../../../../typed/miniKanren/trs2/tests/ch1.rktl")

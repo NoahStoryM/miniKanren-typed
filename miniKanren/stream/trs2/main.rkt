@@ -14,8 +14,8 @@
 
 (require (for-syntax racket/base syntax/parse)
          racket/match
-         racket/stream/private/stream-api
-         racket/stream/private/representation)
+         experiments/search-stream/private/stream-api
+         experiments/search-stream/private/representation)
 
 (provide (all-defined-out))
 

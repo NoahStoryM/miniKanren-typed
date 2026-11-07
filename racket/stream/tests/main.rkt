@@ -2,7 +2,7 @@
 
 (require rackunit racket/match
          (prefix-in stock: racket/stream)
-         (prefix-in new: racket/stream/two-state))
+         (prefix-in new: racket/stream/main))
 
 (define calls 0)
 (define inner
@@ -142,3 +142,37 @@
 (check-equal? (stock:stream->list prefix-root) '(done))
 (check-equal? root-calls 200)
 (check-equal? (stock:stream->list prefix-cursor) '(done))
+
+;; The facade exports exactly the stock interface plus the two new operations.
+(define-values (stock-values stock-syntax) (module->exports 'racket/stream))
+(define-values (new-values new-syntax) (module->exports 'racket/stream/main))
+(define (phase-zero-names exports)
+  (define entry (assv 0 exports))
+  (if entry (map car (cdr entry)) '()))
+(check-equal? (sort (append (phase-zero-names new-values)
+                            (phase-zero-names new-syntax)) symbol<?)
+              (sort (append '(stream-inspect stream-force-one)
+                            (phase-zero-names stock-values)
+                            (phase-zero-names stock-syntax)) symbol<?))
+(check-eq? new:stream-map stock:stream-map)
+(check-eq? new:stream-first stock:stream-first)
+(check-equal? (new:stream->list (new:stream-map add1 (new:stream 1 2 3))) '(2 3 4))
+(check-equal? (new:stream->list (new:stream* 1 2 (new:stream 3))) '(1 2 3))
+(check-equal? (new:stream->list (new:for/stream ([i (in-range 3)]) i)) '(0 1 2))
+
+;; Preserve the independent eager/lazy choices of the native constructor.
+(for ([mode '(lazy head tail both)])
+  (define heads 0)
+  (define tails 0)
+  (define (head) (set! heads (add1 heads)) 7)
+  (define (rest) (set! tails (add1 tails)) new:empty-stream)
+  (define source
+    (case mode
+      [(lazy) (new:stream-cons (head) (rest))]
+      [(head) (new:stream-cons #:eager (head) (rest))]
+      [(tail) (new:stream-cons (head) #:eager (rest))]
+      [(both) (new:stream-cons #:eager (head) #:eager (rest))]))
+  (check-equal? heads (if (memq mode '(head both)) 1 0))
+  (check-equal? tails (if (memq mode '(tail both)) 1 0))
+  (check-equal? (new:stream->list source) '(7))
+  (check-equal? (list heads tails) '(1 1)))

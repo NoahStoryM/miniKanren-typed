@@ -2,7 +2,7 @@
 
 ;; Experimental search streams. Values are ordinary racket/stream streams;
 ;; construction must go through this API to preserve scheduling boundaries.
-(require racket/stream/private/stream-api racket/stream/private/representation)
+(require experiments/search-stream/private/stream-api experiments/search-stream/private/representation)
 (provide stream-empty stream-unit stream-suspend stream-inspect
          stream-merge stream-bind stream-pull stream-take stream-take-all
          stream-trace stream-suspension? stream-force-one

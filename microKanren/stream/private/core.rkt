@@ -1,6 +1,6 @@
 #lang racket/base
 
-(require racket/stream/private/stream-api "terms.rkt")
+(require experiments/search-stream/private/stream-api "terms.rkt")
 (provide (struct-out kanren) make-microkanren)
 
 (struct kanren (streams == call/fresh disj conj delay-goal) #:transparent)

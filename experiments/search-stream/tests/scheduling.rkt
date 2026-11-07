@@ -7,9 +7,9 @@
                   empty-state take var? var-c))
 
 (require rackunit racket/match racket/promise racket/stream
-         racket/stream/private/stream-api racket/stream/private/representation
+         experiments/search-stream/private/stream-api experiments/search-stream/private/representation
          microKanren/stream/private/core microKanren/stream/tests/workloads
-         (prefix-in native: racket/stream/private/representation)
+         (prefix-in native: experiments/search-stream/private/representation)
          (prefix-in term: microKanren/stream/private/terms)
          (prefix-in syntax: microKanren/stream)
          (prefix-in ref: (submod "." reference)))

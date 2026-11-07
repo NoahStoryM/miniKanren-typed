@@ -1,7 +1,7 @@
 #lang racket/base
 
 (require rackunit racket/match racket/promise racket/stream
-         (prefix-in search: racket/stream/search))
+         (prefix-in search: experiments/search-stream/main))
 
 (define calls 0)
 (define source

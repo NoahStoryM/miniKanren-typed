@@ -1,11 +1,12 @@
 # Two-state native-stream experiment (Racket 9.3 CS)
 
-Entry point: `(require racket/stream/two-state)`.
+Historical benchmark snapshot. Use `(require "two-state.rkt")` from this
+directory to reproduce it; the focused extension is now `racket/stream/main`.
 
 This is an isolated primitive fork for studying extensions to Racket itself.
 It does not install a patch into the running Racket distribution or replace
-`racket/stream/search`. It copies the Racket 9.3 primitive source (including its
-license) to `../private/two-state-cons.rkt`; the facade reuses stock generic
+`experiments/search-stream/main`. It copies the Racket 9.3 primitive source (including its
+license) to `private/two-state-cons.rkt`; the facade reuses stock generic
 consumers and derived operations. Racket's stock empty-stream is recognized.
 
 ## Change
@@ -46,10 +47,10 @@ table was added to the stock forcing path.
 From repository root, compile first, then run sequentially:
 
 ```sh
-raco make racket/stream/benchmarks/main.rkt racket/stream/benchmarks/steps.rkt
-python racket/stream/benchmarks/run.py /path/to/racket
-racket racket/stream/benchmarks/steps.rkt
-raco test racket/stream/tests/two-state.rkt
+raco make experiments/stream-benchmarks/main.rkt experiments/stream-benchmarks/steps.rkt
+python experiments/stream-benchmarks/run.py /path/to/racket
+racket experiments/stream-benchmarks/steps.rkt
+raco test racket/stream/tests/main.rkt
 ```
 
 Each stock/fork workload uses a fresh process, small and full warmups, seven
@@ -90,7 +91,7 @@ experiment; it does not yet evaluate microKanren scheduling on the new API.
 The successful `stream-force-one` path now compresses already-cached links
 from its input to the direct result of its one new evaluation (or the existing
 endpoint if nothing remains to evaluate). It does not add node fields or change
-normal `stream-force`. The prefix is traversed twice, using constant auxiliary
+normal `stream-force`. The snapshot prefix is traversed twice, using constant auxiliary
 space without a temporary list. A cursor that starts on a pending node has no
 cached prefix to rewrite. The inspection operation stays read-only.
 
@@ -102,7 +103,7 @@ above 20k for the old-root pattern are run only on the candidate to avoid the
 baseline's quadratic runtime. Run from repository root:
 
 ```sh
-python racket/stream/benchmarks/compression.py /path/to/racket
+python experiments/stream-benchmarks/compression.py /path/to/racket
 ```
 
 CPU medians on Racket 9.3 CS (raw data in
@@ -126,3 +127,6 @@ workload, not a universal complexity guarantee for arbitrary sharing/cycle
 checks. There are now 1,753 passing correctness checks, including repeated old
 roots, exact evaluation counts, retained intermediate aliases, and compression
 of a long prefix created by cursor advancement.
+
+These saved measurements describe the full copied primitive snapshot here, not
+new timings of the private-definition-reusing `racket/stream/main` adapter.

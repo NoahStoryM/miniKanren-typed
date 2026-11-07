@@ -5,7 +5,7 @@
   (include "workloads.rktl"))
 
 (module fork racket/base
-  (require racket/include "../two-state.rkt")
+  (require racket/include "two-state.rkt")
   (include "workloads.rktl"))
 
 (require json racket/match

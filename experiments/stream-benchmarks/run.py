@@ -2,7 +2,7 @@
 """Run sequential fresh-process comparisons; write metadata and raw samples.
 
 From repository root:
-  python racket/stream/benchmarks/run.py /path/to/racket
+  python experiments/stream-benchmarks/run.py /path/to/racket
 Compile benchmarks/main.rkt first to exclude source compilation.
 """
 import hashlib
@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-REPO = HERE.parents[2]
+REPO = HERE.parents[1]
 RACKET = Path(sys.argv[1]).resolve()
 CASES = [
     ("eager", 1_000_000),
@@ -34,7 +34,7 @@ report = {
     "rounds": 7,
     "method": "Sequential fresh processes; small and full warmups; medians of seven samples; full GC between samples. Memory is retained managed-heap delta after full GC with source retained, not peak RSS.",
     "fork_sha256": hashlib.sha256(
-        (HERE.parent / "private/two-state-cons.rkt").read_bytes()
+        (HERE / "private/two-state-cons.rkt").read_bytes()
     ).hexdigest(),
     "stock_source_sha256": hashlib.sha256(
         (RACKET.parent.parent / "collects/racket/private/stream-cons.rkt").read_bytes()
