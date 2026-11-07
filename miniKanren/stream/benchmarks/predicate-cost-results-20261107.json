@@ -1,0 +1,25 @@
+{
+  "version": "9.3 CS",
+  "calls_per_sample": 100000,
+  "ground_list_length": 12,
+  "generated_cpu_ms": [
+    946,
+    914,
+    899,
+    951,
+    911,
+    977,
+    921
+  ],
+  "manual_cpu_ms": [
+    9,
+    7,
+    7,
+    8,
+    8,
+    7,
+    7
+  ],
+  "generated_median_cpu_ms": 921,
+  "manual_median_cpu_ms": 7
+}
