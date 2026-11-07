@@ -152,3 +152,51 @@ PLTCOLLECTS="$PWD:" python3 miniKanren/stream/benchmarks/ablation.py \
   --library-variant stream-local=/path/to/local-scope-checkout \
   --output local-scope-local.json
 ```
+
+## Fuse cached traversal and single-step dispatch (2026-11-08)
+
+The current PR #19 head, `d05d40715dacf025f66ed59bdef1a6143ee95293`, combines
+the local endpoint walk and forcing cond into one tail loop. Its first branch
+recognizes a plain local delayed node and reads creator-if-unforced once:
+#f follows the cached link; a non-#f marker enters the existing forcing body.
+The loop retains the original source for prefix compression and error reporting,
+and uses the current s for cycle detection. All forcing guards remain intact.
+This is the requested single-argument loop, not the earlier two-argument
+root-carrying experimental force.patch.
+
+`dispatch-candidates/force-loop.patch` applies to the preceding scope-only
+commit `67181269c1134c0cbb2e18247949b9737e913591`. All 833 stream assertions
+and 1284 Kanren assertions pass again with the fused version (2117 total).
+
+`force-loop-results-20261108.json` compares that preceding version with the
+fused version on both editions' branching workload: 1000 fresh queries,
+128000 answers per sample, three independent processes, five samples each.
+Compiling, loading, and type checking are excluded; CPU includes GC. Per-process
+CPU medians in ms:
+
+| Edition | Process | Before fusion | Fused |
+| --- | ---: | ---: | ---: |
+| TRS1 | 1 | 182 | 160 |
+| TRS1 | 2 | 177 | 184 |
+| TRS1 | 3 | 192 | 185 |
+| TRS2 | 1 | 251 | 243 |
+| TRS2 | 2 | 247 | 240 |
+| TRS2 | 3 | 251 | 243 |
+
+The median of process medians is 182 → 184 ms for TRS1 and 251 → 243 ms
+for TRS2. TRS1 is approximately unchanged, with variation in both directions;
+TRS2 improves by about 3% in this run. This is primarily a structural cleanup,
+not evidence of a universal speedup. It does not remeasure the earlier full
+six-case matrix against the final head. All 120 samples, including checked TR
+and no-check controls, have matching counts and preview answers.
+
+Reproduce with before/after worktrees of the two commits above:
+
+```sh
+PLTCOLLECTS="$PWD:" python3 miniKanren/stream/benchmarks/ablation.py \
+  "$(command -v racket)" --workloads branching --processes 3 --rounds 5 \
+  --variants stream-before stream-fused \
+  --library-variant stream-before=/path/to/before-fusion-checkout \
+  --library-variant stream-fused=/path/to/fused-checkout \
+  --output force-loop-local.json
+```
