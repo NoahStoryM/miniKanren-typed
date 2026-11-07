@@ -14,6 +14,10 @@
                   stream-cons
                   stream-lazy
                   stream-force
+                  stream-peek
+                  stream-peek-first
+                  stream-peek-rest
+                  stream-force-once
                   unpack-multivalue
                   thunk->multivalue)
          racket/private/generic-methods
@@ -34,6 +38,10 @@
          in-stream
          stream-lazy
          stream-force
+         stream-peek
+         stream-peek-first
+         stream-peek-rest
+         stream-force-once
 
          stream
          stream*

@@ -35,7 +35,8 @@
 
 (require (prefix-in for: racket/private/for))
 
-(provide stream-null stream-cons stream? stream-null? stream-pair?
+(provide stream-peek stream-peek-first stream-peek-rest stream-force-once
+         stream-null stream-cons stream? stream-null? stream-pair?
          stream-car stream-cdr stream-lambda stream-lazy stream-force
          unpack-multivalue thunk->multivalue)
 
@@ -84,10 +85,13 @@
        (cond
          [(not (lazily-created-stream-creator-if-unforced s))
           (define v (lazily-created-stream-thunk-or-stream s))
-          (for ([dep-s (in-list dep-ses)])
-            (set-lazily-created-stream-creator-if-unforced! dep-s #f)
-            (set-lazily-created-stream-thunk-or-stream! dep-s v))
-          v]
+          (if (lazily-created-stream? v)
+              (loop v (cons s dep-ses))
+              (begin
+                (for ([dep-s (in-list dep-ses)])
+                  (set-lazily-created-stream-creator-if-unforced! dep-s #f)
+                  (set-lazily-created-stream-thunk-or-stream! dep-s v))
+                v))]
          [else
           (define thunk (lazily-created-stream-thunk-or-stream s))
           (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
@@ -187,3 +191,98 @@
         (for:stream-rest v))))
 
 (define stream-null (lazily-created-stream #f '()))
+
+
+;; One cached link, not transitive normalization. #f means no exposed cache;
+;; non-delayed streams are already values and are returned unchanged.
+(define (stream-peek source)
+  (cond
+    [(and (impersonator? source) (for:stream? source)) #f]
+    [(lazily-created-stream? source)
+     (and (not (lazily-created-stream-creator-if-unforced source))
+          (lazily-created-stream-thunk-or-stream source))]
+    [(eagerly-created-stream? source) source]
+    [(for:stream? source) source]
+    [else (raise-argument-error 'stream-peek "stream?" source)]))
+
+;; A list represents all cached values, including zero values and a #f value.
+;; #f represents absence of a readable head (empty, pending, or opaque).
+(define (stream-peek-first s)
+  (cond
+    [(eagerly-created-stream? s)
+     (and (not (impersonator? s))
+          (eagerly-created-stream-first-forced? s)
+          (let ([v (eagerly-created-stream-first s)])
+            (if (multivalue? v) (multivalue-content v) (list v))))]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-first (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (list (car s))]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-peek-first "stream?" s)]))
+
+;; A known cons node already stores a tail stream object. Returning that object
+;; does not evaluate the rest expression: the object can still be delayed.
+(define (stream-peek-rest s)
+  (cond
+    [(eagerly-created-stream? s)
+     (and (not (impersonator? s)) (eagerly-created-stream-rest s))]
+    [(lazily-created-stream? s)
+     (and (not (impersonator? s))
+          (not (lazily-created-stream-creator-if-unforced s))
+          (stream-peek-rest (lazily-created-stream-thunk-or-stream s)))]
+    [(and (not (impersonator? s)) (pair? s) (list? s)) (cdr s)]
+    [(for:stream? s) #f]
+    [else (raise-argument-error 'stream-peek-rest "stream?" s)]))
+
+;; Compress the already-cached prefix in a second pass, without a visited list.
+(define (compress-cached-prefix! source stop target)
+  (let loop ([current source])
+    (when (and (not (eq? current stop))
+               (not (impersonator? current))
+               (lazily-created-stream? current)
+               (not (lazily-created-stream-creator-if-unforced current)))
+      (define next (lazily-created-stream-thunk-or-stream current))
+      (set-lazily-created-stream-thunk-or-stream! current target)
+      (loop next))))
+
+(define (stream-force-once source)
+  (let loop ([s source])
+    (cond
+      [(and (not (impersonator? s)) (lazily-created-stream? s))
+       (define who (lazily-created-stream-creator-if-unforced s))
+       (cond
+         [who
+          (define thunk (lazily-created-stream-thunk-or-stream s))
+          (set-lazily-created-stream-thunk-or-stream! s reentrant-error)
+          (define result (thunk))
+          (unless (for:stream? result)
+            (if (symbol? who)
+                (raise-arguments-error who "delayed expression produced a non-stream"
+                                       "result" result)
+                (raise-arguments-error* 'stream-cons 'racket/primitive
+                                        "rest expression produced a non-stream"
+                                        "rest result" result)))
+          ;; Existing cached edges are acyclic. A new edge cannot lead back to s.
+          (let check ([target result])
+            (cond
+              ;; Native nodes need identity checks; keep the general comparison
+              ;; for wrappers and foreign stream implementations.
+              [(or (eq? target s)
+                   (and (or (impersonator? target)
+                            (not (stream? target)))
+                        (impersonator-of? target s)))
+               (reentrant-error)]
+              [(and (lazily-created-stream? target)
+                    (not (lazily-created-stream-creator-if-unforced target)))
+               (check (lazily-created-stream-thunk-or-stream target))]))
+          (set-lazily-created-stream-thunk-or-stream! s result)
+          (set-lazily-created-stream-creator-if-unforced! s #f)
+          (compress-cached-prefix! source s result)
+          result]
+         [else (loop (lazily-created-stream-thunk-or-stream s))])]
+      [(or (eagerly-created-stream? s) (for:stream? s))
+       (compress-cached-prefix! source s s)
+       s]
+      [else (raise-argument-error 'stream-force-once "stream?" source)])))
