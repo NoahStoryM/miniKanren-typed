@@ -1,0 +1,12 @@
+#lang typed/racket/no-check
+(require miniKanren/stream-pause/trs1)
+(define (ao x) (conde [(== x 'a)] [else (ao x)]))
+(define (aoi x) (condi [(== x 'a)] [else (aoi x)]))
+(define (time-it name thk)
+  (thk) (collect-garbage) (collect-garbage)
+  (define t0 (current-process-milliseconds))
+  (define r (thk))
+  (printf "  ~a: ~a ms (~a)\n" name (- (current-process-milliseconds) t0) r))
+(printf "trs1 stream-pause\n")
+(time-it "answers 1e6 (conde)" (λ () (length (run 1000000 (q) (ao q)))))
+(time-it "answers 1e6 (condi)" (λ () (length (run 1000000 (q) (aoi q)))))

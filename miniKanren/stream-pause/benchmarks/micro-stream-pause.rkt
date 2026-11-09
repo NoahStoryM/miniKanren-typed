@@ -1,0 +1,10 @@
+#lang typed/racket/no-check
+(require microKanren/stream-pause)
+(define (ao x) (conde [(== x 'a)] [(ao x)]))
+(define (time-it name thk)
+  (thk) (collect-garbage) (collect-garbage)
+  (define t0 (current-process-milliseconds))
+  (define r (thk))
+  (printf "  ~a: ~a ms (~a)\n" name (- (current-process-milliseconds) t0) r))
+(printf "micro stream-pause\n")
+(time-it "answers 1e6" (λ () (length (run 1000000 (q) (ao q)))))

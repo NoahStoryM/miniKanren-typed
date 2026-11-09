@@ -1,0 +1,12 @@
+#lang typed/racket
+(require typed/microKanren)
+(: ao (→ Term Goal))
+(define (ao x) (conde [(== x 'a)] [(ao x)]))
+(: time-it (→ String (→ Any) Void))
+(define (time-it name thk)
+  (thk) (collect-garbage) (collect-garbage)
+  (define t0 (current-process-milliseconds))
+  (define r (thk))
+  (printf "  ~a: ~a ms (~a)\n" name (- (current-process-milliseconds) t0) r))
+(printf "micro original (typed)\n")
+(time-it "answers 1e6" (λ () (length (run 1000000 (q) (ao q)))))
