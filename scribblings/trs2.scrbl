@@ -50,6 +50,13 @@ the value is ground, which cannot create a cycle.  This does not change
 the results; it lets the type of @racket[ext-s] say that such an
 extension always succeeds.}
 
+@item{@bold{Stream operations.}  The representation of streams is the
+book's, but the code of Chapter 10 reaches it only through a few
+operations (@racket[stream-first], @racket[stream-rest],
+@racket[stream-cons], and so on; see @secref["trs2-streams"]), which
+read a suspension as an element @racket[pause].  Each function keeps
+the cases and the recursion of the book.}
+
 ]
 
 Throughout this section, ``Chapter @italic{n}'' refers to the second
@@ -100,6 +107,11 @@ tagging is needed to tell them apart in Typed Racket.  An immature
 stream need not be preceded by an answer: a computation can give up
 control before it has produced anything.  This is what lets
 @racket[conde] switch away from a branch that never produces an answer.
+
+Read element by element, a suspension is a @racket[pause] followed by
+the stream it produces, so a stream is a lazy list of
+@racket[(Maybe a)]: of answers and pauses.  The operations of
+@secref["trs2-streams"] present it in these terms.
 }
 
 @deftype[Goal]{
@@ -171,13 +183,12 @@ arguments.  For plain arguments, it expands to
 @racketblock[
 (define (name [x : Term] ...) : Goal
   (λ (s)
-    (λ ()
-      ((conj goal ...) s))))
+    (stream-lazy ((conj goal ...) s))))
 ]
 
 so the types of the relation are supplied by @racket[defrel] itself.
-The inner @racket[(λ () ...)] is the @racket[Suspension] that makes the
-stream immature; this is the only place where the language suspends a
+The @racket[stream-lazy], which is the book's @racket[(λ () ...)], is
+the @racket[Suspension] that makes the stream immature; this is the only place where the language suspends a
 computation, and therefore the only place where @racket[conde]
 switches between branches.  (Chapter 1; implemented in the appendix.)
 
@@ -318,11 +329,87 @@ function that @racket[run] maps over the substitutions it obtains.
 
 @section[#:tag "trs2-streams"]{Streams}
 
-These are the stream operations of Chapter 10.  They are polymorphic in
-the type of answers, and together they form the stream monad: a single
-answer @racket[(list a)] is the unit, @racket['()] is zero,
-@racket[append-inf] is the sum, and @racket[append-map-inf] is the
-bind.
+The first four subsections read a stream as a lazy list of answers and
+pauses; their definitions are the only code that knows how
+@racket[Streamof] is represented.  The last one is the stream
+operations of Chapter 10, written with them.
+
+@subsection[#:tag "trs2-pauses"]{Pauses}
+
+@deftogether[(@deftype[Pause]
+              @defthing[pause Pause]
+              @defproc[(pause? [v Any]) Boolean]
+              @deftypeconstr[(Maybe a)])]{
+@racket[pause] is the only value of @racket[Pause], the element that
+stands for a suspension.  @racket[(Maybe a)] is defined as
+@racket[(∪ Pause a)]: an element of a stream of @racket[a]s.  It is a
+union rather than a tagged sum, so the answers themselves must not be
+pauses; for answer types that exclude @racket[Pause], such as
+@racket[Substitution], Typed Racket checks this.
+}
+
+@subsection[#:tag "trs2-stream-constructors"]{Constructing Streams}
+
+@deftogether[(@defthing[empty-stream Null]
+              @defform[(stream a ...)]
+              @defform*[#:literals (pause)
+                        [(stream-cons a d)
+                         (stream-cons pause d)]]
+              @defform[(stream-lazy d)])]{
+@racket[empty-stream] is the empty stream @racket['()], and
+@racket[(stream a ...)] is the mature stream of the answers
+@racket[a ...].  @racket[(stream-cons a d)] is the answer @racket[a]
+followed by the stream @racket[d], that is, @racket[(cons a d)].
+@racket[(stream-cons pause d)], written with the identifier
+@racket[pause] itself, is a pause followed by @racket[d], that is, the
+suspension @racket[(λ () d)]: @racket[d] is evaluated only when the
+suspension is forced.  @racket[(stream-lazy d)] is
+@racket[(stream-cons pause d)].
+}
+
+@subsection[#:tag "trs2-stream-observers"]{Reading Streams}
+
+@deftogether[(@defproc[(stream-empty? [s-inf (Streamof a)]) Boolean]
+              @defproc*[([(stream-first [s-inf (Pair a (Streamof a))]) a]
+                         [(stream-first [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
+                          (Maybe a)])]
+              @defproc[(stream-rest [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
+                       (Streamof a)])]{
+@racket[stream-empty?] recognizes @racket[empty-stream].  The first
+element of a mature stream is its answer and the rest is the stream
+after it; the first element of an immature stream is @racket[pause]
+and the rest is the stream produced by calling the suspension.  So
+@racket[stream-rest] forces a suspension, and calling it twice on the
+same suspension computes the rest twice; the operations of this
+section call it once.
+
+@mk-examples[
+(define s-inf (stream-lazy (begin (displayln "forced") (stream 1))))
+(stream-first s-inf)
+(stream-rest s-inf)
+]
+}
+
+@subsection[#:tag "trs2-stream-forcing"]{Forcing Streams}
+
+@defproc[(stream-force [s-inf (Streamof a)]) (∪ Null (Pair a (Streamof a)))]{
+Skips the pauses at the front of @racket[s-inf], forcing its
+suspensions until the stream is empty or mature.  It does not return
+if every element from some point on is a pause.  The operations of
+Chapter 10 do not use it: where they meet a pause, they return a new
+pause instead, so that another stream can run in the meantime.
+
+@mk-examples[
+(stream-force (stream-lazy (stream-lazy (stream 'a))))
+]
+}
+
+@subsection[#:tag "trs2-stream-operations"]{Stream Operations of Chapter 10}
+
+They are polymorphic in the type of answers, and together they form
+the stream monad: a single answer @racket[(stream a)] is the unit,
+@racket[empty-stream] is zero, @racket[append-inf] is the sum, and
+@racket[append-map-inf] is the bind.
 
 @defproc[(append-inf [s-inf (Streamof a)] [t-inf (Streamof a)])
          (Streamof a)]{
@@ -332,7 +419,7 @@ and the rest of @racket[s-inf] second: the swap is what makes the
 search interleave.  (Chapter 10.)
 
 @mk-examples[
-(take-inf #f (append-inf (λ () (list 1 2)) (list 3 4)))
+(take-inf #f (append-inf (stream-lazy (stream 1 2)) (stream 3 4)))
 ]
 }
 
@@ -350,6 +437,6 @@ when @racket[n] is @racket[#f]), calling suspensions as needed.
 (Chapter 10.)
 
 @mk-examples[
-(take-inf 3 (append-inf (list 'a) (λ () (list 'b 'c 'd))))
+(take-inf 3 (append-inf (stream 'a) (stream-lazy (stream 'b 'c))))
 ]
 }

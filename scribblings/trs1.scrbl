@@ -39,10 +39,17 @@ The differences from the first edition are:
 
 @item{@bold{Stream representation.}  The book uses @racket[#f] for
 the empty stream and the answer itself for exactly one answer.  Here
-the empty stream is @racket['()] and a single answer is wrapped in an
-immutable box to support arbitrary answer types.  This preserves the
+the empty stream is @racket['()] and a stream of exactly one answer is
+a one-element list, which supports arbitrary answer types.  This preserves the
 book's suspension points and search strategies.  See @racket[Streamof]
-for the two representations and the book's restrictions on answers.}
+for the two representations and the book's restrictions on answers.
+Streams are accessed only through a small set of operations
+(@racket[stream-first], @racket[stream-rest], and so on; see
+@secref["trs1-streams"]).  The book's @racket[case∞] is defined in
+terms of them, and its @tt{mzero}, @tt{unit}, and @tt{choice} are
+written @racket[empty-stream], @racket[(stream a)], and
+@racket[(stream-cons a e)], where @racket[e] is the rest itself rather
+than a thunk that produces it.}
 
 @item{@bold{Occurs check.}  The book's @racket[ext-s] never checks
 for circularity; a separate checked variant is introduced in Chapter 9.
@@ -113,16 +120,17 @@ The types of lazy streams of answers and their suspensions, defined as:
 
 @racketblock[
 (define-type (Streamof a)
-  (∪ Null (Boxof a) (Pair a (Suspension a))))
+  (∪ Null (Pair a (∪ Null (Suspension a)))))
 (define-type (Suspension a)
   (→ (Streamof a)))
 ]
 
-A stream is empty (@racket[Null]), contains exactly one answer wrapped
-in an immutable box (@racket[Boxof]), or contains one answer paired
-with a suspension that produces the rest.  The three cases correspond
-to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
-is a thunk that produces a stream when called.
+A stream is empty (@racket[Null]), or an answer followed by its rest.
+The rest is either known to be empty, so that the stream is the
+one-element list @racket[(list a)], or a suspension that produces the
+rest when called.  The three cases are built by
+@racket[empty-stream], @racket[stream], and @racket[stream-cons].  A
+suspension is a thunk that produces a stream when called.
 
 The book uses a different representation: @racket[#f] for the empty
 stream, the answer itself for exactly one answer, and an answer paired
@@ -138,10 +146,16 @@ The book requires that an answer be neither @racket[#f] nor a pair
 whose @racket[cdr] is a procedure, so that the three cases do not
 overlap.  Substitutions satisfy this restriction.
 
-The boxed @racket[Streamof] defined above has no such restriction:
-@racket[unit] wraps each answer in an immutable box, so Typed Racket
-can distinguish the three stream cases for any answer type without
-inspecting the answers.
+The @racket[Streamof] defined above has no such restriction: the
+three cases are told apart by @racket[null?] on the stream and on its
+@racket[cdr], so Typed Racket can distinguish them for any answer type
+without inspecting the answers.
+
+Read element by element, a stream is a list whose answers are all
+computed when they are reached and whose rest is delayed: the rest of a
+@racket[stream-cons] is produced by a suspension, and only a
+@racket[(stream a)] is known to end without calling one.  The operations of
+@secref["trs1-streams"] present it in exactly these terms.
 }
 
 @deftype[Goal]{
@@ -384,9 +398,55 @@ with the result of @racket[(reify-s v empty-s)].
 
 @section[#:tag "trs1-streams"]{Streams}
 
-These are the operators of the appendix ``Connecting the Wires''.
-They are exported so that goals can be written and examined at the
-level of streams.
+The operators of the appendix ``Connecting the Wires'' are written
+here with a few stream operations, which are the only code that knows
+how @racket[Streamof] is represented: the book's @tt{mzero},
+@tt{unit}, and @tt{choice} become @racket[empty-stream],
+@racket[(stream a)], and @racket[(stream-cons a e)], and its
+@racket[case∞] is defined with them.  A reader who wonders what
+@racket[case∞] does with a stream can read it off its definition below.
+Everything is exported so that goals can be written and examined at
+the level of streams.
+
+@subsection[#:tag "trs1-stream-constructors"]{Constructing Streams}
+
+@deftogether[(@defthing[empty-stream Null]
+              @defform[(stream a ...)]
+              @defform[(stream-cons a d)])]{
+@racket[empty-stream] is the empty stream @racket['()], the book's
+@tt{mzero}.  @racket[(stream a ...)] is the stream of the answers
+@racket[a ...]; @racket[(stream a)], the book's @tt{unit}, is known to
+end after @racket[a].  @racket[(stream-cons a d)] is @racket[a]
+followed by the stream @racket[d], which is evaluated only when the
+rest is asked for; the book's @tt{(choice a f)} is
+@racket[(stream-cons a (f))].
+}
+
+@subsection[#:tag "trs1-stream-observers"]{Reading Streams}
+
+@deftogether[(@defproc[(stream-empty? [a∞ (Streamof a)]) Boolean]
+              @defproc[(stream-singleton? [a∞ (Pair a (∪ Null (Suspension a)))]) Boolean]
+              @defproc[(stream-first [a∞ (Pair a (∪ Null (Suspension a)))]) a]
+              @defproc[(stream-rest [a∞ (Pair a (∪ Null (Suspension a)))])
+                       (Streamof a)])]{
+@racket[stream-empty?] recognizes @racket[empty-stream], and
+@racket[stream-singleton?] a nonempty stream known to end after its
+first answer, without forcing anything.  @racket[stream-first] returns
+the first answer of a nonempty stream, which is always already
+computed.  @racket[stream-rest] returns the rest:
+@racket[empty-stream] after a single answer, and otherwise the stream
+produced by calling the suspension.
+
+@mk-examples[
+(define a∞ (stream-cons 1 (begin (displayln "rest") (stream 2))))
+(stream-first a∞)
+(stream-singleton? a∞)
+(stream-rest a∞)
+(stream-singleton? (stream 2))
+]
+}
+
+@subsection[#:tag "trs1-case-inf"]{Lambdas and @racket[case∞]}
 
 @deftogether[(@defform[(λG (s) body ...+)]
               @defform[#:literals (:) (λF : a body ...+)])]{
@@ -395,22 +455,37 @@ level of streams.
 @racket[(Suspension a)], used to suspend the rest of a stream.
 }
 
-@deftogether[(@defform[(mzero)]
-              @defform[(unit a)]
-              @defform[(choice a f)])]{
-Constructors for the three cases of @racket[Streamof]: the empty
-stream, the stream of exactly @racket[a], and the stream of
-@racket[a] followed by the stream produced by the thunk @racket[f].
-}
-
 @defform[#:id case∞
          (case∞ e
            [() on-zero]
            [(a) on-one]
            [(a f) on-choice])]{
 Evaluates @racket[e] to a stream and dispatches on its shape, binding
-the single answer, or the first answer and the suspended rest.
+the single answer, or the first answer and the suspended rest.  It is
+defined as
+
+@racketblock[
+(let ([a∞ e])
+  (cond
+    [(stream-empty? a∞) on-zero]
+    [(stream-singleton? a∞)
+     (define a (stream-first a∞))
+     on-one]
+    [else
+     (define a (stream-first a∞))
+     (define (f) (stream-rest a∞))
+     on-choice]))
+]
+
+so @racket[f] is a suspension that, when called, produces the rest of
+the stream.  The single answer is told apart with
+@racket[stream-singleton?] rather than by looking at
+@racket[(stream-rest a∞)], because that would force the rest at once:
+then a branch that never produces an answer could hold back the
+answers before it.
 }
+
+@subsection[#:tag "trs1-appendix"]{The Operators of the Appendix}
 
 @defproc[(map∞ [n (Option Integer)] [p (→ a b)] [a∞ (Streamof a)])
          (Listof b)]{
@@ -431,7 +506,7 @@ the stream as needed.  This is what @racket[run] uses.
 @racket[mplus] appends the stream produced by @racket[f] after
 @racket[a∞]; @racket[bind] applies @racket[g] to every answer of
 @racket[a∞] and combines the results with @racket[mplus].  Together
-with @racket[unit] and @racket[mzero] they form the stream monad on
+with @racket[stream] and @racket[empty-stream] they form the stream monad on
 which @racket[conde] and @racket[all] are built.
 }
 

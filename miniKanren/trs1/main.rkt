@@ -18,8 +18,6 @@
 (define-type Data (∪ Literal (Pair Data Data)))
 (define-type Term (∪ Literal Var (Pair Term Term)))
 (define-type Substitution (Listof (Pair Var Term)))
-(define-type (Streamof a) (∪ Null (Boxof a) (Pair a (Suspension a))))
-(define-type (Suspension a) (→ (Streamof a)))
 (define-type Goal (→ Substitution (Streamof Substitution)))
 
 (struct var ([name : Symbol])
@@ -116,6 +114,62 @@
         '())))
 (define-syntax-rule (run* (x) g* ...) (run #f (x) g* ...))
 
+;;; Streams
+
+;; A stream is empty, or an answer followed by the rest of the stream.
+;; The rest is either known to be empty, or a suspension that produces
+;; it when called.  So a stream with exactly one answer is (list a), and
+;; the three cases are told apart by null? on the stream and on its cdr,
+;; neither of which looks at the answers.
+(define-type (Streamof a) (∪ Null (Pair a (∪ Null (Suspension a)))))
+(define-type (Suspension a) (→ (Streamof a)))
+
+;; A stream is accessed only through the following operations; this is
+;; the only code that knows how the three cases of Streamof are
+;; represented.  An answer is always mature: what is delayed is the rest
+;; of the stream, including whether there is any rest at all.
+;;
+;;   empty-stream      the empty stream
+;;   (stream a ...)    the stream of the answers a ...; (stream a) is
+;;                     known to end after a
+;;   (stream-cons a d) a followed by the stream d, which is evaluated
+;;                     only when the rest is asked for
+;;   stream-empty?     whether a stream is empty
+;;   stream-singleton? whether a nonempty stream is known to end after
+;;                     its first answer, without forcing anything
+;;   stream-first      the first answer of a nonempty stream
+;;   stream-rest       the rest of a nonempty stream, forcing the
+;;                     suspension if there is one
+
+(: empty-stream Null)
+(define empty-stream '())
+(define stream-empty? null?)
+
+(: stream-singleton? (∀ (a) (→ (Pair a (∪ Null (Suspension a))) Boolean)))
+(: stream-first      (∀ (a) (→ (Pair a (∪ Null (Suspension a))) a)))
+(: stream-rest       (∀ (a) (→ (Pair a (∪ Null (Suspension a))) (Streamof a))))
+(define (stream-singleton? a∞) (null? (cdr a∞)))
+(define (stream-first a∞) (car a∞))
+(define (stream-rest a∞)
+  (define f (cdr a∞))
+  (if (null? f) empty-stream (f)))
+
+(define-syntax stream
+  (syntax-rules ()
+    [(_) empty-stream]
+    [(_ a) (list a)]
+    [(_ a b ...) (stream-cons a (stream b ...))]))
+(define-syntax-rule (stream-cons a d) (cons a (λ () d)))
+
+
+;;; The book's case∞, in terms of the operations above
+;;
+;; It dispatches on the three cases without forcing anything: f is a
+;; suspension that produces the rest when called.  (Looking at
+;; (stream-rest a∞) to tell one answer from more would force the rest at
+;; once, and then a branch that never answers could block the answers
+;; before it.)
+
 (define-syntax-rule
   (case∞ e
     [() on-zero]
@@ -123,18 +177,15 @@
     [(a f) on-choice])
   (let ([a∞ e])
     (cond
-      [(null? a∞)
+      [(stream-empty? a∞)
        on-zero]
-      [(box? a∞)
-       (let ([a^ (unbox a∞)])
-         on-one)]
+      [(stream-singleton? a∞)
+       (define a^ (stream-first a∞))
+       on-one]
       [else
-       (let ([a (car a∞)] [f (cdr a∞)])
-         on-choice)])))
-
-(define-syntax-rule (mzero) '())
-(define-syntax-rule (unit a) (box-immutable a))
-(define-syntax-rule (choice a f) (cons a f))
+       (define a (stream-first a∞))
+       (define (f) (stream-rest a∞))
+       on-choice])))
 
 (: map∞ (∀ (a b) (→ (Option Integer) (→ a b) (Streamof a) (Listof b))))
 (define (map∞ n p a∞)
@@ -149,8 +200,8 @@
         [(> n 1) (map∞ (sub1 n) p (f))]
         [else '()]))]))
 
-(define succeed (λG (s) (unit s)))
-(define fail (λG (s) (mzero)))
+(define succeed (λG (s) (stream s)))
+(define fail (λG (s) empty-stream))
 
 (: == (→ Term Term Goal))
 (define (== v w)
@@ -193,13 +244,13 @@
 (define (mplus a∞ f)
   (case∞ a∞
     [() (f)]
-    [(a) (choice a f)]
-    [(a f0) (choice a (λF : a (mplus (f0) f)))]))
+    [(a) (stream-cons a (f))]
+    [(a f0) (stream-cons a (mplus (f0) f))]))
 
 (: bind (∀ (a) (→ (Streamof a) (→ a (Streamof a)) (Streamof a))))
 (define (bind a∞ g)
   (case∞ a∞
-    [() (mzero)]
+    [() empty-stream]
     [(a) (g a)]
     [(a f) (mplus (g a) (λF : a (bind (f) g)))]))
 
@@ -207,13 +258,13 @@
 (define (mplusi a∞ f)
   (case∞ a∞
     [() (f)]
-    [(a) (choice a f)]
-    [(a f0) (choice a (λF : a (mplusi (f) f0)))]))
+    [(a) (stream-cons a (f))]
+    [(a f0) (stream-cons a (mplusi (f) f0))]))
 
 (: bindi (∀ (a) (→ (Streamof a) (→ a (Streamof a)) (Streamof a))))
 (define (bindi a∞ g)
   (case∞ a∞
-    [() (mzero)]
+    [() empty-stream]
     [(a) (g a)]
     [(a f) (mplusi (g a) (λF : a (bindi (f) g)))]))
 

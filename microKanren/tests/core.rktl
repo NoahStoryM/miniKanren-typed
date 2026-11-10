@@ -24,7 +24,7 @@
 ;; "second-set t3, take"
 (check-equal?
   (let (($ (a-and-b empty-state)))
-    (take 1 $))
+    (stream-force-take $ 1))
   `((((,(var 1) . 5) (,(var 0) . 7)) . 2)))
 
 ;; "second-set t4"
@@ -42,20 +42,20 @@
 ;; "who cares"
 (check-equal?
   (let (($ ((call/fresh (λ (q) (fives q))) empty-state)))
-    (take 1 $))
+    (stream-force-take $ 1))
   `((((,(var 0) . 5)) . 1)))
 
 ;; "take 2 a-and-b stream"
 (check-equal?
   (let (($ (a-and-b empty-state)))
-    (take 2 $))
+    (stream-force-take $ 2))
   `((((,(var 1) . 5) (,(var 0) . 7)) . 2)
     (((,(var 1) . 6) (,(var 0) . 7)) . 2)))
 
 ;; "take-all a-and-b stream"
 (check-equal?
   (let (($ (a-and-b empty-state)))
-    (take-all $))
+    (stream->list $))
   `((((,(var 1) . 5) (,(var 0) . 7)) . 2)
     (((,(var 1) . 6) (,(var 0) . 7)) . 2)))
 
@@ -71,26 +71,26 @@
 
 ;; "appendo"
 (check-equal?
-  (take 2 (call-appendo empty-state))
+  (stream-force-take (call-appendo empty-state) 2)
   `((((,(var 0) ,(var 1) ,(var 2) ,(var 3)) (,(var 2) . ,(var 3)) (,(var 1))) . 4)
     (((,(var 0) ,(var 1) ,(var 2) ,(var 3)) (,(var 2) . ,(var 6)) (,(var 5)) (,(var 3) ,(var 4) . ,(var 6)) (,(var 1) ,(var 4) . ,(var 5))) . 7)))
 
 ;; "appendo2"
 (check-equal?
-  (take 2 (call-appendo2 empty-state))
+  (stream-force-take (call-appendo2 empty-state) 2)
   `((((,(var 0) ,(var 1) ,(var 2) ,(var 3)) (,(var 2) . ,(var 3)) (,(var 1))) . 4) (((,(var 0) ,(var 1) ,(var 2) ,(var 3)) (,(var 3) ,(var 4) . ,(var 6)) (,(var 2) . ,(var 6)) (,(var 5)) (,(var 1) ,(var 4) . ,(var 5))) . 7)))
 
 ;; "reify-1st across appendo"
 (check-equal?
-  (map reify-1st (take 2 (call-appendo empty-state)))
+  (map reify-1st (stream-force-take (call-appendo empty-state) 2))
   '((() _.0 _.0) ((_.0) _.1 (_.0 . _.1))))
 
 ;; "reify-1st across appendo2"
 (check-equal?
-  (map reify-1st (take 2 (call-appendo2 empty-state)))
+  (map reify-1st (stream-force-take (call-appendo2 empty-state) 2))
   '((() _.0 _.0) ((_.0) _.1 (_.0 . _.1))))
 
 ;; "many non-ans"
 (check-equal?
-  (take 1 (many-non-ans empty-state))
+  (stream-force-take (many-non-ans empty-state) 1)
   `((((,(var 0) . 3)) . 1)))

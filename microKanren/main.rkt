@@ -44,35 +44,130 @@
 (define-type (Streamof a) (∪ Null (Pair a (Streamof a)) (Suspension a)))
 (define-type (Suspension a) (→ (Streamof a)))
 
-(define-type Goal (→ State (Streamof State)))
+;; Read element by element, a stream is a lazy list whose elements are
+;; states or PAUSE: a suspension is a pause followed by the stream it
+;; produces.  So (Streamof a) is a lazy list of (Maybe a), and the
+;; operations below are the only code that knows how the three cases are
+;; represented:
+;;
+;;   empty-stream          the empty stream
+;;   (stream a ...)        the mature stream of the states a ...
+;;   (stream-cons a d)     the state a followed by the stream d
+;;   (stream-cons pause d) a pause followed by d: the suspension
+;;                         (λ () d), so d is evaluated only when forced
+;;   (stream-lazy d)       the same as (stream-cons pause d)
+;;   stream-empty?         whether a stream is empty
+;;   stream-first          the first element of a nonempty stream: a
+;;                         state, or pause for an immature stream
+;;   stream-rest           the rest of a nonempty stream, forcing the
+;;                         suspension of an immature one
+;;   (stream-take $ n)     the stream of the first n elements of $
+;;
+;; The following force pauses rather than return them:
+;;
+;;   stream-force          skips the pauses at the front of a stream, so
+;;                         that it is empty or mature (the paper's pull)
+;;   (stream-force-take $ n)
+;;                         the list of the first n states of $ (the
+;;                         paper's take)
+;;   stream->list          the list of all states of $ (the paper's
+;;                         take-all)
+;;
+;; Maybe is a union, not a tagged sum, so the states themselves must not
+;; be pauses.
+(struct Pause () #:type-name Pause)
+(define pause (Pause))
+(define-predicate pause? Pause)
+(define-type (Maybe a) (∪ Pause a))
 
-(: unit (∀ (a) (→ a (Streamof a))))
-(define (unit s/c) (cons s/c mzero))
+(: empty-stream Null)
+(define empty-stream '())
+(define stream-empty? null?)
 
-(: mzero Null)
-(define mzero '())
+;; The first element of a mature stream is always a state.
+(: stream-first (∀ (a) (case→ (→ (Pair a (Streamof a)) a)
+                              (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Maybe a)))))
+(: stream-rest  (∀ (a) (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Streamof a))))
+(define (stream-first $) (if (pair? $) (car $) pause))
+(define (stream-rest  $) (if (pair? $) (cdr $) ($)))
 
+(define-syntax stream-cons
+  (syntax-rules (pause)
+    [(_ pause $) (λ () $)]
+    [(_ a $) (cons a $)]))
+(define-syntax-rule (stream-lazy $) (stream-cons pause $))
+
+(define-syntax stream
+  (syntax-rules ()
+    [(_) empty-stream]
+    [(_ a b ...) (stream-cons a (stream b ...))]))
+
+(: stream-force (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
+(define (stream-force $)
+  (if (procedure? $) (stream-force ($)) $))
+
+(: stream-take (∀ (a) (→ (Streamof a) Natural (Streamof a))))
+(define (stream-take $ n)
+  (cond
+    [(zero? n) empty-stream]
+    [(stream-empty? $) empty-stream]
+    [else
+     (define a (stream-first $))
+     (if (pause? a)
+         (stream-lazy (stream-take (stream-rest $) (- n 1)))
+         (stream-cons a (stream-take (stream-rest $) (- n 1))))]))
+
+(: stream-force-take (∀ (a) (→ (Streamof a) Natural (Listof a))))
+(define (stream-force-take $ n)
+  (cond
+    [(zero? n) '()]
+    [else
+     (define $* (stream-force $))
+     (if (stream-empty? $*)
+         '()
+         (cons (stream-first $*) (stream-force-take (stream-rest $*) (- n 1))))]))
+
+(: stream->list (∀ (a) (→ (Streamof a) (Listof a))))
+(define (stream->list $)
+  (define $* (stream-force $))
+  (if (stream-empty? $*)
+      '()
+      (cons (stream-first $*) (stream->list (stream-rest $*)))))
+
+
+;;; The stream monad
+
+;; Swaps the two streams at each pause, which makes the search interleave.
 (: mplus (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (mplus $1 $2)
   (cond
-    [(null? $1) $2]
-    [(procedure? $1) (λ () (mplus $2 ($1)))]
-    [else (cons (car $1) (mplus (cdr $1) $2))]))
+    [(stream-empty? $1) $2]
+    [else
+     (define a (stream-first $1))
+     (if (pause? a)
+         (stream-lazy (mplus $2 (stream-rest $1)))
+         (stream-cons a (mplus (stream-rest $1) $2)))]))
 
 (: bind (∀ (a b) (→ (Streamof a) (→ a (Streamof b)) (Streamof b))))
 (define (bind $ g)
   (cond
-    [(null? $) mzero]
-    [(procedure? $) (λ () (bind ($) g))]
-    [else (mplus (g (car $)) (bind (cdr $) g))]))
+    [(stream-empty? $) empty-stream]
+    [else
+     (define a (stream-first $))
+     (if (pause? a)
+         (stream-lazy (bind (stream-rest $) g))
+         (mplus (g a) (bind (stream-rest $) g)))]))
 
 
 ;;; Goals
 
+;; A goal maps a state to the stream of states in which it holds.
+(define-type Goal (→ State (Streamof State)))
+
 (: == (→ Term Term Goal))
 (define ((== u v) s/c)
   (let ([s (unify u v (car s/c))])
-    (if s (unit (cons s (cdr s/c))) mzero)))
+    (if s (stream (cons s (cdr s/c))) empty-stream)))
 
 (: unify (→ Term Term Substitution (Option Substitution)))
 (define (unify u v s)
@@ -103,7 +198,7 @@
 ;; Inverse-η-delay: suspends the goal, so that a recursive relation
 ;; produces an immature stream instead of looping.
 (define-syntax-rule (Zzz g)
-  (λ ([s/c : State]) (λ () (g s/c))))
+  (λ ([s/c : State]) (stream-lazy (g s/c))))
 
 (define-syntax conj+
   (syntax-rules ()
@@ -127,33 +222,16 @@
   (disj+ (conj+ g0 g ...) ...))
 
 (define-syntax-rule (run n (x ...) g0 g ...)
-  (map reify-1st (take n (call/goal (fresh (x ...) g0 g ...)))))
+  (map reify-1st (stream-force-take (call/goal (fresh (x ...) g0 g ...)) n)))
 
 (define-syntax-rule (run* (x ...) g0 g ...)
-  (map reify-1st (take-all (call/goal (fresh (x ...) g0 g ...)))))
+  (map reify-1st (stream->list (call/goal (fresh (x ...) g0 g ...)))))
 
 (: empty-state State)
 (define empty-state (cons '() 0))
 
 (: call/goal (→ Goal (Streamof State)))
 (define (call/goal g) (g empty-state))
-
-;; Forces a stream until it is mature or empty.
-(: pull (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
-(define (pull $)
-  (if (procedure? $) (pull ($)) $))
-
-(: take-all (∀ (a) (→ (Streamof a) (Listof a))))
-(define (take-all $)
-  (let ([$ (pull $)])
-    (if (null? $) '() (cons (car $) (take-all (cdr $))))))
-
-(: take (∀ (a) (→ Natural (Streamof a) (Listof a))))
-(define (take n $)
-  (if (zero? n)
-      '()
-      (let ([$ (pull $)])
-        (if (null? $) '() (cons (car $) (take (- n 1) (cdr $)))))))
 
 ;; The value of the first variable, with its fresh variables reified.
 (: reify-1st (→ State Term))
