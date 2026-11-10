@@ -408,25 +408,34 @@ how @racket[Streamof] is represented: the book's @tt{mzero},
 Everything is exported so that goals can be written and examined at
 the level of streams.
 
+@subsection[#:tag "trs1-stream-constructors"]{Constructing Streams}
+
 @deftogether[(@defthing[empty-stream Null]
-              @defproc[(stream-empty? [a∞ (Streamof a)]) Boolean]
+              @defform[(stream a ...)]
+              @defform[(stream-cons a d)])]{
+@racket[empty-stream] is the empty stream @racket['()], the book's
+@tt{mzero}.  @racket[(stream a ...)] is the stream of the answers
+@racket[a ...]; @racket[(stream a)], the book's @tt{unit}, is known to
+end after @racket[a].  @racket[(stream-cons a d)] is @racket[a]
+followed by the stream @racket[d], which is evaluated only when the
+rest is asked for; the book's @tt{(choice a f)} is
+@racket[(stream-cons a (f))].
+}
+
+@subsection[#:tag "trs1-stream-observers"]{Reading Streams}
+
+@deftogether[(@defproc[(stream-empty? [a∞ (Streamof a)]) Boolean]
               @defproc[(stream-singleton? [a∞ (Pair a (∪ Null (Suspension a)))]) Boolean]
               @defproc[(stream-first [a∞ (Pair a (∪ Null (Suspension a)))]) a]
               @defproc[(stream-rest [a∞ (Pair a (∪ Null (Suspension a)))])
-                       (Streamof a)]
-              @defform[(stream a ...)]
-              @defform[(stream-cons a d)])]{
-@racket[empty-stream] is the empty stream @racket['()], and
-@racket[stream-empty?] recognizes it; @racket[stream-singleton?]
-recognizes a nonempty stream known to end after its first answer,
-without forcing anything.  @racket[stream-first] returns the
-first answer of a nonempty stream, which is always already computed.
-@racket[stream-rest] returns the rest: @racket[empty-stream] after a
-single answer, and otherwise the stream produced by calling the suspension.
-@racket[(stream a ...)] is the stream of the answers @racket[a ...];
-@racket[(stream a)] is known to end after @racket[a].  And
-@racket[(stream-cons a d)] is @racket[a] followed by the stream
-@racket[d], which is evaluated only when the rest is asked for.
+                       (Streamof a)])]{
+@racket[stream-empty?] recognizes @racket[empty-stream], and
+@racket[stream-singleton?] a nonempty stream known to end after its
+first answer, without forcing anything.  @racket[stream-first] returns
+the first answer of a nonempty stream, which is always already
+computed.  @racket[stream-rest] returns the rest:
+@racket[empty-stream] after a single answer, and otherwise the stream
+produced by calling the suspension.
 
 @mk-examples[
 (define a∞ (stream-cons 1 (begin (displayln "rest") (stream 2))))
@@ -436,6 +445,8 @@ single answer, and otherwise the stream produced by calling the suspension.
 (stream-singleton? (stream 2))
 ]
 }
+
+@subsection[#:tag "trs1-case-inf"]{Lambdas and @racket[case∞]}
 
 @deftogether[(@defform[(λG (s) body ...+)]
               @defform[#:literals (:) (λF : a body ...+)])]{
@@ -473,6 +484,8 @@ the stream.  The single answer is told apart with
 then a branch that never produces an answer could hold back the
 answers before it.
 }
+
+@subsection[#:tag "trs1-appendix"]{The Operators of the Appendix}
 
 @defproc[(map∞ [n (Option Integer)] [p (→ a b)] [a∞ (Streamof a)])
          (Listof b)]{

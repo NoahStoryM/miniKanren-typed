@@ -91,6 +91,24 @@ the stream it produces, so a stream is a lazy list of
 @racket[(Maybe a)].
 }
 
+@deftype[Goal]{
+Defined as @racket[(→ State (Streamof State))].
+
+@mk-examples[
+((== 1 1) empty-state)
+((call/fresh (λ (q) (== q 5))) empty-state)
+]
+}
+
+@section[#:tag "microKanren-streams"]{Streams}
+
+The definitions of this section are the only code that knows how
+@racket[Streamof] is represented.  They read a stream element by
+element, a suspension being the element @racket[pause]; the rest of the
+code, @racket[mplus] and @racket[bind] included, is written with them.
+
+@subsection[#:tag "microKanren-pauses"]{Pauses}
+
 @deftogether[(@deftype[Pause]
               @defthing[pause Pause]
               @defproc[(pause? [v Any]) Boolean]
@@ -101,33 +119,42 @@ stands for a suspension, and @racket[(Maybe a)] is defined as
 answers themselves must not be pauses.
 }
 
+@subsection[#:tag "microKanren-stream-constructors"]{Constructing Streams}
+
 @deftogether[(@defthing[empty-stream Null]
               @defform[(stream a ...)]
-              @defproc[(stream-empty? [$ (Streamof a)]) Boolean]
+              @defform*[#:literals (pause)
+                        [(stream-cons a d)
+                         (stream-cons pause d)]]
+              @defform[(stream-lazy d)])]{
+@racket[empty-stream] is @racket['()], the paper's @tt{mzero}, and
+@racket[(stream a ...)] is the mature stream of the states
+@racket[a ...], the paper's @tt{unit} when there is one.
+@racket[(stream-cons a d)] is @racket[(cons a d)], and
+@racket[(stream-cons pause d)], written with the identifier
+@racket[pause] itself, is the suspension @racket[(λ () d)]: @racket[d]
+is evaluated only when the suspension is forced.
+@racket[(stream-lazy d)] is @racket[(stream-cons pause d)].
+}
+
+@subsection[#:tag "microKanren-stream-observers"]{Reading Streams}
+
+@deftogether[(@defproc[(stream-empty? [$ (Streamof a)]) Boolean]
               @defproc*[([(stream-first [$ (Pair a (Streamof a))]) a]
                          [(stream-first [$ (∪ (Pair a (Streamof a)) (Suspension a))])
                           (Maybe a)])]
               @defproc[(stream-rest [$ (∪ (Pair a (Streamof a)) (Suspension a))])
                        (Streamof a)]
-              @defform*[#:literals (pause)
-                        [(stream-cons a d)
-                         (stream-cons pause d)]]
-              @defform[(stream-lazy d)]
               @defproc[(stream-take [$ (Streamof a)] [n Natural]) (Streamof a)])]{
-The only code that knows how @racket[Streamof] is represented.
-@racket[empty-stream] is @racket['()], and @racket[stream-empty?]
-recognizes it; @racket[(stream a ...)] is the mature stream of the
-states @racket[a ...], the paper's @tt{unit} when there is one.  The first element of
-a mature stream is its answer and the rest is the stream after it; the
-first element of an immature stream is @racket[pause] and the rest is
-the stream produced by calling the suspension, so @racket[stream-rest]
-forces it.  @racket[(stream-cons a d)] is @racket[(cons a d)], and
-@racket[(stream-cons pause d)], written with the identifier
-@racket[pause] itself, is the suspension @racket[(λ () d)];
-@racket[(stream-lazy d)] is @racket[(stream-cons pause d)].
-@racket[(stream-take $ n)] is the stream of the first @racket[n]
-elements of @racket[$], pauses included.
+@racket[stream-empty?] recognizes @racket[empty-stream].  The first
+element of a mature stream is its answer and the rest is the stream
+after it; the first element of an immature stream is @racket[pause] and
+the rest is the stream produced by calling the suspension, so
+@racket[stream-rest] forces it.  @racket[(stream-take $ n)] is the
+stream of the first @racket[n] elements of @racket[$], pauses included.
 }
+
+@subsection[#:tag "microKanren-stream-forcing"]{Forcing Streams}
 
 @deftogether[(@defproc[(stream-force [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))]
               @defproc[(stream-force-take [$ (Streamof a)] [n Natural]) (Listof a)]
@@ -151,16 +178,24 @@ before it has as many states as they need.
 ]
 }
 
-@deftype[Goal]{
-Defined as @racket[(→ State (Streamof State))].
+@subsection[#:tag "microKanren-monad"]{The Stream Monad}
 
-@mk-examples[
-((== 1 1) empty-state)
-((call/fresh (λ (q) (== q 5))) empty-state)
-]
+@deftogether[(@defproc[(mplus [$1 (Streamof a)] [$2 (Streamof a)]) (Streamof a)]
+              @defproc[(bind [$ (Streamof a)] [g (→ a (Streamof b))])
+                       (Streamof b)])]{
+The stream monad, with @racket[stream] as unit and @racket[empty-stream]
+as zero.  @racket[mplus] appends two streams, swapping them when the
+first element of the first is a @racket[pause], which is what makes
+the search interleave; @racket[bind] runs @racket[g] on every state of
+@racket[$] and combines the results with @racket[mplus].
 }
 
 @section[#:tag "microKanren-core"]{The Core}
+
+The core of @tt{microKanren.scm}: the four goal constructors, and the
+unification they are built on.
+
+@subsection[#:tag "microKanren-goals"]{Goal Constructors}
 
 @defproc[(== [u Term] [v Term]) Goal]{
 Unifies @racket[u] and @racket[v] in the substitution of the state.
@@ -186,14 +221,7 @@ Disjunction combines the streams of @racket[g1] and @racket[g2] with
 ]
 }
 
-@deftogether[(@defproc[(mplus [$1 (Streamof a)] [$2 (Streamof a)]) (Streamof a)]
-              @defproc[(bind [$ (Streamof a)] [g (→ a (Streamof b))])
-                       (Streamof b)])]{
-The stream monad, with @racket[stream] as unit and @racket[empty-stream]
-as zero.  @racket[mplus] appends two streams, swapping them
-when the first element of the first is a @racket[pause], which is what
-makes the search interleave.
-}
+@subsection[#:tag "microKanren-unification"]{Unification}
 
 @deftogether[(@defproc[(walk [u Term] [s Substitution]) Term]
               @defproc[(ext-s [x Var] [v Term] [s Substitution]) Substitution]
@@ -206,6 +234,8 @@ occurs check.
 @section[#:tag "microKanren-wrappers"]{User-Level Forms}
 
 These are the forms of @tt{miniKanren-wrappers.scm}.
+
+@subsection[#:tag "microKanren-goal-forms"]{Goal Forms}
 
 @defform[(Zzz goal)]{
 The inverse-η-delay: a goal that suspends before running
@@ -234,6 +264,12 @@ and disjunction of conjunctions.
 ]
 }
 
+@defproc[(fresh/nf [n Natural] [f (→ Var * Goal)]) Goal]{
+Applies @racket[f] to @racket[n] fresh variables.
+}
+
+@subsection[#:tag "microKanren-running"]{Running Goals}
+
 @deftogether[(@defform[(run n (x ...+) goal ...+)
                        #:contracts ([n Natural])]
               @defform[(run* (x ...+) goal ...+)])]{
@@ -248,14 +284,12 @@ Running goals: @racket[call/goal] runs a goal in @racket[empty-state].
 @racket[run*] with @racket[stream->list].
 }
 
+@subsection[#:tag "microKanren-reification"]{Reification}
+
 @deftogether[(@defproc[(reify-1st [s/c State]) Term]
               @defproc[(walk* [v Term] [s Substitution]) Term]
               @defproc[(reify-s [v Term] [s Substitution]) Substitution]
               @defproc[(reify-name [n Natural]) Symbol])]{
 Reification of the value of the first variable, with the names
 @racket['_.0], @racket['_.1], and so on.
-}
-
-@defproc[(fresh/nf [n Natural] [f (→ Var * Goal)]) Goal]{
-Applies @racket[f] to @racket[n] fresh variables.
 }
