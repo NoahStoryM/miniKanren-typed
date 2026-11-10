@@ -128,9 +128,10 @@ which remains under the terms of its own copyright holders.
    and miniKanren-wrappers.scm.  The changes are: type definitions and
    annotations throughout; variables are structs holding their counter
    instead of vectors; literals are compared with equal? instead of
-   eqv?; and the stream functions reach streams only through a few
+   eqv?; the stream functions reach streams only through a few
    operations (stream-first, stream-rest, stream-cons, and so on) that
-   read a suspension as an element pause.  The tests are adapted from the test files and from the test
+   read a suspension as an element pause; and pull, take, and take-all
+   are replaced by stream-force, stream-take, and stream->list.  The tests are adapted from the test files and from the test
    programs in miniKanren-wrappers.scm.  The code is distributed under
    the following license:
 

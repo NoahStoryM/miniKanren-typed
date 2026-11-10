@@ -36,11 +36,14 @@ are distinguished from the other values of a term.}
 rather than @racket[eqv?], as in the other modules of this package.}
 
 @item{@bold{Stream operations.}  The representation of streams is the
-paper's, but @racket[mplus], @racket[bind], @racket[Zzz], and
-@racket[pull] reach it only through a few operations
-(@racket[stream-first], @racket[stream-rest], @racket[stream-cons],
-and so on), which read a suspension as an element @racket[pause].  The
-same operations are used by @racketmodname[typed/miniKanren/trs2].}
+paper's, but @racket[mplus], @racket[bind], and @racket[Zzz] reach it
+only through a few operations (@racket[stream-first],
+@racket[stream-rest], @racket[stream-cons], and so on), which read a
+suspension as an element @racket[pause].  The same operations are used
+by @racketmodname[typed/miniKanren/trs2].  The paper's @tt{pull},
+@tt{take}, and @tt{take-all} are replaced by @racket[stream-force],
+@racket[stream-take], and @racket[stream->list], named after their
+counterparts in @racketmodname[racket/stream].}
 
 ]
 
@@ -107,8 +110,7 @@ answers themselves must not be pauses.
               @defform*[#:literals (pause)
                         [(stream-cons a d)
                          (stream-cons pause d)]]
-              @defform[(stream-lazy d)]
-              @defproc[(stream-force [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))])]{
+              @defform[(stream-lazy d)])]{
 The only code that knows how @racket[Streamof] is represented.
 @racket[empty-stream] is @racket['()], and @racket[stream-empty?]
 recognizes it.  The first element of
@@ -119,8 +121,29 @@ forces it.  @racket[(stream-cons a d)] is @racket[(cons a d)], and
 @racket[(stream-cons pause d)], written with the identifier
 @racket[pause] itself, is the suspension @racket[(λ () d)];
 @racket[(stream-lazy d)] is @racket[(stream-cons pause d)].
+}
+
+@deftogether[(@defproc[(stream-force [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))]
+              @defproc[(stream-take [$ (Streamof a)] [n Natural]) (Streamof a)]
+              @defproc[(stream->list [$ (Streamof a)]) (Listof a)])]{
+These treat a pause as a delay rather than as data, like the consumers
+of @racketmodname[racket/stream]: they count and collect states.
 @racket[stream-force] skips the pauses at the front of a stream, so
-that it is empty or mature; it is the paper's @racket[pull].
+that it is empty or mature; it is the paper's @tt{pull}.
+@racket[(stream-take $ n)] is the stream of the first @racket[n]
+states of @racket[$], keeping its pauses, and @racket[stream->list]
+forces a stream and returns the list of its states.  So the paper's
+@tt{(take n $)} is @racket[(stream->list (stream-take $ n))] and its
+@tt{(take-all $)} is @racket[(stream->list $)].  Like their
+counterparts in @racketmodname[racket/stream], @racket[stream-force]
+and @racket[stream->list] do not return if a stream pauses forever.
+
+@mk-examples[
+(define $ (stream-lazy (stream-cons 1 (stream-lazy (stream-cons 2 empty-stream)))))
+(stream-force $)
+(stream->list (stream-take $ 1))
+(stream->list $)
+]
 }
 
 @deftype[Goal]{
@@ -151,7 +174,7 @@ Disjunction combines the streams of @racket[g1] and @racket[g2] with
 @racket[g1] with @racket[bind].
 
 @mk-examples[
-(take-all
+(stream->list
  ((conj (call/fresh (λ (a) (== a 7)))
         (call/fresh (λ (b) (disj (== b 5) (== b 6)))))
   empty-state))
@@ -215,12 +238,10 @@ Runs the goals with fresh variables @racket[x ...] and returns at most
 }
 
 @deftogether[(@defthing[empty-state State]
-              @defproc[(call/goal [g Goal]) (Streamof State)]
-              @defproc[(pull [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))]
-              @defproc[(take [n Natural] [$ (Streamof a)]) (Listof a)]
-              @defproc[(take-all [$ (Streamof a)]) (Listof a)])]{
-Running goals: @racket[pull] is @racket[stream-force], and
-@racket[take] and @racket[take-all] collect the states of a stream.
+              @defproc[(call/goal [g Goal]) (Streamof State)])]{
+Running goals: @racket[call/goal] runs a goal in @racket[empty-state].
+@racket[run] collects its states with @racket[stream-take] and
+@racket[stream->list], and @racket[run*] with @racket[stream->list].
 }
 
 @deftogether[(@defproc[(reify-1st [s/c State]) Term]

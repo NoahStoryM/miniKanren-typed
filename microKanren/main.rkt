@@ -60,8 +60,17 @@
 ;;                         state, or pause for an immature stream
 ;;   stream-rest           the rest of a nonempty stream, forcing the
 ;;                         suspension of an immature one
+;;
+;; The following treat a pause as a delay rather than as data, like the
+;; consumers of Racket's own streams: they count and collect states.
+;;
 ;;   stream-force          skips the pauses at the front of a stream, so
-;;                         that it is empty or mature (pull)
+;;                         that it is empty or mature (the paper's pull)
+;;   (stream-take $ n)     the stream of the first n states of $, with
+;;                         its pauses kept
+;;   stream->list          the list of all states of a stream, forcing
+;;                         every pause (with stream-take, the paper's
+;;                         take and take-all)
 ;;
 ;; Maybe is a union, not a tagged sum, so the states themselves must not
 ;; be pauses.
@@ -90,6 +99,24 @@
 (: stream-force (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
 (define (stream-force $)
   (if (procedure? $) (stream-force ($)) $))
+
+(: stream-take (∀ (a) (→ (Streamof a) Natural (Streamof a))))
+(define (stream-take $ n)
+  (cond
+    [(zero? n) empty-stream]
+    [(stream-empty? $) empty-stream]
+    [else
+     (define a (stream-first $))
+     (if (pause? a)
+         (stream-lazy (stream-take (stream-rest $) n))
+         (stream-cons a (stream-take (stream-rest $) (- n 1))))]))
+
+(: stream->list (∀ (a) (→ (Streamof a) (Listof a))))
+(define (stream->list $)
+  (define $* (stream-force $))
+  (if (stream-empty? $*)
+      '()
+      (cons (stream-first $*) (stream->list (stream-rest $*)))))
 
 
 ;;; The stream monad
@@ -185,36 +212,16 @@
   (disj+ (conj+ g0 g ...) ...))
 
 (define-syntax-rule (run n (x ...) g0 g ...)
-  (map reify-1st (take n (call/goal (fresh (x ...) g0 g ...)))))
+  (map reify-1st (stream->list (stream-take (call/goal (fresh (x ...) g0 g ...)) n))))
 
 (define-syntax-rule (run* (x ...) g0 g ...)
-  (map reify-1st (take-all (call/goal (fresh (x ...) g0 g ...)))))
+  (map reify-1st (stream->list (call/goal (fresh (x ...) g0 g ...)))))
 
 (: empty-state State)
 (define empty-state (cons '() 0))
 
 (: call/goal (→ Goal (Streamof State)))
 (define (call/goal g) (g empty-state))
-
-;; Forces a stream until it is mature or empty.
-(: pull (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
-(define (pull $) (stream-force $))
-
-(: take-all (∀ (a) (→ (Streamof a) (Listof a))))
-(define (take-all $)
-  (let ([$ (pull $)])
-    (if (stream-empty? $)
-        '()
-        (cons (stream-first $) (take-all (stream-rest $))))))
-
-(: take (∀ (a) (→ Natural (Streamof a) (Listof a))))
-(define (take n $)
-  (if (zero? n)
-      '()
-      (let ([$ (pull $)])
-        (if (stream-empty? $)
-            '()
-            (cons (stream-first $) (take (- n 1) (stream-rest $)))))))
 
 ;; The value of the first variable, with its fresh variables reified.
 (: reify-1st (→ State Term))
