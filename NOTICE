@@ -23,7 +23,7 @@ which remains under the terms of its own copyright holders.
 
    miniKanren/trs1/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout; a single
-   answer in a stream is represented by an immutable box and the empty
+   answer in a stream is represented by a one-element list and the empty
    stream by '(), and mzero, unit, choice, and case∞ are defined in
    terms of a few stream operations (stream-first, stream-rest, and so
    on); ext-s performs the occurs check (so == is the checked

@@ -18,8 +18,6 @@
 (define-type Data (∪ Literal (Pair Data Data)))
 (define-type Term (∪ Literal Var (Pair Term Term)))
 (define-type Substitution (Listof (Pair Var Term)))
-(define-type (Streamof a) (∪ Null (Boxof a) (Pair a (Suspension a))))
-(define-type (Suspension a) (→ (Streamof a)))
 (define-type Goal (→ Substitution (Streamof Substitution)))
 
 (struct var ([name : Symbol])
@@ -117,38 +115,51 @@
 (define-syntax-rule (run* (x) g* ...) (run #f (x) g* ...))
 
 ;;; Streams
-;;
+
+;; A stream is empty, or an answer followed by the rest of the stream.
+;; The rest is either known to be empty, or a suspension that produces
+;; it when called.  So a stream with exactly one answer is (list a), and
+;; the three cases are told apart by null? on the stream and on its cdr,
+;; neither of which looks at the answers.
+(define-type (Streamof a) (∪ Null (Pair a (∪ Null (Suspension a)))))
+(define-type (Suspension a) (→ (Streamof a)))
+
 ;; A stream is accessed only through the following operations; this is
 ;; the only code that knows how the three cases of Streamof are
 ;; represented.  An answer is always mature: what is delayed is the rest
 ;; of the stream, including whether there is any rest at all.
 ;;
-;;   '()               the empty stream
+;;   empty-stream      the empty stream
 ;;   (stream a)        the stream of exactly a
 ;;   (stream-cons a d) a followed by the stream d, which is evaluated
 ;;                     only when the rest is asked for
 ;;   stream-empty?     whether a stream is empty
-;;   stream-singleton? whether a stream is known to end after its first
-;;                     answer, without forcing anything
+;;   stream-singleton? whether a nonempty stream is known to end after
+;;                     its first answer, without forcing anything
 ;;   stream-first      the first answer of a nonempty stream
 ;;   stream-rest       the rest of a nonempty stream, forcing the
 ;;                     suspension if there is one
 
+(: empty-stream Null)
+(define empty-stream '())
 (define stream-empty? null?)
-(define stream-singleton? box?)
 
-(: stream-first (∀ (a) (→ (∪ (Boxof a) (Pair a (Suspension a))) a)))
-(: stream-rest  (∀ (a) (→ (∪ (Boxof a) (Pair a (Suspension a))) (Streamof a))))
-(define (stream-first a∞) (if (box? a∞) (unbox a∞) (car a∞)))
-(define (stream-rest  a∞) (if (box? a∞) '() ((cdr a∞))))
+(: stream-singleton? (∀ (a) (→ (Pair a (∪ Null (Suspension a))) Boolean)))
+(: stream-first      (∀ (a) (→ (Pair a (∪ Null (Suspension a))) a)))
+(: stream-rest       (∀ (a) (→ (Pair a (∪ Null (Suspension a))) (Streamof a))))
+(define (stream-singleton? a∞) (null? (cdr a∞)))
+(define (stream-first a∞) (car a∞))
+(define (stream-rest a∞)
+  (define f (cdr a∞))
+  (if (null? f) empty-stream (f)))
 
-(define-syntax-rule (stream a) (box-immutable a))
+(define-syntax-rule (stream a) (list a))
 (define-syntax-rule (stream-cons a d) (cons a (λ () d)))
 
 
 ;;; The book's stream forms, in terms of the operations above
 
-(define-syntax-rule (mzero) '())
+(define-syntax-rule (mzero) empty-stream)
 (define-syntax-rule (unit a) (stream a))
 (define-syntax-rule (choice a f) (stream-cons a (f)))
 
@@ -162,11 +173,12 @@
       [(stream-empty? a∞)
        on-zero]
       [(stream-singleton? a∞)
-       (let ([a^ (stream-first a∞)])
-         on-one)]
+       (define a^ (stream-first a∞))
+       on-one]
       [else
-       (let ([a (stream-first a∞)] [f (λ () (stream-rest a∞))])
-         on-choice)])))
+       (define a (stream-first a∞))
+       (define (f) (stream-rest a∞))
+       on-choice])))
 
 (: map∞ (∀ (a b) (→ (Option Integer) (→ a b) (Streamof a) (Listof b))))
 (define (map∞ n p a∞)
