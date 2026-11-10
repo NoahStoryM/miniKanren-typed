@@ -24,7 +24,9 @@ which remains under the terms of its own copyright holders.
    miniKanren/trs1/main.rkt is a Typed Racket rewrite of that code.  The
    changes are: type definitions and annotations throughout; a single
    answer in a stream is represented by an immutable box and the empty
-   stream by '(); ext-s performs the occurs check (so == is the checked
+   stream by '(), and mzero, unit, choice, and case∞ are defined in
+   terms of a few stream operations (stream-first, stream-rest, and so
+   on); ext-s performs the occurs check (so == is the checked
    unification); and #s, #u, and the goal and thunk lambdas are spelled
    succeed, fail, λG, and λF.
 
@@ -60,7 +62,10 @@ which remains under the terms of its own copyright holders.
    gives an argument the type Term unless it is annotated, and the
    result the type Goal); variables are structs compared with eq? and
    named after the fresh identifier; literals are compared with equal?
-   instead of eqv?; and ext-s skips the occurs check for ground terms.
+   instead of eqv?; ext-s skips the occurs check for ground terms; and
+   the stream functions reach streams only through a few operations
+   (stream-first, stream-rest, stream-cons, and so on) that read a
+   suspension as an element pause.
    miniKanren/trs2/tests/arith.rktl adapts the arithmetic code with a
    type annotation for build-num; the shared list helpers are provided
    by the chapter tests.  The code is distributed under the following
@@ -122,8 +127,10 @@ which remains under the terms of its own copyright holders.
    microKanren/main.rkt is a Typed Racket rewrite of microKanren.scm
    and miniKanren-wrappers.scm.  The changes are: type definitions and
    annotations throughout; variables are structs holding their counter
-   instead of vectors; and literals are compared with equal? instead of
-   eqv?.  The tests are adapted from the test files and from the test
+   instead of vectors; literals are compared with equal? instead of
+   eqv?; and the stream functions reach streams only through a few
+   operations (stream-first, stream-rest, stream-cons, and so on) that
+   read a suspension as an element pause.  The tests are adapted from the test files and from the test
    programs in miniKanren-wrappers.scm.  The code is distributed under
    the following license:
 

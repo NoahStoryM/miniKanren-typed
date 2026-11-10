@@ -46,25 +46,69 @@
 
 (define-type Goal (→ State (Streamof State)))
 
+;; Read element by element, a stream is a lazy list whose elements are
+;; states or PAUSE: a suspension is a pause followed by the stream it
+;; produces.  So (Streamof a) is a lazy list of (Maybe a), and the
+;; operations below are the only code that knows how the three cases are
+;; represented:
+;;
+;;   '()                   the empty stream
+;;   (stream-cons a d)     the state a followed by the stream d
+;;   (stream-cons pause d) a pause followed by d: the suspension
+;;                         (λ () d), so d is evaluated only when forced
+;;   (stream-lazy d)       the same as (stream-cons pause d)
+;;   stream-empty?         whether a stream is empty
+;;   stream-first          the first element of a nonempty stream: a
+;;                         state, or pause for an immature stream
+;;   stream-rest           the rest of a nonempty stream, forcing the
+;;                         suspension of an immature one
+;;
+;; Maybe is a union, not a tagged sum, so the states themselves must not
+;; be pauses.
+(struct Pause () #:type-name Pause)
+(define pause (Pause))
+(define-predicate pause? Pause)
+(define-type (Maybe a) (∪ Pause a))
+
+(define stream-empty? null?)
+
+(: stream-first (∀ (a) (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Maybe a))))
+(: stream-rest  (∀ (a) (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Streamof a))))
+(define (stream-first $) (if (pair? $) (car $) pause))
+(define (stream-rest  $) (if (pair? $) (cdr $) ($)))
+
+(define-syntax stream-cons
+  (syntax-rules (pause)
+    [(_ pause $) (λ () $)]
+    [(_ a $) (cons a $)]))
+(define-syntax-rule (stream-lazy $) (stream-cons pause $))
+
 (: unit (∀ (a) (→ a (Streamof a))))
-(define (unit s/c) (cons s/c mzero))
+(define (unit s/c) (stream-cons s/c mzero))
 
 (: mzero Null)
 (define mzero '())
 
+;; Swaps the two streams at each pause, which makes the search interleave.
 (: mplus (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (mplus $1 $2)
   (cond
-    [(null? $1) $2]
-    [(procedure? $1) (λ () (mplus $2 ($1)))]
-    [else (cons (car $1) (mplus (cdr $1) $2))]))
+    [(stream-empty? $1) $2]
+    [else
+     (let ([a (stream-first $1)])
+       (if (pause? a)
+           (stream-lazy (mplus $2 (stream-rest $1)))
+           (stream-cons a (mplus (stream-rest $1) $2))))]))
 
 (: bind (∀ (a b) (→ (Streamof a) (→ a (Streamof b)) (Streamof b))))
 (define (bind $ g)
   (cond
-    [(null? $) mzero]
-    [(procedure? $) (λ () (bind ($) g))]
-    [else (mplus (g (car $)) (bind (cdr $) g))]))
+    [(stream-empty? $) mzero]
+    [else
+     (let ([a (stream-first $)])
+       (if (pause? a)
+           (stream-lazy (bind (stream-rest $) g))
+           (mplus (g a) (bind (stream-rest $) g))))]))
 
 
 ;;; Goals
@@ -103,7 +147,7 @@
 ;; Inverse-η-delay: suspends the goal, so that a recursive relation
 ;; produces an immature stream instead of looping.
 (define-syntax-rule (Zzz g)
-  (λ ([s/c : State]) (λ () (g s/c))))
+  (λ ([s/c : State]) (stream-lazy (g s/c))))
 
 (define-syntax conj+
   (syntax-rules ()
@@ -138,10 +182,18 @@
 (: call/goal (→ Goal (Streamof State)))
 (define (call/goal g) (g empty-state))
 
-;; Forces a stream until it is mature or empty.
+;; Skips the pauses at the front of a stream.  The result is mature or
+;; empty, which its type records as an ordinary list cell, so take and
+;; take-all read it with car and cdr.
 (: pull (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
 (define (pull $)
-  (if (procedure? $) (pull ($)) $))
+  (cond
+    [(stream-empty? $) '()]
+    [else
+     (let ([a (stream-first $)])
+       (if (pause? a)
+           (pull (stream-rest $))
+           (stream-cons a (stream-rest $))))]))
 
 (: take-all (∀ (a) (→ (Streamof a) (Listof a))))
 (define (take-all $)

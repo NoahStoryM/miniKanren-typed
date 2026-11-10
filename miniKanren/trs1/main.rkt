@@ -116,6 +116,42 @@
         '())))
 (define-syntax-rule (run* (x) g* ...) (run #f (x) g* ...))
 
+;;; Streams
+;;
+;; A stream is accessed only through the following operations; this is
+;; the only code that knows how the three cases of Streamof are
+;; represented.  An answer is always mature: what is delayed is the rest
+;; of the stream, including whether there is any rest at all.
+;;
+;;   '()               the empty stream
+;;   (stream a)        the stream of exactly a
+;;   (stream-cons a d) a followed by the stream d, which is evaluated
+;;                     only when the rest is asked for
+;;   stream-empty?     whether a stream is empty
+;;   stream-singleton? whether a stream is known to end after its first
+;;                     answer, without forcing anything
+;;   stream-first      the first answer of a nonempty stream
+;;   stream-rest       the rest of a nonempty stream, forcing the
+;;                     suspension if there is one
+
+(define stream-empty? null?)
+(define stream-singleton? box?)
+
+(: stream-first (∀ (a) (→ (∪ (Boxof a) (Pair a (Suspension a))) a)))
+(: stream-rest  (∀ (a) (→ (∪ (Boxof a) (Pair a (Suspension a))) (Streamof a))))
+(define (stream-first a∞) (if (box? a∞) (unbox a∞) (car a∞)))
+(define (stream-rest  a∞) (if (box? a∞) '() ((cdr a∞))))
+
+(define-syntax-rule (stream a) (box-immutable a))
+(define-syntax-rule (stream-cons a d) (cons a (λ () d)))
+
+
+;;; The book's stream forms, in terms of the operations above
+
+(define-syntax-rule (mzero) '())
+(define-syntax-rule (unit a) (stream a))
+(define-syntax-rule (choice a f) (stream-cons a (f)))
+
 (define-syntax-rule
   (case∞ e
     [() on-zero]
@@ -123,18 +159,14 @@
     [(a f) on-choice])
   (let ([a∞ e])
     (cond
-      [(null? a∞)
+      [(stream-empty? a∞)
        on-zero]
-      [(box? a∞)
-       (let ([a^ (unbox a∞)])
+      [(stream-singleton? a∞)
+       (let ([a^ (stream-first a∞)])
          on-one)]
       [else
-       (let ([a (car a∞)] [f (cdr a∞)])
+       (let ([a (stream-first a∞)] [f (λ () (stream-rest a∞))])
          on-choice)])))
-
-(define-syntax-rule (mzero) '())
-(define-syntax-rule (unit a) (box-immutable a))
-(define-syntax-rule (choice a f) (cons a f))
 
 (: map∞ (∀ (a b) (→ (Option Integer) (→ a b) (Streamof a) (Listof b))))
 (define (map∞ n p a∞)

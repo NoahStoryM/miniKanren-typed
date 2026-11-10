@@ -55,6 +55,14 @@ The second edition also has three, but a suspension stands on its own:
   (∪ Null (Pair a (Streamof a)) (Suspension a)))
 ]
 
+Both modules read their streams through operations named
+@racket[stream-first] and @racket[stream-rest], and the element view
+makes the difference plain.  In the first edition every element is an
+answer, and it is the rest after an answer that is delayed.  In the
+second edition the delay itself is an element, @trs2[pause], so a
+stream of answers is a lazy list of @racket[(Maybe a)], and
+@trs2[append-inf] can swap its two streams at a pause.
+
 In the first edition, a computation can only give up control after it
 has produced an answer; in the second, it can give up control at any
 call to a relation defined with @trs2[defrel].  This has two

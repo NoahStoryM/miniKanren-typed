@@ -87,35 +87,76 @@
 
 (define-type Goal (→ Substitution (Streamof Substitution)))
 
-;; mplus: interleaves by swapping the two streams at each suspension.
+;; Read element by element, a stream is a lazy list whose elements are
+;; answers or PAUSE: a suspension is a pause followed by the stream it
+;; produces.  So (Streamof a) is a lazy list of (Maybe a), and the
+;; operations below are the only code that knows how the three cases are
+;; represented:
+;;
+;;   '()                   the empty stream
+;;   (stream-cons a d)     the answer a followed by the stream d
+;;   (stream-cons pause d) a pause followed by d: the suspension
+;;                         (λ () d), so d is evaluated only when forced
+;;   (stream-lazy d)       the same as (stream-cons pause d)
+;;   stream-empty?         whether a stream is empty
+;;   stream-first          the first element of a nonempty stream: an
+;;                         answer, or pause for an immature stream
+;;   stream-rest           the rest of a nonempty stream, forcing the
+;;                         suspension of an immature one
+;;
+;; Maybe is a union, not a tagged sum, so the answers themselves must
+;; not be pauses; Typed Racket rejects (stream-cons x d) when the type
+;; of x includes Pause and the type of the answers does not.
+(struct Pause () #:type-name Pause)
+(define pause (Pause))
+(define-predicate pause? Pause)
+(define-type (Maybe a) (∪ Pause a))
+
+(define stream-empty? null?)
+
+(: stream-first (∀ (a) (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Maybe a))))
+(: stream-rest  (∀ (a) (→ (∪ (Pair a (Streamof a)) (Suspension a)) (Streamof a))))
+(define (stream-first a*) (if (pair? a*) (car a*) pause))
+(define (stream-rest  a*) (if (pair? a*) (cdr a*) (a*)))
+
+(define-syntax stream-cons
+  (syntax-rules (pause)
+    [(_ pause a*) (λ () a*)]
+    [(_ a a*) (cons a a*)]))
+(define-syntax-rule (stream-lazy a*) (stream-cons pause a*))
+
+;; mplus: interleaves by swapping the two streams at each pause.
 (: append-inf (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
 (define (append-inf s-inf t-inf)
   (cond
-    [(null? s-inf) t-inf]
-    [(pair? s-inf)
-     (cons (car s-inf)
-           (append-inf (cdr s-inf) t-inf))]
-    [else (λ () (append-inf t-inf (s-inf)))]))
+    [(stream-empty? s-inf) t-inf]
+    [else
+     (let ([a (stream-first s-inf)])
+       (if (pause? a)
+           (stream-lazy (append-inf t-inf (stream-rest s-inf)))
+           (stream-cons a (append-inf (stream-rest s-inf) t-inf))))]))
 
 ;; bind, with the arguments in the order of append-map.
 (: append-map-inf (∀ (a b) (→ (→ a (Streamof b)) (Streamof a) (Streamof b))))
 (define (append-map-inf g s-inf)
   (cond
-    [(null? s-inf) '()]
-    [(pair? s-inf)
-     (append-inf (g (car s-inf))
-                 (append-map-inf g (cdr s-inf)))]
-    [else (λ () (append-map-inf g (s-inf)))]))
+    [(stream-empty? s-inf) '()]
+    [else
+     (let ([a (stream-first s-inf)])
+       (if (pause? a)
+           (stream-lazy (append-map-inf g (stream-rest s-inf)))
+           (append-inf (g a) (append-map-inf g (stream-rest s-inf)))))]))
 
 (: take-inf (∀ (a) (→ (Option Natural) (Streamof a) (Listof a))))
 (define (take-inf n s-inf)
   (cond
     [(and n (zero? n)) '()]
-    [(null? s-inf) '()]
-    [(pair? s-inf)
-     (cons (car s-inf)
-           (take-inf (and n (sub1 n)) (cdr s-inf)))]
-    [else (take-inf n (s-inf))]))
+    [(stream-empty? s-inf) '()]
+    [else
+     (let ([a (stream-first s-inf)])
+       (if (pause? a)
+           (take-inf n (stream-rest s-inf))
+           (cons a (take-inf (and n (sub1 n)) (stream-rest s-inf)))))]))
 
 
 ;;; Goals
@@ -123,10 +164,10 @@
 (: == (→ Term Term Goal))
 (define ((== u v) s)
   (let ([s (unify u v s)])
-    (if s (list s) '())))
+    (if s (stream-cons s '()) '())))
 
 (: succeed Goal)
-(define (succeed s) (list s))
+(define (succeed s) (stream-cons s '()))
 
 (: fail Goal)
 (define (fail s) '())
@@ -145,19 +186,22 @@
 
 (: ifte (→ Goal Goal Goal Goal))
 (define ((ifte g1 g2 g3) s)
-  (let loop ([s-inf (g1 s)])
+  (let loop : (Streamof Substitution) ([s-inf (g1 s)])
     (cond
-      [(null? s-inf) (g3 s)]
-      [(pair? s-inf) (append-map-inf g2 s-inf)]
-      [else (λ () (loop (s-inf)))])))
+      [(stream-empty? s-inf) (g3 s)]
+      [(pause? (stream-first s-inf)) (stream-lazy (loop (stream-rest s-inf)))]
+      [else (append-map-inf g2 s-inf)])))
 
 (: once (→ Goal Goal))
 (define ((once g) s)
-  (let loop ([s-inf (g s)])
+  (let loop : (Streamof Substitution) ([s-inf (g s)])
     (cond
-      [(null? s-inf) '()]
-      [(pair? s-inf) (list (car s-inf))]
-      [else (λ () (loop (s-inf)))])))
+      [(stream-empty? s-inf) '()]
+      [else
+       (let ([a (stream-first s-inf)])
+         (if (pause? a)
+             (stream-lazy (loop (stream-rest s-inf)))
+             (stream-cons a '())))])))
 
 
 ;;; Reification
@@ -225,8 +269,7 @@
          [[x:id : t] arg]))
      #'(define (name param ...) : Goal
          (λ (s)
-           (λ ()
-             ((conj g ...) s))))]))
+           (stream-lazy ((conj g ...) s))))]))
 
 (define-syntax run
   (syntax-rules ()

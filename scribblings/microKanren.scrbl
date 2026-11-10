@@ -35,6 +35,13 @@ are distinguished from the other values of a term.}
 @item{@bold{Literals.}  Literals are compared with @racket[equal?]
 rather than @racket[eqv?], as in the other modules of this package.}
 
+@item{@bold{Stream operations.}  The representation of streams is the
+paper's, but @racket[mplus], @racket[bind], @racket[Zzz], and
+@racket[pull] reach it only through a few operations
+(@racket[stream-first], @racket[stream-rest], @racket[stream-cons],
+and so on), which read a suspension as an element @racket[pause].  The
+same operations are used by @racketmodname[typed/miniKanren/trs2].}
+
 ]
 
 @section[#:tag "microKanren-types"]{Types}
@@ -75,6 +82,39 @@ Defined as
 
 A stream is empty, or an answer followed by a stream (@emph{mature}),
 or a suspension that produces a stream when called (@emph{immature}).
+Read element by element, a suspension is a @racket[pause] followed by
+the stream it produces, so a stream is a lazy list of
+@racket[(Maybe a)].
+}
+
+@deftogether[(@deftype[Pause]
+              @defthing[pause Pause]
+              @defproc[(pause? [v Any]) Boolean]
+              @deftypeconstr[(Maybe a)])]{
+@racket[pause] is the only value of @racket[Pause], the element that
+stands for a suspension, and @racket[(Maybe a)] is defined as
+@racket[(∪ Pause a)].  It is a union rather than a tagged sum, so the
+answers themselves must not be pauses.
+}
+
+@deftogether[(@defproc[(stream-empty? [$ (Streamof a)]) Boolean]
+              @defproc[(stream-first [$ (∪ (Pair a (Streamof a)) (Suspension a))])
+                       (Maybe a)]
+              @defproc[(stream-rest [$ (∪ (Pair a (Streamof a)) (Suspension a))])
+                       (Streamof a)]
+              @defform*[#:literals (pause)
+                        [(stream-cons a d)
+                         (stream-cons pause d)]]
+              @defform[(stream-lazy d)])]{
+The only code that knows how @racket[Streamof] is represented.
+@racket[stream-empty?] recognizes @racket['()].  The first element of
+a mature stream is its answer and the rest is the stream after it; the
+first element of an immature stream is @racket[pause] and the rest is
+the stream produced by calling the suspension, so @racket[stream-rest]
+forces it.  @racket[(stream-cons a d)] is @racket[(cons a d)], and
+@racket[(stream-cons pause d)], written with the identifier
+@racket[pause] itself, is the suspension @racket[(λ () d)];
+@racket[(stream-lazy d)] is @racket[(stream-cons pause d)].
 }
 
 @deftype[Goal]{
@@ -118,7 +158,8 @@ Disjunction combines the streams of @racket[g1] and @racket[g2] with
               @defproc[(bind [$ (Streamof a)] [g (→ a (Streamof b))])
                        (Streamof b)])]{
 The stream monad.  @racket[mplus] appends two streams, swapping them
-when the first is immature, which is what makes the search interleave.
+when the first element of the first is a @racket[pause], which is what
+makes the search interleave.
 }
 
 @deftogether[(@defproc[(walk [u Term] [s Substitution]) Term]
@@ -136,7 +177,8 @@ These are the forms of @tt{miniKanren-wrappers.scm}.
 @defform[(Zzz goal)]{
 The inverse-η-delay: a goal that suspends before running
 @racket[goal], so that a recursive relation produces an immature
-stream instead of looping.
+stream instead of looping.  It is defined as
+@racket[(λ ([s/c : State]) (stream-lazy (goal s/c)))].
 }
 
 @deftogether[(@defform[(conj+ goal ...+)]
@@ -171,8 +213,9 @@ Runs the goals with fresh variables @racket[x ...] and returns at most
               @defproc[(pull [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))]
               @defproc[(take [n Natural] [$ (Streamof a)]) (Listof a)]
               @defproc[(take-all [$ (Streamof a)]) (Listof a)])]{
-Running goals: @racket[pull] forces a stream until it is mature or
-empty, and @racket[take] and @racket[take-all] collect its states.
+Running goals: @racket[pull] skips the pauses at the front of a
+stream, so that it is mature or empty, and @racket[take] and
+@racket[take-all] collect its states.
 }
 
 @deftogether[(@defproc[(reify-1st [s/c State]) Term]
