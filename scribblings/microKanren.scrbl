@@ -97,17 +97,21 @@ stands for a suspension, and @racket[(Maybe a)] is defined as
 answers themselves must not be pauses.
 }
 
-@deftogether[(@defproc[(stream-empty? [$ (Streamof a)]) Boolean]
-              @defproc[(stream-first [$ (∪ (Pair a (Streamof a)) (Suspension a))])
-                       (Maybe a)]
+@deftogether[(@defthing[empty-stream Null]
+              @defproc[(stream-empty? [$ (Streamof a)]) Boolean]
+              @defproc*[([(stream-first [$ (Pair a (Streamof a))]) a]
+                         [(stream-first [$ (∪ (Pair a (Streamof a)) (Suspension a))])
+                          (Maybe a)])]
               @defproc[(stream-rest [$ (∪ (Pair a (Streamof a)) (Suspension a))])
                        (Streamof a)]
               @defform*[#:literals (pause)
                         [(stream-cons a d)
                          (stream-cons pause d)]]
-              @defform[(stream-lazy d)])]{
+              @defform[(stream-lazy d)]
+              @defproc[(stream-force [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))])]{
 The only code that knows how @racket[Streamof] is represented.
-@racket[stream-empty?] recognizes @racket['()].  The first element of
+@racket[empty-stream] is @racket['()], and @racket[stream-empty?]
+recognizes it.  The first element of
 a mature stream is its answer and the rest is the stream after it; the
 first element of an immature stream is @racket[pause] and the rest is
 the stream produced by calling the suspension, so @racket[stream-rest]
@@ -115,6 +119,8 @@ forces it.  @racket[(stream-cons a d)] is @racket[(cons a d)], and
 @racket[(stream-cons pause d)], written with the identifier
 @racket[pause] itself, is the suspension @racket[(λ () d)];
 @racket[(stream-lazy d)] is @racket[(stream-cons pause d)].
+@racket[stream-force] skips the pauses at the front of a stream, so
+that it is empty or mature; it is the paper's @racket[pull].
 }
 
 @deftype[Goal]{
@@ -213,9 +219,8 @@ Runs the goals with fresh variables @racket[x ...] and returns at most
               @defproc[(pull [$ (Streamof a)]) (∪ Null (Pair a (Streamof a)))]
               @defproc[(take [n Natural] [$ (Streamof a)]) (Listof a)]
               @defproc[(take-all [$ (Streamof a)]) (Listof a)])]{
-Running goals: @racket[pull] skips the pauses at the front of a
-stream, so that it is mature or empty, and @racket[take] and
-@racket[take-all] collect its states.
+Running goals: @racket[pull] is @racket[stream-force], and
+@racket[take] and @racket[take-all] collect the states of a stream.
 }
 
 @deftogether[(@defproc[(reify-1st [s/c State]) Term]

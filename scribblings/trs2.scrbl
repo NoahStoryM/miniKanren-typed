@@ -334,8 +334,8 @@ answers and pauses; they are the only code that knows how
 @racket[Streamof] is represented.  The second group is the stream
 operations of Chapter 10, written with the first.  They are polymorphic
 in the type of answers, and together they form the stream monad: a
-single answer @racket[(stream-cons a '())] is the unit, @racket['()] is
-zero, @racket[append-inf] is the sum, and @racket[append-map-inf] is
+single answer @racket[(stream-cons a empty-stream)] is the unit,
+@racket[empty-stream] is zero, @racket[append-inf] is the sum, and @racket[append-map-inf] is
 the bind.
 
 @deftogether[(@deftype[Pause]
@@ -350,12 +350,15 @@ pauses; for answer types that exclude @racket[Pause], such as
 @racket[Substitution], Typed Racket checks this.
 }
 
-@deftogether[(@defproc[(stream-empty? [s-inf (Streamof a)]) Boolean]
-              @defproc[(stream-first [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
-                       (Maybe a)]
+@deftogether[(@defthing[empty-stream Null]
+              @defproc[(stream-empty? [s-inf (Streamof a)]) Boolean]
+              @defproc*[([(stream-first [s-inf (Pair a (Streamof a))]) a]
+                         [(stream-first [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
+                          (Maybe a)])]
               @defproc[(stream-rest [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
                        (Streamof a)])]{
-@racket[stream-empty?] recognizes the empty stream @racket['()].  The
+@racket[empty-stream] is the empty stream @racket['()], and
+@racket[stream-empty?] recognizes it.  The
 first element of a mature stream is its answer and the rest is the
 stream after it; the first element of an immature stream is
 @racket[pause] and the rest is the stream produced by calling the
@@ -364,7 +367,7 @@ it twice on the same suspension computes the rest twice; the
 operations of this section call it once.
 
 @mk-examples[
-(define s-inf (stream-lazy (begin (displayln "forced") (stream-cons 1 '()))))
+(define s-inf (stream-lazy (begin (displayln "forced") (stream-cons 1 empty-stream))))
 (stream-first s-inf)
 (stream-rest s-inf)
 ]
@@ -383,6 +386,18 @@ suspension is forced.  @racket[(stream-lazy d)] is
 @racket[(stream-cons pause d)].
 }
 
+@defproc[(stream-force [s-inf (Streamof a)]) (∪ Null (Pair a (Streamof a)))]{
+Skips the pauses at the front of @racket[s-inf], forcing its
+suspensions until the stream is empty or mature.  It does not return
+if every element from some point on is a pause.  The operations of
+Chapter 10 do not use it: where they meet a pause, they return a new
+pause instead, so that another stream can run in the meantime.
+
+@mk-examples[
+(stream-force (stream-lazy (stream-lazy (stream-cons 'a empty-stream))))
+]
+}
+
 @defproc[(append-inf [s-inf (Streamof a)] [t-inf (Streamof a)])
          (Streamof a)]{
 Appends two streams.  When @racket[s-inf] is a suspension, the result
@@ -391,8 +406,8 @@ and the rest of @racket[s-inf] second: the swap is what makes the
 search interleave.  (Chapter 10.)
 
 @mk-examples[
-(take-inf #f (append-inf (stream-lazy (stream-cons 1 (stream-cons 2 '())))
-                         (stream-cons 3 (stream-cons 4 '()))))
+(take-inf #f (append-inf (stream-lazy (stream-cons 1 (stream-cons 2 empty-stream)))
+                         (stream-cons 3 (stream-cons 4 empty-stream))))
 ]
 }
 
@@ -410,7 +425,7 @@ when @racket[n] is @racket[#f]), calling suspensions as needed.
 (Chapter 10.)
 
 @mk-examples[
-(take-inf 3 (append-inf (stream-cons 'a '())
-                        (stream-lazy (stream-cons 'b (stream-cons 'c '())))))
+(take-inf 3 (append-inf (stream-cons 'a empty-stream)
+                        (stream-lazy (stream-cons 'b (stream-cons 'c empty-stream)))))
 ]
 }
