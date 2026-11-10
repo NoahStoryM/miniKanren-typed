@@ -45,9 +45,11 @@ book's suspension points and search strategies.  See @racket[Streamof]
 for the two representations and the book's restrictions on answers.
 Streams are accessed only through a small set of operations
 (@racket[stream-first], @racket[stream-rest], and so on; see
-@secref["trs1-streams"]), and the book's @racket[mzero],
-@racket[unit], @racket[choice], and @racket[case∞] are defined in terms
-of them, so the code of the appendix is otherwise unchanged.}
+@secref["trs1-streams"]).  The book's @racket[case∞] is defined in
+terms of them, and its @tt{mzero}, @tt{unit}, and @tt{choice} are
+written @racket[empty-stream], @racket[(stream a)], and
+@racket[(stream-cons a e)], where @racket[e] is the rest itself rather
+than a thunk that produces it.}
 
 @item{@bold{Occurs check.}  The book's @racket[ext-s] never checks
 for circularity; a separate checked variant is introduced in Chapter 9.
@@ -126,9 +128,9 @@ The types of lazy streams of answers and their suspensions, defined as:
 A stream is empty (@racket[Null]), or an answer followed by its rest.
 The rest is either known to be empty, so that the stream is the
 one-element list @racket[(list a)], or a suspension that produces the
-rest when called.  The three cases correspond
-to @racket[mzero], @racket[unit], and @racket[choice].  A suspension
-is a thunk that produces a stream when called.
+rest when called.  The three cases are built by
+@racket[empty-stream], @racket[stream], and @racket[stream-cons].  A
+suspension is a thunk that produces a stream when called.
 
 The book uses a different representation: @racket[#f] for the empty
 stream, the answer itself for exactly one answer, and an answer paired
@@ -151,8 +153,8 @@ without inspecting the answers.
 
 Read element by element, a stream is a list whose answers are all
 computed when they are reached and whose rest is delayed: the rest of a
-@racket[choice] is produced by a suspension, and only a
-@racket[unit] is known to end without calling one.  The operations of
+@racket[stream-cons] is produced by a suspension, and only a
+@racket[(stream a)] is known to end without calling one.  The operations of
 @secref["trs1-streams"] present it in exactly these terms.
 }
 
@@ -397,10 +399,11 @@ with the result of @racket[(reify-s v empty-s)].
 @section[#:tag "trs1-streams"]{Streams}
 
 The operators of the appendix ``Connecting the Wires'' are written
-with the book's @racket[mzero], @racket[unit], @racket[choice], and
-@racket[case∞].  Here those four forms are in turn defined by a few
-stream operations, which are the only code that knows how
-@racket[Streamof] is represented.  A reader who wonders what
+here with a few stream operations, which are the only code that knows
+how @racket[Streamof] is represented: the book's @tt{mzero},
+@tt{unit}, and @tt{choice} become @racket[empty-stream],
+@racket[(stream a)], and @racket[(stream-cons a e)], and its
+@racket[case∞] is defined with them.  A reader who wonders what
 @racket[case∞] does with a stream can read it off its definition below.
 Everything is exported so that goals can be written and examined at
 the level of streams.
@@ -441,16 +444,6 @@ single answer, and otherwise the stream produced by calling the suspension.
 @racket[(Suspension a)], used to suspend the rest of a stream.
 }
 
-@deftogether[(@defform[(mzero)]
-              @defform[(unit a)]
-              @defform[(choice a f)])]{
-Constructors for the three cases of @racket[Streamof]: the empty
-stream, the stream of exactly @racket[a], and the stream of
-@racket[a] followed by the stream produced by the thunk @racket[f].
-They are defined as @racket[empty-stream], @racket[(stream a)], and
-@racket[(stream-cons a (f))].
-}
-
 @defform[#:id case∞
          (case∞ e
            [() on-zero]
@@ -474,7 +467,11 @@ defined as
 ]
 
 so @racket[f] is a suspension that, when called, produces the rest of
-the stream.
+the stream.  The single answer is told apart with
+@racket[stream-singleton?] rather than by looking at
+@racket[(stream-rest a∞)], because that would force the rest at once:
+then a branch that never produces an answer could hold back the
+answers before it.
 }
 
 @defproc[(map∞ [n (Option Integer)] [p (→ a b)] [a∞ (Streamof a)])
@@ -496,7 +493,7 @@ the stream as needed.  This is what @racket[run] uses.
 @racket[mplus] appends the stream produced by @racket[f] after
 @racket[a∞]; @racket[bind] applies @racket[g] to every answer of
 @racket[a∞] and combines the results with @racket[mplus].  Together
-with @racket[unit] and @racket[mzero] they form the stream monad on
+with @racket[stream] and @racket[empty-stream] they form the stream monad on
 which @racket[conde] and @racket[all] are built.
 }
 

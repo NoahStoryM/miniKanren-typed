@@ -162,11 +162,13 @@
 (define-syntax-rule (stream-cons a d) (cons a (λ () d)))
 
 
-;;; The book's stream forms, in terms of the operations above
-
-(define-syntax-rule (mzero) empty-stream)
-(define-syntax-rule (unit a) (stream a))
-(define-syntax-rule (choice a f) (stream-cons a (f)))
+;;; The book's case∞, in terms of the operations above
+;;
+;; It dispatches on the three cases without forcing anything: f is a
+;; suspension that produces the rest when called.  (Looking at
+;; (stream-rest a∞) to tell one answer from more would force the rest at
+;; once, and then a branch that never answers could block the answers
+;; before it.)
 
 (define-syntax-rule
   (case∞ e
@@ -198,8 +200,8 @@
         [(> n 1) (map∞ (sub1 n) p (f))]
         [else '()]))]))
 
-(define succeed (λG (s) (unit s)))
-(define fail (λG (s) (mzero)))
+(define succeed (λG (s) (stream s)))
+(define fail (λG (s) empty-stream))
 
 (: == (→ Term Term Goal))
 (define (== v w)
@@ -242,13 +244,13 @@
 (define (mplus a∞ f)
   (case∞ a∞
     [() (f)]
-    [(a) (choice a f)]
-    [(a f0) (choice a (λF : a (mplus (f0) f)))]))
+    [(a) (stream-cons a (f))]
+    [(a f0) (stream-cons a (mplus (f0) f))]))
 
 (: bind (∀ (a) (→ (Streamof a) (→ a (Streamof a)) (Streamof a))))
 (define (bind a∞ g)
   (case∞ a∞
-    [() (mzero)]
+    [() empty-stream]
     [(a) (g a)]
     [(a f) (mplus (g a) (λF : a (bind (f) g)))]))
 
@@ -256,13 +258,13 @@
 (define (mplusi a∞ f)
   (case∞ a∞
     [() (f)]
-    [(a) (choice a f)]
-    [(a f0) (choice a (λF : a (mplusi (f) f0)))]))
+    [(a) (stream-cons a (f))]
+    [(a f0) (stream-cons a (mplusi (f) f0))]))
 
 (: bindi (∀ (a) (→ (Streamof a) (→ a (Streamof a)) (Streamof a))))
 (define (bindi a∞ g)
   (case∞ a∞
-    [() (mzero)]
+    [() empty-stream]
     [(a) (g a)]
     [(a f) (mplusi (g a) (λF : a (bindi (f) g)))]))
 
