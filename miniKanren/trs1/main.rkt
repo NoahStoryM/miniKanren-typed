@@ -130,7 +130,8 @@
 ;; of the stream, including whether there is any rest at all.
 ;;
 ;;   empty-stream      the empty stream
-;;   (stream a)        the stream of exactly a
+;;   (stream a ...)    the stream of the answers a ...; (stream a) is
+;;                     known to end after a
 ;;   (stream-cons a d) a followed by the stream d, which is evaluated
 ;;                     only when the rest is asked for
 ;;   stream-empty?     whether a stream is empty
@@ -153,7 +154,11 @@
   (define f (cdr a∞))
   (if (null? f) empty-stream (f)))
 
-(define-syntax-rule (stream a) (list a))
+(define-syntax stream
+  (syntax-rules ()
+    [(_) empty-stream]
+    [(_ a) (list a)]
+    [(_ a b ...) (stream-cons a (stream b ...))]))
 (define-syntax-rule (stream-cons a d) (cons a (λ () d)))
 
 

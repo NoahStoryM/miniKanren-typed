@@ -51,6 +51,7 @@
 ;; represented:
 ;;
 ;;   empty-stream          the empty stream
+;;   (stream a ...)        the mature stream of the states a ...
 ;;   (stream-cons a d)     the state a followed by the stream d
 ;;   (stream-cons pause d) a pause followed by d: the suspension
 ;;                         (λ () d), so d is evaluated only when forced
@@ -60,17 +61,17 @@
 ;;                         state, or pause for an immature stream
 ;;   stream-rest           the rest of a nonempty stream, forcing the
 ;;                         suspension of an immature one
+;;   (stream-take $ n)     the stream of the first n elements of $
 ;;
-;; The following treat a pause as a delay rather than as data, like the
-;; consumers of Racket's own streams: they count and collect states.
+;; The following force pauses rather than return them:
 ;;
 ;;   stream-force          skips the pauses at the front of a stream, so
 ;;                         that it is empty or mature (the paper's pull)
-;;   (stream-take $ n)     the stream of the first n states of $, with
-;;                         its pauses kept
-;;   stream->list          the list of all states of a stream, forcing
-;;                         every pause (with stream-take, the paper's
-;;                         take and take-all)
+;;   (stream-force-take $ n)
+;;                         the list of the first n states of $ (the
+;;                         paper's take)
+;;   stream->list          the list of all states of $ (the paper's
+;;                         take-all)
 ;;
 ;; Maybe is a union, not a tagged sum, so the states themselves must not
 ;; be pauses.
@@ -96,6 +97,11 @@
     [(_ a $) (cons a $)]))
 (define-syntax-rule (stream-lazy $) (stream-cons pause $))
 
+(define-syntax stream
+  (syntax-rules ()
+    [(_) empty-stream]
+    [(_ a b ...) (stream-cons a (stream b ...))]))
+
 (: stream-force (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
 (define (stream-force $)
   (if (procedure? $) (stream-force ($)) $))
@@ -108,8 +114,18 @@
     [else
      (define a (stream-first $))
      (if (pause? a)
-         (stream-lazy (stream-take (stream-rest $) n))
+         (stream-lazy (stream-take (stream-rest $) (- n 1)))
          (stream-cons a (stream-take (stream-rest $) (- n 1))))]))
+
+(: stream-force-take (∀ (a) (→ (Streamof a) Natural (Listof a))))
+(define (stream-force-take $ n)
+  (cond
+    [(zero? n) '()]
+    [else
+     (define $* (stream-force $))
+     (if (stream-empty? $*)
+         '()
+         (cons (stream-first $*) (stream-force-take (stream-rest $*) (- n 1))))]))
 
 (: stream->list (∀ (a) (→ (Streamof a) (Listof a))))
 (define (stream->list $)
@@ -120,12 +136,6 @@
 
 
 ;;; The stream monad
-
-(: unit (∀ (a) (→ a (Streamof a))))
-(define (unit s/c) (stream-cons s/c mzero))
-
-(: mzero Null)
-(define mzero empty-stream)
 
 ;; Swaps the two streams at each pause, which makes the search interleave.
 (: mplus (∀ (a) (→ (Streamof a) (Streamof a) (Streamof a))))
@@ -141,7 +151,7 @@
 (: bind (∀ (a b) (→ (Streamof a) (→ a (Streamof b)) (Streamof b))))
 (define (bind $ g)
   (cond
-    [(stream-empty? $) mzero]
+    [(stream-empty? $) empty-stream]
     [else
      (define a (stream-first $))
      (if (pause? a)
@@ -157,7 +167,7 @@
 (: == (→ Term Term Goal))
 (define ((== u v) s/c)
   (let ([s (unify u v (car s/c))])
-    (if s (unit (cons s (cdr s/c))) mzero)))
+    (if s (stream (cons s (cdr s/c))) empty-stream)))
 
 (: unify (→ Term Term Substitution (Option Substitution)))
 (define (unify u v s)
@@ -212,7 +222,7 @@
   (disj+ (conj+ g0 g ...) ...))
 
 (define-syntax-rule (run n (x ...) g0 g ...)
-  (map reify-1st (stream->list (stream-take (call/goal (fresh (x ...) g0 g ...)) n))))
+  (map reify-1st (stream-force-take (call/goal (fresh (x ...) g0 g ...)) n)))
 
 (define-syntax-rule (run* (x ...) g0 g ...)
   (map reify-1st (stream->list (call/goal (fresh (x ...) g0 g ...)))))

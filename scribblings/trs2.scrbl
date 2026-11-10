@@ -334,7 +334,7 @@ answers and pauses; they are the only code that knows how
 @racket[Streamof] is represented.  The second group is the stream
 operations of Chapter 10, written with the first.  They are polymorphic
 in the type of answers, and together they form the stream monad: a
-single answer @racket[(stream-cons a empty-stream)] is the unit,
+single answer @racket[(stream a)] is the unit,
 @racket[empty-stream] is zero, @racket[append-inf] is the sum, and @racket[append-map-inf] is
 the bind.
 
@@ -351,6 +351,7 @@ pauses; for answer types that exclude @racket[Pause], such as
 }
 
 @deftogether[(@defthing[empty-stream Null]
+              @defform[(stream a ...)]
               @defproc[(stream-empty? [s-inf (Streamof a)]) Boolean]
               @defproc*[([(stream-first [s-inf (Pair a (Streamof a))]) a]
                          [(stream-first [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
@@ -358,7 +359,8 @@ pauses; for answer types that exclude @racket[Pause], such as
               @defproc[(stream-rest [s-inf (∪ (Pair a (Streamof a)) (Suspension a))])
                        (Streamof a)])]{
 @racket[empty-stream] is the empty stream @racket['()], and
-@racket[stream-empty?] recognizes it.  The
+@racket[stream-empty?] recognizes it; @racket[(stream a ...)] is the
+mature stream of the answers @racket[a ...].  The
 first element of a mature stream is its answer and the rest is the
 stream after it; the first element of an immature stream is
 @racket[pause] and the rest is the stream produced by calling the

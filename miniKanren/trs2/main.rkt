@@ -92,6 +92,7 @@
 ;; represented:
 ;;
 ;;   empty-stream          the empty stream
+;;   (stream a ...)        the mature stream of the answers a ...
 ;;   (stream-cons a d)     the answer a followed by the stream d
 ;;   (stream-cons pause d) a pause followed by d: the suspension
 ;;                         (λ () d), so d is evaluated only when forced
@@ -128,6 +129,11 @@
     [(_ pause a*) (λ () a*)]
     [(_ a a*) (cons a a*)]))
 (define-syntax-rule (stream-lazy a*) (stream-cons pause a*))
+
+(define-syntax stream
+  (syntax-rules ()
+    [(_) empty-stream]
+    [(_ a b ...) (stream-cons a (stream b ...))]))
 
 (: stream-force (∀ (a) (→ (Streamof a) (∪ Null (Pair a (Streamof a))))))
 (define (stream-force a*)
@@ -175,10 +181,10 @@
 (: == (→ Term Term Goal))
 (define ((== u v) s)
   (let ([s (unify u v s)])
-    (if s (stream-cons s empty-stream) empty-stream)))
+    (if s (stream s) empty-stream)))
 
 (: succeed Goal)
-(define (succeed s) (stream-cons s empty-stream))
+(define (succeed s) (stream s))
 
 (: fail Goal)
 (define (fail s) empty-stream)
@@ -212,7 +218,7 @@
        (define a (stream-first s-inf))
        (if (pause? a)
            (stream-lazy (loop (stream-rest s-inf)))
-           (stream-cons a empty-stream))])))
+           (stream a))])))
 
 
 ;;; Reification

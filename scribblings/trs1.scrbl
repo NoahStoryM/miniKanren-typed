@@ -411,7 +411,7 @@ the level of streams.
               @defproc[(stream-first [a∞ (Pair a (∪ Null (Suspension a)))]) a]
               @defproc[(stream-rest [a∞ (Pair a (∪ Null (Suspension a)))])
                        (Streamof a)]
-              @defform[(stream a)]
+              @defform[(stream a ...)]
               @defform[(stream-cons a d)])]{
 @racket[empty-stream] is the empty stream @racket['()], and
 @racket[stream-empty?] recognizes it; @racket[stream-singleton?]
@@ -420,7 +420,8 @@ without forcing anything.  @racket[stream-first] returns the
 first answer of a nonempty stream, which is always already computed.
 @racket[stream-rest] returns the rest: @racket[empty-stream] after a
 single answer, and otherwise the stream produced by calling the suspension.
-@racket[(stream a)] is the stream of exactly @racket[a], and
+@racket[(stream a ...)] is the stream of the answers @racket[a ...];
+@racket[(stream a)] is known to end after @racket[a].  And
 @racket[(stream-cons a d)] is @racket[a] followed by the stream
 @racket[d], which is evaluated only when the rest is asked for.
 
